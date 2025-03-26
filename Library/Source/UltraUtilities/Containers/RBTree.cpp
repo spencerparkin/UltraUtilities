@@ -22,19 +22,122 @@ RBTreeNode* RBTree::FindNode(const RBTreeKey* key)
 	return this->rootNode->FindNode(key);
 }
 
-bool RBTree::InsertNode(RBTreeNode* node)
+bool RBTree::InsertNode(RBTreeNode* newNode)
 {
-	return false;
+	if (!newNode || !newNode->key || newNode->tree)
+		return false;
+
+	if (!this->rootNode)
+		this->rootNode = newNode;
+	else
+	{
+		RBTreeNode* node = this->rootNode;
+		while (true)
+		{
+			if (*newNode->key < *node->key)
+			{
+				if (!node->leftChildNode)
+				{
+					node->leftChildNode = newNode;
+					newNode->parentNode = node;
+					break;
+				}
+
+				node = node->leftChildNode;
+			}
+			else if (*newNode->key > *node->key)
+			{
+				if (!node->rightChildNode)
+				{
+					node->rightChildNode = newNode;
+					newNode->parentNode = node;
+					break;
+				}
+
+				node = node->rightChildNode;
+			}
+			else
+			{
+				assert(*newNode->key == *node->key);
+				return false;
+			}
+		}
+	}
+
+	newNode->tree = this;
+
+	// TODO: Rebalance the tree here.
+
+	return true;
 }
 
 RBTreeNode* RBTree::RemoveNode(const RBTreeKey* key)
 {
+	RBTreeNode* node = this->FindNode(key);
+	if (this->RemoveNode(node))
+		return node;
+
 	return nullptr;
+}
+
+bool RBTree::RemoveNode(RBTreeNode*& oldNode)
+{
+	if (!oldNode || oldNode->tree != this)
+		return false;
+
+	if (oldNode->IsInternal())
+	{
+		RBTreeNode* node = oldNode->FindSuccessor();
+		assert(!node->IsInternal());
+
+		oldNode->CopyValue(node);
+
+		if (!this->RemoveNode(node))
+		{
+			assert(false);
+			return false;
+		}
+
+		oldNode = node;
+		return true;
+	}
+	else
+	{
+		RBTreeNode** branch = oldNode->FindParentBranchPointer();
+
+		if (oldNode->leftChildNode)
+		{
+			oldNode->leftChildNode->parentNode = oldNode->parentNode;
+			*branch = oldNode->leftChildNode;
+		}
+		else if (oldNode->rightChildNode)
+		{
+			oldNode->rightChildNode->parentNode = oldNode->parentNode;
+			*branch = oldNode->rightChildNode;
+		}
+		else
+		{
+			*branch = nullptr;
+		}
+		
+		oldNode->parentNode = nullptr;
+	}
+	
+	oldNode->tree = nullptr;
+
+	// TODO: Rebalance the tree here.
+
+	return true;
 }
 
 bool RBTree::DeleteNode(const RBTreeKey* key)
 {
-	return false;
+	RBTreeNode* node = this->RemoveNode(key);
+	if (!node)
+		return false;
+
+	delete node;
+	return true;
 }
 
 bool RBTree::IsBinaryTree() const
@@ -117,6 +220,11 @@ bool RBTreeNode::IsRoot() const
 	return !this->parentNode;
 }
 
+bool RBTreeNode::IsInternal() const
+{
+	return this->leftChildNode && this->rightChildNode;
+}
+
 //------------------------------ RBTreeKey ------------------------------
 
 /*virtual*/ bool RBTreeKey::operator<=(const RBTreeKey& key) const
@@ -134,6 +242,7 @@ bool RBTreeNode::IsRoot() const
 RBTreeNode::RBTreeNode()
 {
 	this->key = nullptr;
+	this->tree = nullptr;
 	this->leftChildNode = nullptr;
 	this->rightChildNode = nullptr;
 	this->parentNode = nullptr;
@@ -145,6 +254,67 @@ RBTreeNode::RBTreeNode()
 	delete this->key;
 	delete this->leftChildNode;
 	delete this->rightChildNode;
+}
+
+RBTreeNode* RBTreeNode::FindSuccessor()
+{
+	if (this->rightChildNode)
+	{
+		RBTreeNode* node = this->rightChildNode;
+		while (node->leftChildNode)
+			node = node->leftChildNode;
+		return node;
+	}
+	else
+	{
+		RBTreeNode* node = this;
+		while (true)
+		{
+			RBTreeNode* parentNode = node->parentNode;
+			if (!parentNode)
+				break;
+
+			if (parentNode->leftChildNode == node)
+				return parentNode;
+
+			node = parentNode;
+		}
+	}
+
+	return nullptr;
+}
+
+RBTreeNode* RBTreeNode::FindPredecessor()
+{
+	if (this->leftChildNode)
+	{
+		RBTreeNode* node = this->leftChildNode;
+		while (node->rightChildNode)
+			node = node->rightChildNode;
+		return node;
+	}
+	else
+	{
+		RBTreeNode* node = this;
+		while (true)
+		{
+			RBTreeNode* parentNode = node->parentNode;
+			if (!parentNode)
+				break;
+
+			if (parentNode->rightChildNode == node)
+				return parentNode;
+
+			node = parentNode;
+		}
+	}
+
+	return nullptr;
+}
+
+/*virtual*/ void RBTreeNode::CopyValue(RBTreeNode* node)
+{
+	// We do nothing here by default.
 }
 
 RBTreeNode* RBTreeNode::FindNode(const RBTreeKey* key)
@@ -161,63 +331,71 @@ RBTreeNode* RBTreeNode::FindNode(const RBTreeKey* key)
 	return nullptr;
 }
 
-void RBTreeNode::Rotate(RotationDirection rotationDirection, RBTree* tree)
+RBTreeNode** RBTreeNode::FindParentBranchPointer()
 {
 	RBTreeNode** branch = nullptr;
 
 	if (!this->parentNode)
-		branch = &tree->rootNode;
+		branch = &this->tree->rootNode;
 	else if (this->parentNode->rightChildNode == this)
 		branch = &this->parentNode->rightChildNode;
 	else if (this->parentNode->leftChildNode == this)
 		branch = &this->parentNode->leftChildNode;
-	else
-	{
-		assert(false);
-		return;
-	}
+	
+	return branch;
+}
+
+void RBTreeNode::Rotate(RotationDirection rotationDirection)
+{
+	RBTreeNode** branch = this->FindParentBranchPointer();
+	assert(branch != nullptr);
 
 	switch (rotationDirection)
 	{
 		case LEFT:
 		{
-			if (this->rightChildNode)
+			if (!this->rightChildNode)
 			{
-				RBTreeNode* node = this->rightChildNode;
-
-				if (this->rightChildNode->leftChildNode)
-				{
-					this->rightChildNode = this->rightChildNode->leftChildNode;
-					this->rightChildNode->parentNode = this;
-				}
-
-				node->parentNode = this->parentNode;
-				*branch = node;
-
-				node->leftChildNode = this;
-				this->parentNode = node;
+				assert(false);
+				return;
 			}
+
+			RBTreeNode* node = this->rightChildNode;
+
+			if (this->rightChildNode->leftChildNode)
+			{
+				this->rightChildNode = this->rightChildNode->leftChildNode;
+				this->rightChildNode->parentNode = this;
+			}
+
+			node->parentNode = this->parentNode;
+			*branch = node;
+
+			node->leftChildNode = this;
+			this->parentNode = node;
 			break;
 		}
 		case RIGHT:
 		{
-			if (this->leftChildNode)
+			if (!this->leftChildNode)
 			{
-				RBTreeNode* node = this->leftChildNode;
-
-				if (this->leftChildNode->rightChildNode)
-				{
-					this->leftChildNode = this->leftChildNode->rightChildNode;
-					this->leftChildNode->parentNode = this;
-				}
-
-				node->parentNode = this->parentNode;
-				*branch = node;
-
-				node->rightChildNode = this;
-				this->parentNode = node;
+				assert(false);
+				return;
 			}
 
+			RBTreeNode* node = this->leftChildNode;
+
+			if (this->leftChildNode->rightChildNode)
+			{
+				this->leftChildNode = this->leftChildNode->rightChildNode;
+				this->leftChildNode->parentNode = this;
+			}
+
+			node->parentNode = this->parentNode;
+			*branch = node;
+
+			node->rightChildNode = this;
+			this->parentNode = node;
 			break;
 		}
 	}	

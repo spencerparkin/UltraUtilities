@@ -32,7 +32,7 @@ namespace UU
 		 * node unless failure occurs.  Failure can occur here
 		 * if a node already exists having the same key.
 		 */
-		bool InsertNode(RBTreeNode* node);
+		bool InsertNode(RBTreeNode* newNode);
 
 		/**
 		 * Efficiently remove the node, if any, with the given key.
@@ -41,6 +41,16 @@ namespace UU
 		 * given key exists.
 		 */
 		RBTreeNode* RemoveNode(const RBTreeKey* key);
+
+		/**
+		 * Efficiently remove the given node from this tree.
+		 * Once removed, the caller is responsible for deleting
+		 * the memory associated with the returned node.  Failure
+		 * can occur here if the given node is not a member of this
+		 * tree.  Note that the returned node is not necessarily
+		 * going to be the same as the given node!
+		 */
+		bool RemoveNode(RBTreeNode*& oldNode);
 
 		/**
 		 * This is the same as @ref RemoveNode, except that we
@@ -77,10 +87,29 @@ namespace UU
 		RBTreeNode();
 		virtual ~RBTreeNode();
 
+		/**
+		 * This should be overridden to copy the satilate data
+		 * owned by the given node to this node.
+		 */
+		virtual void CopyValue(RBTreeNode* node);
+
+		/**
+		 * Assuming the tree is valid, this efficiently finds the
+		 * node, if any, with the given key.
+		 */
 		RBTreeNode* FindNode(const RBTreeKey* key);
 
+		/**
+		 * Verify that the sub-tree rooted at this node is a valid
+		 * binary tree according to definition.
+		 */
 		bool IsBinaryTree() const;
 
+		/**
+		 * This provides a convenient way to visit all nodes in
+		 * the tree unconditionally.  You can early-out by returning
+		 * false from the given lambda.
+		 */
 		bool ForAllNodes(std::function<bool(const RBTreeNode* node)> callback) const;
 
 		/**
@@ -90,8 +119,30 @@ namespace UU
 		 */
 		bool IsBalanced(int& blackHeight, int blackCount) const;
 
+		/**
+		 * Return true if and only if this node is a leaf node.
+		 */
 		bool IsLeaf() const;
+
+		/**
+		 * Return true if and only if this node is the root node.
+		 */
 		bool IsRoot() const;
+
+		/**
+		 * Return true if and only if this node has both a left and right node.
+		 */
+		bool IsInternal() const;
+
+		/**
+		 * Find the node in the tree having the smallest key greater than this node's key.
+		 */
+		RBTreeNode* FindSuccessor();
+
+		/**
+		 * Find the node in the tree having the largest key less than this node's key.
+		 */
+		RBTreeNode* FindPredecessor();
 
 		enum Color
 		{
@@ -104,14 +155,17 @@ namespace UU
 		const RBTreeNode* GetRightNode() const { return this->rightChildNode; }
 
 	private:
+		RBTreeNode** FindParentBranchPointer();
+
 		enum RotationDirection
 		{
 			LEFT,
 			RIGHT
 		};
 
-		void Rotate(RotationDirection rotationDirection, RBTree* tree);
+		void Rotate(RotationDirection rotationDirection);
 
+		RBTree* tree;
 		RBTreeKey* key;
 		RBTreeNode* leftChildNode;
 		RBTreeNode* rightChildNode;
@@ -172,7 +226,6 @@ namespace UU
 				delete treeNode;
 				return false;
 			}
-
 			return true;
 		}
 
@@ -183,11 +236,12 @@ namespace UU
 		bool Remove(K key, V* value = nullptr)
 		{
 			RBTreeKey_<K> treeKey(key);
-			auto treeNode = static_cast<RBTreeNode_<V>*>(this->tree.RemoveNode(&treeNode));
+			RBTreeNode* treeNode = this->tree.FindNode(&treeKey);
 			if (!treeNode)
 				return false;
 			if (value)
-				*value = treeNode->value;
+				*value = static_cast<RBTreeNode_<V>*>(treeNode)->value;
+			this->tree.RemoveNode(treeNode);
 			delete treeNode;
 			return true;
 		}
@@ -210,6 +264,11 @@ namespace UU
 
 		virtual ~RBTreeNode_()
 		{
+		}
+
+		virtual void CopyValue(RBTreeNode* node) override
+		{
+			this->value = static_cast<RBTreeNode_<V>*>(node)->value;
 		}
 
 	public:
