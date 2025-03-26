@@ -7,3 +7,6 @@
 #else
 #	define UU_API
 #endif
+
+#include <assert.h>
+#include <functional>

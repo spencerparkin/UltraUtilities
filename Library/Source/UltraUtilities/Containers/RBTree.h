@@ -13,6 +13,8 @@ namespace UU
 	 */
 	class UU_API RBTree
 	{
+		friend class RBTreeNode;
+
 	public:
 		RBTree();
 		virtual ~RBTree();
@@ -47,6 +49,19 @@ namespace UU
 		 */
 		bool DeleteNode(const RBTreeKey* key);
 
+		/**
+		 * This is used purely for diagnostic purposes to verify
+		 * that the tree is indeed a valid binary search tree.
+		 */
+		bool IsBinaryTree() const;
+
+		/**
+		 * This is used purely for diagnostic purposes to verify
+		 * that this tree is indeed a valid red/black tree according
+		 * to definition.
+		 */
+		bool IsRedBlackTree() const;
+
 	private:
 		RBTreeNode* rootNode;
 	};
@@ -62,11 +77,21 @@ namespace UU
 		RBTreeNode();
 		virtual ~RBTreeNode();
 
-	private:
-		RBTreeKey* key;
-		RBTreeNode* leftChildNode;
-		RBTreeNode* rightChildNode;
-		RBTreeNode* parentNode;
+		RBTreeNode* FindNode(const RBTreeKey* key);
+
+		bool IsBinaryTree() const;
+
+		bool ForAllNodes(std::function<bool(const RBTreeNode* node)> callback) const;
+
+		/**
+		 * This is used purely for diagnostic purposes to verify that the
+		 * sub-tree rooted at this node is balanced according to one of the
+		 * defining properties of a red/black tree.
+		 */
+		bool IsBalanced(int& blackHeight, int blackCount) const;
+
+		bool IsLeaf() const;
+		bool IsRoot() const;
 
 		enum Color
 		{
@@ -74,6 +99,23 @@ namespace UU
 			BLACK
 		};
 
+		Color GetColor() const { return this->color; }
+		const RBTreeNode* GetLeftNode() const { return this->leftChildNode; }
+		const RBTreeNode* GetRightNode() const { return this->rightChildNode; }
+
+	private:
+		enum RotationDirection
+		{
+			LEFT,
+			RIGHT
+		};
+
+		void Rotate(RotationDirection rotationDirection, RBTree* tree);
+
+		RBTreeKey* key;
+		RBTreeNode* leftChildNode;
+		RBTreeNode* rightChildNode;
+		RBTreeNode* parentNode;
 		Color color;
 	};
 
@@ -83,9 +125,11 @@ namespace UU
 	class UU_API RBTreeKey
 	{
 	public:
-		virtual bool operator<(const RBTreeKey* key) = 0;
-		virtual bool operator>(const RBTreeKey* key) = 0;
-		virtual bool operator==(const RBTreeKey* key) = 0;
+		virtual bool operator<(const RBTreeKey& key) const = 0;
+		virtual bool operator>(const RBTreeKey& key) const = 0;
+		virtual bool operator==(const RBTreeKey& key) const = 0;
+		virtual bool operator<=(const RBTreeKey& key) const;
+		virtual bool operator>=(const RBTreeKey& key) const;
 	};
 
 	template<typename K> class RBTreeKey_;
@@ -184,19 +228,19 @@ namespace UU
 			this->value = value;
 		}
 
-		virtual bool operator<(const RBTreeKey* key) override
+		virtual bool operator<(const RBTreeKey& key) const override
 		{
-			return this->value < static_cast<const RBTreeKey_<K>*>(key)->value;
+			return this->value < static_cast<const RBTreeKey_<K>*>(&key)->value;
 		}
 
-		virtual bool operator>(const RBTreeKey* key) override
+		virtual bool operator>(const RBTreeKey& key) const override
 		{
-			return this->value > static_cast<const RBTreeKey_<K>*>(key)->value;
+			return this->value > static_cast<const RBTreeKey_<K>*>(&key)->value;
 		}
 
-		virtual bool operator==(const RBTreeKey* key) override
+		virtual bool operator==(const RBTreeKey& key) const override
 		{
-			return this->value == static_cast<const RBTreeKey_<K>*>(key)->value;
+			return this->value == static_cast<const RBTreeKey_<K>*>(&key)->value;
 		}
 
 	public:
