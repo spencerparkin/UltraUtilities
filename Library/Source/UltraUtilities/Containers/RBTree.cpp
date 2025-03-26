@@ -2,45 +2,52 @@
 
 using namespace UU;
 
-//-------------------------- RBTreeBase --------------------------
+//------------------------------ RBTree ------------------------------
 
-RBTreeBase::RBTreeBase()
+RBTree::RBTree()
 {
+	this->rootNode = nullptr;
 }
 
-/*virtual*/ RBTreeBase::~RBTreeBase()
+/*virtual*/ RBTree::~RBTree()
 {
+	delete this->rootNode;
 }
 
-//-------------------------- RBTreeNodeBase --------------------------
-
-RBTreeNodeBase::RBTreeNodeBase()
+RBTreeNode* RBTree::FindNode(const RBTreeKey* key)
 {
+	return nullptr;
+}
+
+bool RBTree::InsertNode(RBTreeNode* node)
+{
+	return false;
+}
+
+RBTreeNode* RBTree::RemoveNode(const RBTreeKey* key)
+{
+	return nullptr;
+}
+
+bool RBTree::DeleteNode(const RBTreeKey* key)
+{
+	return false;
+}
+
+//------------------------------ RBTreeNode ------------------------------
+
+RBTreeNode::RBTreeNode()
+{
+	this->key = nullptr;
 	this->leftChildNode = nullptr;
 	this->rightChildNode = nullptr;
 	this->parentNode = nullptr;
+	this->color = Color::BLACK;
 }
 
-/*virtual*/ RBTreeNodeBase::~RBTreeNodeBase()
+/*virtual*/ RBTreeNode::~RBTreeNode()
 {
-}
-
-/*virtual*/ long RBTreeNodeBase::Key() const
-{
-	return 0;
-}
-
-/*virtual*/ bool RBTreeNodeBase::operator<(const RBTreeNodeBase* node) const
-{
-	return this->Key() < node->Key();
-}
-
-/*virtual*/ bool RBTreeNodeBase::operator>(const RBTreeNodeBase* node) const
-{
-	return this->Key() > node->Key();
-}
-
-/*virtual*/ bool RBTreeNodeBase::operator==(const RBTreeNodeBase* node) const
-{
-	return this->Key() == node->Key();
+	delete this->key;
+	delete this->leftChildNode;
+	delete this->rightChildNode;
 }

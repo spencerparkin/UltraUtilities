@@ -1,9 +1,9 @@
 #pragma once
 
 #if defined ULTRA_UTILITIES_EXPORT
-#	define ULTRA_UTILITIES_API		__declspec(dllexport)
+#	define UU_API		__declspec(dllexport)
 #elif defined ULTRA_UTILITIES_IMPORT
-#	define ULTRA_UTILITIES_API		__declspec(dllimport)
+#	define UU_API		__declspec(dllimport)
 #else
-#	define ULTRA_UTILITIES_API
+#	define UU_API
 #endif
