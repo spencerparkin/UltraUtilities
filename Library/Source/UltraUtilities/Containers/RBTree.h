@@ -43,7 +43,7 @@ namespace UU
 		RBTreeNode* RemoveNode(const RBTreeKey* key);
 
 		/**
-		 * Efficiently remove the given node from this tree.
+		 * Efficiently remove the key for the given node from this tree.
 		 * Once removed, the caller is responsible for deleting
 		 * the memory associated with the returned node.  Failure
 		 * can occur here if the given node is not a member of this
@@ -68,6 +68,16 @@ namespace UU
 		 * Remove all key/value pairs (nodes) from this tree, making it empty.
 		 */
 		void Clear();
+
+		/**
+		 * Find and return the node in this tree having the smallest key.
+		 */
+		RBTreeNode* FindMinimum();
+
+		/**
+		 * Find and return the node in this tree having the largest key.
+		 */
+		RBTreeNode* FindMaximum();
 
 		/**
 		 * This is used purely for diagnostic purposes to verify

@@ -152,6 +152,40 @@ bool RBTree::DeleteNode(const RBTreeKey* key)
 	return true;
 }
 
+RBTreeNode* RBTree::FindMinimum()
+{
+	if (!this->rootNode)
+		return nullptr;
+
+	RBTreeNode* node = this->rootNode;
+	while (true)
+	{
+		if (!node->leftChildNode)
+			return node;
+
+		node = node->leftChildNode;
+	}
+
+	return node;
+}
+
+RBTreeNode* RBTree::FindMaximum()
+{
+	if (!this->rootNode)
+		return nullptr;
+
+	RBTreeNode* node = this->rootNode;
+	while (true)
+	{
+		if (!node->rightChildNode)
+			return node;
+
+		node = node->rightChildNode;
+	}
+
+	return node;
+}
+
 bool RBTree::IsBinaryTree() const
 {
 	if (!this->rootNode)

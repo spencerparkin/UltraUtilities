@@ -79,6 +79,8 @@ namespace UU
 		 */
 		RBTree& GetTree() { return this->tree; }
 
+		// TODO: Add ranged for-loop compatability.
+
 	private:
 		RBTree tree;
 	};

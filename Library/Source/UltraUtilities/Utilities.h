@@ -10,3 +10,10 @@
 
 #include <assert.h>
 #include <functional>
+
+// TODO: Remove all dependence on std::c++?
+// TODO: Add priority queue.
+// TODO: Add hash map.
+// TODO: Add link-list and thread-safe stuff.
+// TODO: Add string class?
+// TODO: Add custom assert functionality.

@@ -45,6 +45,46 @@ TEST_CASE("Red/Black Maps", "[RBMap]")
 		REQUIRE(map.GetTree().IsBinaryTree());
 	}
 
+	SECTION("Basic traversal.")
+	{
+		map.Insert(4, 4);
+		map.Insert(3, 3);
+		map.Insert(2, 2);
+		map.Insert(1, 1);
+
+		RBTreeNode* minNode = map.GetTree().FindMinimum();
+		REQUIRE(minNode != nullptr);
+		if (minNode)
+		{
+			REQUIRE(static_cast<RBMapNode<int>*>(minNode)->value == 1);
+		}
+
+		RBTreeNode* maxNode = map.GetTree().FindMaximum();
+		REQUIRE(maxNode != nullptr);
+		if (maxNode)
+		{
+			REQUIRE(static_cast<RBMapNode<int>*>(maxNode)->value == 4);
+		}
+
+		int i = 1;
+		RBTreeNode* node = minNode;
+		while (node)
+		{
+			REQUIRE(static_cast<RBMapNode<int>*>(node)->value == i);
+			node = node->FindSuccessor();
+			i++;
+		}
+		
+		i = 4;
+		node = maxNode;
+		while (node)
+		{
+			REQUIRE(static_cast<RBMapNode<int>*>(node)->value == i);
+			node = node->FindPredecessor();
+			i--;
+		}
+	}
+
 	// TODO: Write massive test where we add thousands of nodes random,
 	//       traverse them all in order, then remove them all one-by-one.
 	//       After each addition or removal, verify all tree properties.
