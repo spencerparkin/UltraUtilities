@@ -73,9 +73,54 @@ bool RBTree::InsertNode(RBTreeNode* newNode)
 	}
 
 	newNode->tree = this;
+	newNode->color = RBTreeNode::RED;
 	this->numNodes++;
 
-	// TODO: Rebalance the tree here.
+	// Restore the red/black properties of the tree.  (i.e., rebalance the tree.)
+	RBTreeNode* node = newNode;
+	while (node && node->parentNode && node->parentNode->color == RBTreeNode::RED)
+	{
+		RBTreeNode* grandParentNode = node->parentNode->parentNode;
+		assert(grandParentNode != nullptr);		// Our coloring of the root black should guarentee this condition.
+
+		RBTreeNode::RotationDirection grandParentRotationDirection = RBTreeNode::RotationDirection::LEFT;
+		RBTreeNode* uncleNode = nullptr;
+		
+		if (node->parentNode == grandParentNode->leftChildNode)
+		{
+			grandParentRotationDirection = RBTreeNode::RotationDirection::RIGHT;
+			uncleNode = grandParentNode->rightChildNode;
+		}
+		else if (node->parentNode == grandParentNode->rightChildNode)
+		{
+			grandParentRotationDirection = RBTreeNode::RotationDirection::LEFT;
+			uncleNode = grandParentNode->leftChildNode;
+		}
+
+		if (!uncleNode || uncleNode->color == RBTreeNode::BLACK)
+		{
+			// Note that if we get here, once these rotations are complete, we should exit the loop immediately.
+
+			if (node->parentNode->rightChildNode == node && grandParentRotationDirection == RBTreeNode::RotationDirection::RIGHT)
+				node->parentNode->Rotate(RBTreeNode::RotationDirection::LEFT);
+			else if (node->parentNode->leftChildNode == node && grandParentRotationDirection == RBTreeNode::RotationDirection::LEFT)
+				node->parentNode->Rotate(RBTreeNode::RotationDirection::RIGHT);
+
+			grandParentNode->Rotate(grandParentRotationDirection);
+			grandParentNode->color = RBTreeNode::RED;
+			node->parentNode->color = RBTreeNode::BLACK;
+			node = node->parentNode;
+		}
+		else
+		{
+			node->parentNode->color = RBTreeNode::BLACK;
+			uncleNode->color = RBTreeNode::BLACK;
+			grandParentNode->color = RBTreeNode::RED;
+			node = grandParentNode;
+		}
+	}
+
+	this->rootNode->color = RBTreeNode::BLACK;
 
 	return true;
 }
@@ -419,7 +464,9 @@ void RBTreeNode::Rotate(RotationDirection rotationDirection)
 
 			RBTreeNode* node = this->rightChildNode;
 
-			if (this->rightChildNode->leftChildNode)
+			if (!this->rightChildNode->leftChildNode)
+				this->rightChildNode = nullptr;
+			else
 			{
 				this->rightChildNode = this->rightChildNode->leftChildNode;
 				this->rightChildNode->parentNode = this;
@@ -442,7 +489,9 @@ void RBTreeNode::Rotate(RotationDirection rotationDirection)
 
 			RBTreeNode* node = this->leftChildNode;
 
-			if (this->leftChildNode->rightChildNode)
+			if (!this->leftChildNode->rightChildNode)
+				this->leftChildNode = nullptr;
+			else
 			{
 				this->leftChildNode = this->leftChildNode->rightChildNode;
 				this->leftChildNode->parentNode = this;
