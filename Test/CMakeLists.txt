@@ -1,8 +1,8 @@
 # CMakeLists.txt for Catch2-based test program that exercizes/tests the UltraUtilities library.
 
 set(TEST_SOURCES
-	Source/Test.cpp
-	Source/Test.h
+	Source/RBMapTest.cpp
+	Source/RBSetTest.cpp
 )
 
 add_executable(Test ${TEST_SOURCES})

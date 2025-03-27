@@ -48,7 +48,7 @@ namespace UU
 		 * the memory associated with the returned node.  Failure
 		 * can occur here if the given node is not a member of this
 		 * tree.  Note that the returned node is not necessarily
-		 * going to be the same as the one given node!
+		 * going to be the same as the one given!
 		 */
 		bool RemoveNode(RBTreeNode*& oldNode);
 

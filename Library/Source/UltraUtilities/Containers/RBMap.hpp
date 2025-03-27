@@ -38,7 +38,7 @@ namespace UU
 		bool Insert(K key, V value)
 		{
 			auto treeNode = new RBMapNode<V>(value);
-			treeNode->SetKey(new RBMapKey<V>(key));
+			treeNode->SetKey(new RBMapKey<K>(key));
 			if (!this->tree.InsertNode(treeNode))
 			{
 				delete treeNode;
