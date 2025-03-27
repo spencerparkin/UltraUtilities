@@ -60,6 +60,16 @@ namespace UU
 		bool DeleteNode(const RBTreeKey* key);
 
 		/**
+		 * Indicate how many nodes/keys are present in this tree.
+		 */
+		unsigned int GetNumNodes() const { return this->numNodes; }
+
+		/**
+		 * Remove all key/value pairs (nodes) from this tree, making it empty.
+		 */
+		void Clear();
+
+		/**
 		 * This is used purely for diagnostic purposes to verify
 		 * that the tree is indeed a valid binary search tree.
 		 */
@@ -74,6 +84,7 @@ namespace UU
 
 	private:
 		RBTreeNode* rootNode;
+		unsigned int numNodes;
 	};
 
 	/**
@@ -154,6 +165,9 @@ namespace UU
 		const RBTreeNode* GetLeftNode() const { return this->leftChildNode; }
 		const RBTreeNode* GetRightNode() const { return this->rightChildNode; }
 
+		void SetKey(RBTreeKey* key);
+		const RBTreeKey* GetKey() const;
+
 	private:
 		RBTreeNode** FindParentBranchPointer();
 
@@ -220,7 +234,7 @@ namespace UU
 		bool Insert(K key, V value)
 		{
 			auto treeNode = new RBTreeNode_<V>(value);
-			treeNode->key = new RBTreeKey_<V>(key);
+			treeNode->SetKey(new RBTreeKey_<V>(key));
 			if (!this->tree.InsertNode(treeNode))
 			{
 				delete treeNode;
@@ -245,6 +259,24 @@ namespace UU
 			delete treeNode;
 			return true;
 		}
+
+		/**
+		 * Remove all key/value pairs.
+		 */
+		void Clear()
+		{
+			this->tree.Clear();
+		}
+
+		/**
+		 * Indicate how many key/value pairs are stored in the tree.
+		 */
+		unsigned int GetNumPairs() const { return this->tree.GetNumNodes(); }
+
+		/**
+		 * Provide access to the tree being wrapped by this template class.
+		 */
+		RBTree& GetTree() { return this->tree; }
 
 	private:
 		RBTree tree;

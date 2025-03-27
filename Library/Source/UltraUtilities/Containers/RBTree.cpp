@@ -7,6 +7,7 @@ using namespace UU;
 RBTree::RBTree()
 {
 	this->rootNode = nullptr;
+	this->numNodes = 0;
 }
 
 /*virtual*/ RBTree::~RBTree()
@@ -20,6 +21,13 @@ RBTreeNode* RBTree::FindNode(const RBTreeKey* key)
 		return nullptr;
 
 	return this->rootNode->FindNode(key);
+}
+
+void RBTree::Clear()
+{
+	delete this->rootNode;
+	this->rootNode = nullptr;
+	this->numNodes = 0;
 }
 
 bool RBTree::InsertNode(RBTreeNode* newNode)
@@ -65,6 +73,7 @@ bool RBTree::InsertNode(RBTreeNode* newNode)
 	}
 
 	newNode->tree = this;
+	this->numNodes++;
 
 	// TODO: Rebalance the tree here.
 
@@ -124,6 +133,7 @@ bool RBTree::RemoveNode(RBTreeNode*& oldNode)
 	}
 	
 	oldNode->tree = nullptr;
+	this->numNodes--;
 
 	// TODO: Rebalance the tree here.
 
@@ -254,6 +264,17 @@ RBTreeNode::RBTreeNode()
 	delete this->key;
 	delete this->leftChildNode;
 	delete this->rightChildNode;
+}
+
+void RBTreeNode::SetKey(RBTreeKey* key)
+{
+	delete this->key;
+	this->key = key;
+}
+
+const RBTreeKey* RBTreeNode::GetKey() const
+{
+	return this->key;
 }
 
 RBTreeNode* RBTreeNode::FindSuccessor()
