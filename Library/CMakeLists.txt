@@ -4,6 +4,7 @@ set(ULTRA_UTILITIES_SOURCES
 	Source/UltraUtilities/Utilities.h
 	Source/UltraUtilities/Containers/RBTree.cpp
 	Source/UltraUtilities/Containers/RBTree.h
+	Source/UltraUtilities/Containers/RBMap.hpp
 )
 
 add_library(UltraUtilities SHARED

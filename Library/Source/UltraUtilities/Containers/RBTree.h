@@ -48,7 +48,7 @@ namespace UU
 		 * the memory associated with the returned node.  Failure
 		 * can occur here if the given node is not a member of this
 		 * tree.  Note that the returned node is not necessarily
-		 * going to be the same as the given node!
+		 * going to be the same as the one given node!
 		 */
 		bool RemoveNode(RBTreeNode*& oldNode);
 
@@ -81,6 +81,11 @@ namespace UU
 		 * to definition.
 		 */
 		bool IsRedBlackTree() const;
+
+		/**
+		 * Provide read-only access to the root node.
+		 */
+		const RBTreeNode* GetRootNode() const { return this->rootNode; }
 
 	private:
 		RBTreeNode* rootNode;
@@ -198,143 +203,5 @@ namespace UU
 		virtual bool operator==(const RBTreeKey& key) const = 0;
 		virtual bool operator<=(const RBTreeKey& key) const;
 		virtual bool operator>=(const RBTreeKey& key) const;
-	};
-
-	template<typename K> class RBTreeKey_;
-	template<typename V> class RBTreeNode_;
-
-	/**
-	 * This is a templatized wrapper for the @ref RBTree class.
-	 * It is provided as a more convenient way to use the tree.
-	 */
-	template<typename K, typename V>
-	class UU_API RBTree_
-	{
-	public:
-		/**
-		 * Find a value by key.  If a value pointer is not given,
-		 * then this method can be used to check for existance
-		 * of the given key in the tree.
-		 */
-		bool Find(K key, V* value = nullptr)
-		{
-			RBTreeKey_<K> treeKey(key);
-			auto node = static_cast<RBTreeNode_<V>*>(this->tree.FindNode(&treeKey));
-			if (!node)
-				return false;
-			if (value)
-				*value = node->value;
-			return true;
-		}
-
-		/**
-		 * Insert a value at the given key.  Failure occurs here
-		 * if a value already exists in the tree at the given key.
-		 */
-		bool Insert(K key, V value)
-		{
-			auto treeNode = new RBTreeNode_<V>(value);
-			treeNode->SetKey(new RBTreeKey_<V>(key));
-			if (!this->tree.InsertNode(treeNode))
-			{
-				delete treeNode;
-				return false;
-			}
-			return true;
-		}
-
-		/**
-		 * Remove the value at the given key, if any.
-		 * The value at the given key is returned if desired.
-		 */
-		bool Remove(K key, V* value = nullptr)
-		{
-			RBTreeKey_<K> treeKey(key);
-			RBTreeNode* treeNode = this->tree.FindNode(&treeKey);
-			if (!treeNode)
-				return false;
-			if (value)
-				*value = static_cast<RBTreeNode_<V>*>(treeNode)->value;
-			this->tree.RemoveNode(treeNode);
-			delete treeNode;
-			return true;
-		}
-
-		/**
-		 * Remove all key/value pairs.
-		 */
-		void Clear()
-		{
-			this->tree.Clear();
-		}
-
-		/**
-		 * Indicate how many key/value pairs are stored in the tree.
-		 */
-		unsigned int GetNumPairs() const { return this->tree.GetNumNodes(); }
-
-		/**
-		 * Provide access to the tree being wrapped by this template class.
-		 */
-		RBTree& GetTree() { return this->tree; }
-
-	private:
-		RBTree tree;
-	};
-
-	/**
-	 * This is used internally by the @ref RBTree_ class.
-	 */
-	template<typename V>
-	class UU_API RBTreeNode_ : public RBTreeNode
-	{
-	public:
-		RBTreeNode_(V value)
-		{
-			this->value = value;
-		}
-
-		virtual ~RBTreeNode_()
-		{
-		}
-
-		virtual void CopyValue(RBTreeNode* node) override
-		{
-			this->value = static_cast<RBTreeNode_<V>*>(node)->value;
-		}
-
-	public:
-		V value;
-	};
-
-	/**
-	 * This is used internally by the @ref RBTree_ class.
-	 */
-	template<typename K>
-	class UU_API RBTreeKey_ : public RBTreeKey
-	{
-	public:
-		RBTreeKey_(K value)
-		{
-			this->value = value;
-		}
-
-		virtual bool operator<(const RBTreeKey& key) const override
-		{
-			return this->value < static_cast<const RBTreeKey_<K>*>(&key)->value;
-		}
-
-		virtual bool operator>(const RBTreeKey& key) const override
-		{
-			return this->value > static_cast<const RBTreeKey_<K>*>(&key)->value;
-		}
-
-		virtual bool operator==(const RBTreeKey& key) const override
-		{
-			return this->value == static_cast<const RBTreeKey_<K>*>(&key)->value;
-		}
-
-	public:
-		K value;
 	};
 }
