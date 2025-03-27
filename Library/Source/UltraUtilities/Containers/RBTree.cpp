@@ -133,6 +133,8 @@ bool RBTree::RemoveNode(RBTreeNode*& oldNode)
 	}
 	
 	oldNode->tree = nullptr;
+	oldNode->leftChildNode = nullptr;
+	oldNode->rightChildNode = nullptr;
 	this->numNodes--;
 
 	// TODO: Rebalance the tree here.
@@ -343,10 +345,10 @@ RBTreeNode* RBTreeNode::FindNode(const RBTreeKey* key)
 	if (*this->key == *key)
 		return this;
 
-	if (this->leftChildNode && *this->key < *key)
+	if (this->leftChildNode && *key < *this->key)
 		return this->leftChildNode->FindNode(key);
 
-	if (this->rightChildNode && *this->key > *key)
+	if (this->rightChildNode && *key > *this->key)
 		return this->rightChildNode->FindNode(key);
 
 	return nullptr;
