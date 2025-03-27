@@ -16,6 +16,20 @@ namespace UU
 	{
 	public:
 		/**
+		 * This provides bracket-syntax access to the map.
+		 * Note that if you ask for the value of a key that
+		 * does not exist in the map, then you may get an
+		 * uninitialized value if the value type does not
+		 * have a constructor.
+		 */
+		V operator[](K key)
+		{
+			V value;
+			this->Find(key, &value);
+			return value;
+		}
+
+		/**
 		 * Find a value by key.  If a value pointer is not given,
 		 * then this method can be used to check for existance
 		 * of the given key in the tree.

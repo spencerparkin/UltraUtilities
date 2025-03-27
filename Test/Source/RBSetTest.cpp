@@ -33,15 +33,15 @@ TEST_CASE("Red/Black Sets", "[RBSet]")
 		set.Insert(3);
 		set.Insert(4);
 		REQUIRE(set.GetNumKeys() == 4);
-		REQUIRE(set.Find(3));
-		REQUIRE(set.Find(4));
+		REQUIRE(set[3]);
+		REQUIRE(set[4]);
 		REQUIRE(set.GetTree().IsBinaryTree());
 
 		set.Remove(3);
 		set.Remove(1);
 		REQUIRE(set.GetNumKeys() == 2);
-		REQUIRE(!set.Find(3));
-		REQUIRE(set.Find(4));
+		REQUIRE(!set[3]);
+		REQUIRE(set[4]);
 		REQUIRE(set.GetTree().IsBinaryTree());
 	}
 }

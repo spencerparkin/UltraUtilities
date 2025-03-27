@@ -13,6 +13,14 @@ namespace UU
 	{
 	public:
 		/**
+		 * This provides bracket-syntax for membership queries.
+		 */
+		bool operator[](K key)
+		{
+			return this->Find(key);
+		}
+
+		/**
 		 * Indicate whether the given key is a member of this set.
 		 */
 		bool Find(K key)
