@@ -6,6 +6,7 @@ namespace UU
 {
 	template<typename K> class RBMapKey;
 	template<typename V> class RBMapNode;
+	template<typename K, typename V> class RBMapIterator;
 
 	/**
 	 * This is a templatized wrapper for the @ref RBTree class.
@@ -15,6 +16,11 @@ namespace UU
 	class UU_API RBMap
 	{
 	public:
+		RBMap()
+		{
+			this->iterationDirection = RBMapIterator<K, V>::FORWARD;
+		}
+
 		/**
 		 * This provides bracket-syntax access to the map.
 		 * Note that if you ask for the value of a key that
@@ -96,10 +102,101 @@ namespace UU
 		 */
 		RBTree& GetTree() { return this->tree; }
 
-		// TODO: Add ranged for-loop compatability.
+		/**
+		 * This configures the behavior of the ranged for-loop syntax of C++ with regards to this container.
+		 */
+		void SetIterationDirection(RBMapIterator<K, V>::Direction iterationDirection) const
+		{
+			this->iterationDirection = iterationDirection;
+		}
+
+		/**
+		 * This is provided to support the ranged for-loop syntax.
+		 */
+		RBMapIterator<K, V> begin()
+		{
+			return RBMapIterator<K, V>(&this->tree, this->iterationDirection);
+		}
+
+		/**
+		 * This is the end sentinal for the ranged for-loop support.
+		 */
+		RBTreeNode* end()
+		{
+			return nullptr;
+		}
 
 	private:
 		RBTree tree;
+		mutable RBMapIterator<K, V>::Direction iterationDirection;
+	};
+
+	/**
+	 * This is used internally by the @ref RBMap class to
+	 * support the ranged for-loop syntax of C++.
+	 */
+	template<typename K, typename V>
+	class UU_API RBMapIterator
+	{
+	public:
+		enum Direction
+		{
+			FORWARD,
+			BACKWARD
+		};
+
+		struct Pair
+		{
+			K key;
+			V value;
+		};
+
+		RBMapIterator(RBTree* tree, Direction direction)
+		{
+			this->direction = direction;
+			switch (this->direction)
+			{
+			case FORWARD:
+				this->node = tree->FindMinimum();
+				break;
+			case BACKWARD:
+				this->node = tree->FindMaximum();
+				break;
+			default:
+				this->node = nullptr;
+				break;
+			}
+		}
+
+		void operator++()
+		{
+			switch (this->direction)
+			{
+			case FORWARD:
+				this->node = this->node->FindSuccessor();
+				break;
+			case BACKWARD:
+				this->node = this->node->FindPredecessor();
+				break;
+			}
+		}
+
+		bool operator==(RBTreeNode* node)
+		{
+			return this->node == node;
+		}
+
+		Pair operator*()
+		{
+			Pair pair;
+			pair.key = static_cast<const RBMapKey<K>*>(this->node->GetKey())->value;
+			pair.value = static_cast<RBMapNode<V>*>(this->node)->value;
+			return pair;
+		}
+
+	private:
+		RBTreeNode* node;
+		Direction direction;
 	};
 
 	/**

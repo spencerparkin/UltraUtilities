@@ -85,6 +85,31 @@ TEST_CASE("Red/Black Maps", "[RBMap]")
 		}
 	}
 
+	SECTION("Ranged for-loop.")
+	{
+		map.Insert(4, 4);
+		map.Insert(3, 3);
+		map.Insert(2, 2);
+		map.Insert(1, 1);
+
+		int i = 1;
+		for (auto pair : map)
+		{
+			REQUIRE(pair.key == i);
+			REQUIRE(pair.value == i);
+			i++;
+		}
+
+		map.SetIterationDirection(RBMapIterator<int, int>::BACKWARD);
+		i = 4;
+		for (auto pair : map)
+		{
+			REQUIRE(pair.key == i);
+			REQUIRE(pair.value == i);
+			i--;
+		}
+	}
+
 	// TODO: Write massive test where we add thousands of nodes random,
 	//       traverse them all in order, then remove them all one-by-one.
 	//       After each addition or removal, verify all tree properties.

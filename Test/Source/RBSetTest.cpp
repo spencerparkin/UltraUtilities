@@ -44,4 +44,27 @@ TEST_CASE("Red/Black Sets", "[RBSet]")
 		REQUIRE(set[4]);
 		REQUIRE(set.GetTree().IsBinaryTree());
 	}
+
+	SECTION("Ranged for-loop.")
+	{
+		set.Insert(4);
+		set.Insert(3);
+		set.Insert(2);
+		set.Insert(1);
+
+		int i = 1;
+		for (int key : set)
+		{
+			REQUIRE(key == i);
+			i++;
+		}
+
+		set.SetIterationDirection(RBSetIterator<int>::BACKWARD);
+		i = 4;
+		for (int key : set)
+		{
+			REQUIRE(key == i);
+			i--;
+		}
+	}
 }

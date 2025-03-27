@@ -4,6 +4,8 @@
 
 namespace UU
 {
+	template<typename K> class RBSetIterator;
+
 	/**
 	 * This is a templatized wrapper for the @ref RBTree class.
 	 * It is provided as a more convenient way to use the tree.
@@ -12,6 +14,11 @@ namespace UU
 	class UU_API RBSet
 	{
 	public:
+		RBSet()
+		{
+			this->iterationDirection = RBSetIterator<K>::FORWARD;
+		}
+
 		/**
 		 * This provides bracket-syntax for membership queries.
 		 */
@@ -79,9 +86,91 @@ namespace UU
 		 */
 		RBTree& GetTree() { return this->tree; }
 
-		// TODO: Add ranged for-loop compatability.
+		/**
+		 * This configures the behavior of the ranged for-loop syntax of C++ with regards to this container.
+		 */
+		void SetIterationDirection(RBSetIterator<K>::Direction iterationDirection) const
+		{
+			this->iterationDirection = iterationDirection;
+		}
+
+		/**
+		 * This is provided to support the ranged for-loop syntax.
+		 */
+		RBSetIterator<K> begin()
+		{
+			return RBSetIterator<K>(&this->tree, this->iterationDirection);
+		}
+
+		/**
+		 * This is the end sentinal for the ranged for-loop support.
+		 */
+		RBTreeNode* end()
+		{
+			return nullptr;
+		}
 
 	private:
 		RBTree tree;
+		mutable RBSetIterator<K>::Direction iterationDirection;
+	};
+
+	/**
+	 * This is used internally by the @ref RBSet class to
+	 * support the ranged for-loop syntax of C++.
+	 */
+	template<typename K>
+	class UU_API RBSetIterator
+	{
+	public:
+		enum Direction
+		{
+			FORWARD,
+			BACKWARD
+		};
+
+		RBSetIterator(RBTree* tree, Direction direction)
+		{
+			this->direction = direction;
+			switch (this->direction)
+			{
+			case FORWARD:
+				this->node = tree->FindMinimum();
+				break;
+			case BACKWARD:
+				this->node = tree->FindMaximum();
+				break;
+			default:
+				this->node = nullptr;
+				break;
+			}
+		}
+
+		void operator++()
+		{
+			switch (this->direction)
+			{
+			case FORWARD:
+				this->node = this->node->FindSuccessor();
+				break;
+			case BACKWARD:
+				this->node = this->node->FindPredecessor();
+				break;
+			}
+		}
+
+		bool operator==(RBTreeNode* node)
+		{
+			return this->node == node;
+		}
+
+		K operator*()
+		{
+			return static_cast<const RBMapKey<K>*>(this->node->GetKey())->value;
+		}
+
+	private:
+		RBTreeNode* node;
+		Direction direction;
 	};
 }
