@@ -110,7 +110,12 @@ TEST_CASE("Red/Black Maps", "[RBMap]")
 		}
 	}
 
-	// TODO: Write massive test where we add thousands of nodes random,
-	//       traverse them all in order, then remove them all one-by-one.
-	//       After each addition or removal, verify all tree properties.
+	SECTION("Remains balanced with many insertions.")
+	{
+		for (int i = 0; i < 1000; i++)
+		{
+			map.Insert(i, i);
+			REQUIRE(map.GetTree().IsRedBlackTree());
+		}
+	}
 }

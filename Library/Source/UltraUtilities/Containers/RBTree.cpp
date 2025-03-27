@@ -278,6 +278,9 @@ bool RBTree::IsRedBlackTree() const
 
 bool RBTreeNode::IsBalanced(int& blackHeight, int blackCount) const
 {
+	if (this->color == Color::BLACK)
+		blackCount++;
+
 	if (this->IsLeaf())
 	{
 		if (blackHeight == -1)
@@ -288,9 +291,6 @@ bool RBTreeNode::IsBalanced(int& blackHeight, int blackCount) const
 
 		return blackHeight == blackCount;
 	}
-
-	if (this->color == Color::BLACK)
-		blackCount++;
 
 	if (this->leftChildNode && !this->leftChildNode->IsBalanced(blackHeight, blackCount))
 		return false;
