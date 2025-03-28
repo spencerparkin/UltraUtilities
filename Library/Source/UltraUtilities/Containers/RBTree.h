@@ -9,7 +9,9 @@ namespace UU
 
 	/**
 	 * This is an implementation of a red/black tree.  This is a
-	 * self-balancing binary search tree.
+	 * type of self-balancing binary search tree.
+	 * 
+	 * See: Introduction to Algorithms by Cormen, et. al.
 	 */
 	class UU_API RBTree
 	{

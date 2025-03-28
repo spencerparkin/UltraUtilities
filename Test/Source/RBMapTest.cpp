@@ -118,4 +118,16 @@ TEST_CASE("Red/Black Maps", "[RBMap]")
 			REQUIRE(map.GetTree().IsRedBlackTree());
 		}
 	}
+
+	SECTION("Remains balanced with many deletions.")
+	{
+		for (int i = 0; i < 1000; i++)
+			map.Insert(i, i);
+
+		for (int i = 0; i < 1000; i++)
+		{
+			map.Remove(i);
+			REQUIRE(map.GetTree().IsRedBlackTree());
+		}
+	}
 }

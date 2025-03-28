@@ -141,7 +141,7 @@ bool RBTree::RemoveNode(RBTreeNode*& oldNode)
 
 	if (oldNode->IsInternal())
 	{
-		RBTreeNode* node = oldNode->FindSuccessor();
+		RBTreeNode* node = oldNode->FindSuccessor();	// Could use predecessor here too; doesn't matter which.
 		assert(!node->IsInternal());
 
 		oldNode->CopyValue(node);
@@ -155,34 +155,119 @@ bool RBTree::RemoveNode(RBTreeNode*& oldNode)
 		oldNode = node;
 		return true;
 	}
+	
+	RBTreeNode** branch = oldNode->FindParentBranchPointer();
+	assert(branch);
+
+	if (oldNode->leftChildNode)
+	{
+		oldNode->leftChildNode->parentNode = oldNode->parentNode;
+		*branch = oldNode->leftChildNode;
+	}
+	else if (oldNode->rightChildNode)
+	{
+		oldNode->rightChildNode->parentNode = oldNode->parentNode;
+		*branch = oldNode->rightChildNode;
+	}
 	else
 	{
-		RBTreeNode** branch = oldNode->FindParentBranchPointer();
-
-		if (oldNode->leftChildNode)
-		{
-			oldNode->leftChildNode->parentNode = oldNode->parentNode;
-			*branch = oldNode->leftChildNode;
-		}
-		else if (oldNode->rightChildNode)
-		{
-			oldNode->rightChildNode->parentNode = oldNode->parentNode;
-			*branch = oldNode->rightChildNode;
-		}
-		else
-		{
-			*branch = nullptr;
-		}
-		
-		oldNode->parentNode = nullptr;
+		*branch = nullptr;
 	}
-	
+
+	oldNode->parentNode = nullptr;
 	oldNode->tree = nullptr;
 	oldNode->leftChildNode = nullptr;
 	oldNode->rightChildNode = nullptr;
 	this->numNodes--;
 
-	// TODO: Rebalance the tree here.
+	// Restore the red/black properties of the tree.  (i.e., rebalance the tree.)
+	RBTreeNode* extraBlackNode = *branch;
+	if (extraBlackNode)
+	{
+		assert(extraBlackNode->parentNode);
+
+		while (extraBlackNode != this->rootNode && extraBlackNode->color == RBTreeNode::BLACK)
+		{
+			if (extraBlackNode->parentNode->leftChildNode == extraBlackNode)
+			{
+				RBTreeNode* siblingNode = extraBlackNode->parentNode->rightChildNode;
+
+				if (siblingNode->color == RBTreeNode::RED)
+				{
+					// Case 1
+					extraBlackNode->parentNode->color = RBTreeNode::RED;
+					siblingNode->color = RBTreeNode::BLACK;
+					extraBlackNode->parentNode->Rotate(RBTreeNode::RotationDirection::LEFT);
+				}
+				else if (siblingNode->color == RBTreeNode::BLACK)
+				{
+					if (!siblingNode->rightChildNode || siblingNode->rightChildNode->color == RBTreeNode::BLACK)
+					{
+						if (!siblingNode->leftChildNode || siblingNode->leftChildNode->color == RBTreeNode::BLACK)
+						{
+							// Case 2
+							siblingNode->color = RBTreeNode::RED;
+							extraBlackNode = extraBlackNode->parentNode;
+						}
+						else if (siblingNode->leftChildNode->color == RBTreeNode::RED)
+						{
+							// Case 3
+							siblingNode->color = RBTreeNode::BLACK;
+							siblingNode->leftChildNode->color = RBTreeNode::BLACK;
+							siblingNode->Rotate(RBTreeNode::RotationDirection::RIGHT);
+						}
+					}
+					else if (siblingNode->rightChildNode->color == RBTreeNode::RED)
+					{
+						// Case 4
+						siblingNode->color = extraBlackNode->parentNode->color;
+						siblingNode->rightChildNode->color = RBTreeNode::BLACK;
+						extraBlackNode->parentNode->Rotate(RBTreeNode::RotationDirection::LEFT);
+					}
+				}
+			}
+			else if (extraBlackNode->parentNode->rightChildNode == extraBlackNode)
+			{
+				RBTreeNode* siblingNode = extraBlackNode->parentNode->leftChildNode;
+
+				if (siblingNode->color == RBTreeNode::RED)
+				{
+					// Case 1
+					extraBlackNode->parentNode->color = RBTreeNode::RED;
+					siblingNode->color = RBTreeNode::BLACK;
+					extraBlackNode->parentNode->Rotate(RBTreeNode::RotationDirection::RIGHT);
+				}
+				else if (siblingNode->color == RBTreeNode::BLACK)
+				{
+					if (!siblingNode->leftChildNode || siblingNode->leftChildNode->color == RBTreeNode::BLACK)
+					{
+						if (!siblingNode->rightChildNode || siblingNode->rightChildNode->color == RBTreeNode::BLACK)
+						{
+							// Case 2
+							siblingNode->color = RBTreeNode::RED;
+							extraBlackNode = extraBlackNode->parentNode;
+						}
+						else if (siblingNode->rightChildNode->color == RBTreeNode::RED)
+						{
+							// Case 3
+							siblingNode->color = RBTreeNode::BLACK;
+							siblingNode->rightChildNode->color = RBTreeNode::BLACK;
+							siblingNode->Rotate(RBTreeNode::RotationDirection::LEFT);
+						}
+					}
+					else if (siblingNode->leftChildNode->color == RBTreeNode::RED)
+					{
+						// Case 4
+						siblingNode->color = extraBlackNode->parentNode->color;
+						siblingNode->leftChildNode->color = RBTreeNode::BLACK;
+						extraBlackNode->parentNode->Rotate(RBTreeNode::RotationDirection::RIGHT);
+					}
+				}
+			}
+		}
+
+		this->rootNode->color = RBTreeNode::BLACK;
+	}
 
 	return true;
 }
