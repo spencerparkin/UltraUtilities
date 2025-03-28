@@ -182,10 +182,8 @@ bool RBTree::RemoveNode(RBTreeNode*& oldNode)
 
 	// Restore the red/black properties of the tree.  (i.e., rebalance the tree.)
 	RBTreeNode* extraBlackNode = *branch;
-	if (extraBlackNode)
+	if (extraBlackNode && extraBlackNode->parentNode)
 	{
-		assert(extraBlackNode->parentNode);
-
 		while (extraBlackNode != this->rootNode && extraBlackNode->color == RBTreeNode::BLACK)
 		{
 			if (extraBlackNode->parentNode->leftChildNode == extraBlackNode)

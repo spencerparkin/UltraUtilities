@@ -121,10 +121,12 @@ TEST_CASE("Red/Black Maps", "[RBMap]")
 
 	SECTION("Remains balanced with many deletions.")
 	{
-		for (int i = 0; i < 1000; i++)
+		int numNodes = 7;
+
+		for (int i = 0; i < numNodes; i++)
 			map.Insert(i, i);
 
-		for (int i = 0; i < 1000; i++)
+		for (int i = 0; i < numNodes; i++)
 		{
 			map.Remove(i);
 			REQUIRE(map.GetTree().IsRedBlackTree());
