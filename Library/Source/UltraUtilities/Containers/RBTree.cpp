@@ -212,7 +212,7 @@ bool RBTree::RemoveNode(RBTreeNode*& oldNode)
 						else if (siblingNode->leftChildNode->color == RBTreeNode::RED)
 						{
 							// Case 3
-							siblingNode->color = RBTreeNode::BLACK;
+							siblingNode->color = RBTreeNode::RED;
 							siblingNode->leftChildNode->color = RBTreeNode::BLACK;
 							siblingNode->Rotate(RBTreeNode::RotationDirection::RIGHT);
 						}
@@ -250,7 +250,7 @@ bool RBTree::RemoveNode(RBTreeNode*& oldNode)
 						else if (siblingNode->rightChildNode->color == RBTreeNode::RED)
 						{
 							// Case 3
-							siblingNode->color = RBTreeNode::BLACK;
+							siblingNode->color = RBTreeNode::RED;
 							siblingNode->rightChildNode->color = RBTreeNode::BLACK;
 							siblingNode->Rotate(RBTreeNode::RotationDirection::LEFT);
 						}
