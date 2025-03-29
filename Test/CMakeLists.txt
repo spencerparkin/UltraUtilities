@@ -4,6 +4,8 @@ set(TEST_SOURCES
 	Source/RBMapTest.cpp
 	Source/RBSetTest.cpp
 	Source/ListTest.cpp
+	Source/DArrayTest.cpp
+	Source/StringTest.cpp
 )
 
 add_executable(Test ${TEST_SOURCES})

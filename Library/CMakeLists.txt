@@ -9,6 +9,9 @@ set(ULTRA_UTILITIES_SOURCES
 	Source/UltraUtilities/Containers/LinkedList.cpp
 	Source/UltraUtilities/Containers/LinkedList.h
 	Source/UltraUtilities/Containers/List.hpp
+	Source/UltraUtilities/Containers/DArray.hpp
+	Source/UltraUtilities/String.cpp
+	Source/UltraUtilities/String.h
 )
 
 add_library(UltraUtilities SHARED

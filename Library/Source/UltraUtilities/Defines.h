@@ -25,6 +25,4 @@
 
 // TODO: Add priority queue?
 // TODO: Add hash map.
-// TODO: Add link-list.
-// TODO: Add string class?  Make sure it works with the RBMap.
 // TODO: Generate doxegen stuff?
