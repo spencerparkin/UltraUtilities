@@ -1,6 +1,6 @@
 #pragma once
 
-#include "UltraUtilities/Utilities.h"
+#include "UltraUtilities/Defines.h"
 
 namespace UU
 {
