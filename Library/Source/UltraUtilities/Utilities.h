@@ -9,9 +9,9 @@
 #endif
 
 #if defined _WIN32
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-#include <debugapi.h>
+#	define WIN32_LEAN_AND_MEAN
+#	include <Windows.h>
+#	include <debugapi.h>
 #	define UU_ASSERT(condition) \
 						do { \
 							if (!(condition)) { \
@@ -23,11 +23,8 @@
 #	define UU_UU_ASSERT(condition)
 #endif
 
-#include <functional>
-
-// TODO: Remove all dependence on std::c++?
-// TODO: Add priority queue.
+// TODO: Add priority queue?
 // TODO: Add hash map.
-// TODO: Add link-list and thread-safe stuff.
-// TODO: Add string class?
-// TODO: Add custom assert functionality.
+// TODO: Add link-list.
+// TODO: Add string class?  Make sure it works with the RBMap.
+// TODO: Generate doxegen stuff?

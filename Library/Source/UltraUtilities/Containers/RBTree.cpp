@@ -350,7 +350,7 @@ bool RBTree::IsRedBlackTree() const
 	if (!this->rootNode)
 		return true;
 
-	if (!this->rootNode->ForAllNodes([](const RBTreeNode* node) -> bool
+	if (!this->rootNode->ForAllNodesDFS([](const RBTreeNode* node) -> bool
 		{
 			if (node->GetColor() == RBTreeNode::RED)
 			{
@@ -367,7 +367,7 @@ bool RBTree::IsRedBlackTree() const
 		return false;
 	}
 
-	if (!this->rootNode->ForAllNodes([](const RBTreeNode* node) -> bool
+	if (!this->rootNode->ForAllNodesDFS([](const RBTreeNode* node) -> bool
 		{
 			int blackHeight = -1;
 			return node->IsBalanced(blackHeight, 0);
@@ -618,7 +618,7 @@ bool RBTreeNode::IsBinaryTree() const
 			return false;
 
 		const RBTreeKey* largestKey = nullptr;
-		this->leftChildNode->ForAllNodes([this, &largestKey](const RBTreeNode* node) -> bool
+		this->leftChildNode->ForAllNodesDFS([this, &largestKey](const RBTreeNode* node) -> bool
 			{
 				if (!largestKey || *largestKey < *node->key)
 					largestKey = node->key;
@@ -635,7 +635,7 @@ bool RBTreeNode::IsBinaryTree() const
 			return false;
 
 		const RBTreeKey* smallestKey = nullptr;
-		this->rightChildNode->ForAllNodes([this, &smallestKey](const RBTreeNode* node) -> bool
+		this->rightChildNode->ForAllNodesDFS([this, &smallestKey](const RBTreeNode* node) -> bool
 			{
 				if (!smallestKey || *smallestKey > *node->key)
 					smallestKey = node->key;
@@ -645,20 +645,6 @@ bool RBTreeNode::IsBinaryTree() const
 		if (*smallestKey <= *this->key)
 			return false;
 	}
-
-	return true;
-}
-
-bool RBTreeNode::ForAllNodes(std::function<bool(const RBTreeNode* node)> callback) const
-{
-	if (!callback(this))
-		return false;
-
-	if (this->leftChildNode && !this->leftChildNode->ForAllNodes(callback))
-		return false;
-
-	if (this->rightChildNode && !this->rightChildNode->ForAllNodes(callback))
-		return false;
 
 	return true;
 }

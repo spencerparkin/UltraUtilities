@@ -136,9 +136,34 @@ namespace UU
 		/**
 		 * This provides a convenient way to visit all nodes in
 		 * the tree unconditionally.  You can early-out by returning
-		 * false from the given lambda.
+		 * false from the given lambda.  As the name suggests, we
+		 * perform a depth-first traversal of the tree.
 		 */
-		bool ForAllNodes(std::function<bool(const RBTreeNode* node)> callback) const;
+		template<typename Lambda>
+		bool ForAllNodesDFS(Lambda callback) const
+		{
+			if (!callback(this))
+				return false;
+
+			if (this->leftChildNode && !this->leftChildNode->ForAllNodesDFS(callback))
+				return false;
+
+			if (this->rightChildNode && !this->rightChildNode->ForAllNodesDFS(callback))
+				return false;
+
+			return true;
+		}
+
+		/**
+		 * This is just like @ref ForAllNodesDFS, except here we're
+		 * doing a breadth-first traversal of the tree.
+		 */
+		template<typename Lambda>
+		bool ForAllNodesBFS(Lambda callback) const
+		{
+			// TODO: Write this once we have a queue container.
+			return false;
+		}
 
 		/**
 		 * This is used purely for diagnostic purposes to verify that the
