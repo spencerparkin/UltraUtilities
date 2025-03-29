@@ -1,6 +1,7 @@
 #pragma once
 
 #include "UltraUtilities/Defines.h"
+#include "UltraUtilities/Containers/List.hpp"
 
 namespace UU
 {
@@ -144,13 +145,10 @@ namespace UU
 		{
 			if (!callback(this))
 				return false;
-
 			if (this->leftChildNode && !this->leftChildNode->ForAllNodesDFS(callback))
 				return false;
-
 			if (this->rightChildNode && !this->rightChildNode->ForAllNodesDFS(callback))
 				return false;
-
 			return true;
 		}
 
@@ -161,8 +159,20 @@ namespace UU
 		template<typename Lambda>
 		bool ForAllNodesBFS(Lambda callback) const
 		{
-			// TODO: Write this once we have a queue container.
-			return false;
+			List<const RBTreeNode*> queue;
+			queue.PushBack(this);
+			while (queue.GetNumValues() > 0)
+			{
+				const RBTreeNode* node = nullptr;
+				queue.PopBack(&node);
+				if (!callback(node))
+					return false;
+				if (node->leftChildNode)
+					queue.PushBack(node->leftChildNode);
+				if (node->rightChildNode)
+					queue.PushBack(node->rightChildNode);
+			}
+			return true;
 		}
 
 		/**
