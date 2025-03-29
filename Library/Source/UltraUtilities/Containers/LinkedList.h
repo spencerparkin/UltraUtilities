@@ -81,6 +81,7 @@ namespace UU
 
 		LinkedListNode* GetNext() { return this->nextNode; }
 		LinkedListNode* GetPrev() { return this->prevNode; }
+		LinkedList* GetList() { return this->list; }
 
 	private:
 		LinkedList* list;

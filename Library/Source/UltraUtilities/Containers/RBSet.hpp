@@ -9,6 +9,8 @@ namespace UU
 	/**
 	 * This is a templatized wrapper for the @ref RBTree class.
 	 * It is provided as a more convenient way to use the tree.
+	 * Note that unlike @ref HashSet, this set imposes an ordering
+	 * on its elements.
 	 */
 	template<typename K>
 	class UU_API RBSet
@@ -43,11 +45,11 @@ namespace UU
 		 */
 		bool Insert(K key)
 		{
-			auto treeNode = new RBTreeNode();
-			treeNode->SetKey(new RBMapKey<K>(key));
-			if (!this->tree.InsertNode(treeNode))
+			auto node = new RBTreeNode();
+			node->SetKey(new RBMapKey<K>(key));
+			if (!this->tree.InsertNode(node))
 			{
-				delete treeNode;
+				delete node;
 				return false;
 			}
 			return true;
@@ -60,11 +62,11 @@ namespace UU
 		bool Remove(K key)
 		{
 			RBMapKey<K> treeKey(key);
-			RBTreeNode* treeNode = this->tree.FindNode(&treeKey);
-			if (!treeNode)
+			RBTreeNode* node = this->tree.FindNode(&treeKey);
+			if (!node)
 				return false;
-			this->tree.RemoveNode(treeNode);
-			delete treeNode;
+			this->tree.RemoveNode(node);
+			delete node;
 			return true;
 		}
 

@@ -10,6 +10,10 @@ set(ULTRA_UTILITIES_SOURCES
 	Source/UltraUtilities/Containers/LinkedList.h
 	Source/UltraUtilities/Containers/List.hpp
 	Source/UltraUtilities/Containers/DArray.hpp
+	Source/UltraUtilities/Containers/HashTable.cpp
+	Source/UltraUtilities/Containers/HashTable.h
+	Source/UltraUtilities/Containers/HashMap.hpp
+	Source/UltraUtilities/Containers/HashSet.hpp
 	Source/UltraUtilities/String.cpp
 	Source/UltraUtilities/String.h
 )

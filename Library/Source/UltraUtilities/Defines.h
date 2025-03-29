@@ -24,5 +24,4 @@
 #endif
 
 // TODO: Add priority queue?
-// TODO: Add hash map.
 // TODO: Generate doxegen stuff?

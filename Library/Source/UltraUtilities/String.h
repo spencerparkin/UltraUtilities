@@ -39,7 +39,39 @@ namespace UU
 			return (*this->charArray)[i];
 		}
 
+		/**
+		 * Alphabetically compare this string with the given string.
+		 */
 		int CompareWith(const String& string) const;
+
+		/**
+		 * This is provided for compatabillity with the @ref HashSet and @ref HashMap
+		 * classes so that string keys can be checked for equality.
+		 */
+		static bool Equal(const String& stringA, const String& stringB)
+		{
+			return stringA == stringB;
+		}
+
+		/**
+		 * This is provided for compatabillity with the @ref HashSet and @ref HashMap
+		 * classes so that string keys can be hashed.
+		 */
+		static unsigned int Hash(const String& string, unsigned int tableSize)
+		{
+			unsigned int hash = 0;
+			for (unsigned int i = 0; i < string.Length(); i++)
+			{
+				auto j = (unsigned int)(string[i]);
+
+				// I made this up and it's probably stupid.
+				hash += j;
+				hash ^= j << i;
+				hash += hash << j;
+				hash += hash << i * j;
+			}
+			return hash;
+		}
 
 		// TODO: Add split and combine, each with a delimeter.
 

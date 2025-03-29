@@ -52,17 +52,24 @@ namespace UU
 		}
 
 		/**
-		 * Insert a value at the given key.  Failure occurs here
-		 * if a value already exists in the tree at the given key.
+		 * Insert a value at the given key.  If a value already
+		 * exists at the given key, it is replaced.
 		 */
 		bool Insert(K key, V value)
 		{
-			auto treeNode = new RBMapNode<V>(value);
-			treeNode->SetKey(new RBMapKey<K>(key));
-			if (!this->tree.InsertNode(treeNode))
+			RBMapKey<K> treeKey(key);
+			auto node = static_cast<RBMapNode<V>*>(this->tree.FindNode(&treeKey));
+			if (node)
+				node->value = value;
+			else
 			{
-				delete treeNode;
-				return false;
+				node = new RBMapNode<V>(value);
+				node->SetKey(new RBMapKey<K>(key));
+				if (!this->tree.InsertNode(node))
+				{
+					delete node;
+					return false;
+				}
 			}
 			return true;
 		}
@@ -74,13 +81,13 @@ namespace UU
 		bool Remove(K key, V* value = nullptr)
 		{
 			RBMapKey<K> treeKey(key);
-			RBTreeNode* treeNode = this->tree.FindNode(&treeKey);
-			if (!treeNode)
+			RBTreeNode* node = this->tree.FindNode(&treeKey);
+			if (!node)
 				return false;
 			if (value)
-				*value = static_cast<RBMapNode<V>*>(treeNode)->value;
-			this->tree.RemoveNode(treeNode);
-			delete treeNode;
+				*value = static_cast<RBMapNode<V>*>(node)->value;
+			this->tree.RemoveNode(node);
+			delete node;
 			return true;
 		}
 
