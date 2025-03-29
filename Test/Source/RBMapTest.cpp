@@ -110,21 +110,15 @@ TEST_CASE("Red/Black Maps", "[RBMap]")
 		}
 	}
 
-	SECTION("Remains balanced with many insertions.")
-	{
-		for (int i = 0; i < 1000; i++)
-		{
-			map.Insert(i, i);
-			REQUIRE(map.GetTree().IsRedBlackTree());
-		}
-	}
-
-	SECTION("Remains balanced with many deletions.")
+	SECTION("Remains balanced with many insertions and deletions.")
 	{
 		int numNodes = 1000;
 
 		for (int i = 0; i < numNodes; i++)
+		{
 			map.Insert(i, i);
+			REQUIRE(map.GetTree().IsRedBlackTree());
+		}
 
 		for (int i = 0; i < numNodes; i++)
 		{
