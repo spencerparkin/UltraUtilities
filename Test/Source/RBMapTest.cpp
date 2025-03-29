@@ -121,7 +121,7 @@ TEST_CASE("Red/Black Maps", "[RBMap]")
 
 	SECTION("Remains balanced with many deletions.")
 	{
-		int numNodes = 7;
+		int numNodes = 1000;
 
 		for (int i = 0; i < numNodes; i++)
 			map.Insert(i, i);

@@ -180,6 +180,7 @@ bool RBTree::RemoveNode(RBTreeNode*& oldNode)
 	}
 
 	// Removing a red node from a red/black tree does not break any of the red/black tree properties.
+	// I've studied this at length, but admittedly, I'd be lying if I said I fully understood all cases.
 	if (oldNode->color == RBTreeNode::BLACK)
 	{
 		RBTreeNode* extraBlackNode = *branch;
