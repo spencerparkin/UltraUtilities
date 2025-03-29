@@ -8,7 +8,21 @@
 #	define UU_API
 #endif
 
-#include <assert.h>
+#if defined _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#include <debugapi.h>
+#	define UU_ASSERT(condition) \
+						do { \
+							if (!(condition)) { \
+								if (IsDebuggerPresent()) \
+									DebugBreak(); \
+							} \
+						} while(false)
+#else
+#	define UU_UU_ASSERT(condition)
+#endif
+
 #include <functional>
 
 // TODO: Remove all dependence on std::c++?

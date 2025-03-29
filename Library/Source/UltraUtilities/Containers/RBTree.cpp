@@ -66,7 +66,7 @@ bool RBTree::InsertNode(RBTreeNode* newNode)
 			}
 			else
 			{
-				assert(*newNode->key == *node->key);
+				UU_ASSERT(*newNode->key == *node->key);
 				return false;
 			}
 		}
@@ -81,7 +81,7 @@ bool RBTree::InsertNode(RBTreeNode* newNode)
 	while (node && node->parentNode && node->parentNode->color == RBTreeNode::RED)
 	{
 		RBTreeNode* grandParentNode = node->parentNode->parentNode;
-		assert(grandParentNode != nullptr);		// Our coloring of the root black should guarentee this condition.
+		UU_ASSERT(grandParentNode != nullptr);		// Our coloring of the root black should guarentee this condition.
 
 		RBTreeNode::RotationDirection grandParentRotationDirection = RBTreeNode::RotationDirection::LEFT;
 		RBTreeNode* uncleNode = nullptr;
@@ -142,13 +142,13 @@ bool RBTree::RemoveNode(RBTreeNode*& oldNode)
 	if (oldNode->IsInternal())
 	{
 		RBTreeNode* node = oldNode->FindSuccessor();	// Could use predecessor here too; doesn't matter which.
-		assert(!node->IsInternal());
+		UU_ASSERT(!node->IsInternal());
 
 		oldNode->CopyValue(node);
 
 		if (!this->RemoveNode(node))
 		{
-			assert(false);
+			UU_ASSERT(false);
 			return false;
 		}
 
@@ -157,7 +157,7 @@ bool RBTree::RemoveNode(RBTreeNode*& oldNode)
 	}
 	
 	RBTreeNode** branch = oldNode->FindParentBranchPointer();
-	assert(branch);
+	UU_ASSERT(branch);
 
 	RBTreeNode sentinal;
 	sentinal.color = RBTreeNode::BLACK;
@@ -553,7 +553,7 @@ RBTreeNode** RBTreeNode::FindParentBranchPointer()
 void RBTreeNode::Rotate(RotationDirection rotationDirection)
 {
 	RBTreeNode** branch = this->FindParentBranchPointer();
-	assert(branch != nullptr);
+	UU_ASSERT(branch != nullptr);
 
 	switch (rotationDirection)
 	{
@@ -561,7 +561,7 @@ void RBTreeNode::Rotate(RotationDirection rotationDirection)
 		{
 			if (!this->rightChildNode)
 			{
-				assert(false);
+				UU_ASSERT(false);
 				return;
 			}
 
@@ -586,7 +586,7 @@ void RBTreeNode::Rotate(RotationDirection rotationDirection)
 		{
 			if (!this->leftChildNode)
 			{
-				assert(false);
+				UU_ASSERT(false);
 				return;
 			}
 
