@@ -2,6 +2,9 @@
 
 set(ULTRA_UTILITIES_SOURCES
 	Source/UltraUtilities/Defines.h
+	Source/UltraUtilities/String.cpp
+	Source/UltraUtilities/String.h
+	Source/UltraUtilities/Memory/ObjectHeap.hpp
 	Source/UltraUtilities/Containers/RBTree.cpp
 	Source/UltraUtilities/Containers/RBTree.h
 	Source/UltraUtilities/Containers/RBMap.hpp
@@ -14,8 +17,6 @@ set(ULTRA_UTILITIES_SOURCES
 	Source/UltraUtilities/Containers/HashTable.h
 	Source/UltraUtilities/Containers/HashMap.hpp
 	Source/UltraUtilities/Containers/HashSet.hpp
-	Source/UltraUtilities/String.cpp
-	Source/UltraUtilities/String.h
 )
 
 add_library(UltraUtilities SHARED

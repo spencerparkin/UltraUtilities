@@ -11,8 +11,10 @@ namespace UU
 	/**
 	 * This is a templatized wrapper for the @ref RBTree class.
 	 * It is provided as a more convenient way to use the tree.
+	 * 
+	 * TODO: Add configurable node and key heaps.
 	 */
-	template<typename K, typename V>
+	template<typename K, typename V /*, typename NH = DefaultObjectHeap<RBMapNode<V>>, typename KH = DefaultObjectHeap<RBMapKey<V>>*/>
 	class UU_API RBMap
 	{
 	public:

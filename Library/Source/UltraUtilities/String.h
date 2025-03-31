@@ -66,9 +66,7 @@ namespace UU
 
 				// I made this up and it's probably stupid.
 				hash += j;
-				hash ^= j << i;
-				hash += hash << j;
-				hash += hash << i * j;
+				hash *= 0xFFFFFFFF - j;
 			}
 			return hash;
 		}
