@@ -1,6 +1,7 @@
 #pragma once
 
 #include "UltraUtilities/Containers/HashTable.h"
+#include "UltraUtilities/Memory/ObjectHeap.hpp"
 
 namespace UU
 {
@@ -10,7 +11,7 @@ namespace UU
 	/**
 	 * This is a template wrapper around the @ref HashTable class.
 	 */
-	template<typename K, typename V>
+	template<typename K, typename V, typename NH = DefaultObjectHeap<HashMapNode<V>>, typename KH = DefaultObjectHeap<HashMapKey<K>>>
 	class HashMap
 	{
 	public:
@@ -43,8 +44,9 @@ namespace UU
 		 */
 		bool Find(K key, V* value = nullptr)
 		{
-			HashMapKey<K> tableKey(key);
-			auto node = static_cast<HashMapNode<V>*>(this->table.FindNode(&tableKey));
+			HashMapKey<K> mapKey;
+			key.value = key;
+			auto node = static_cast<HashMapNode<V>*>(this->table.FindNode(&mapKey));
 			if (!node)
 				return false;
 			if (value)
@@ -58,17 +60,21 @@ namespace UU
 		 */
 		bool Insert(K key, V value)
 		{
-			HashMapKey<K> tableKey(key);
-			auto node = static_cast<HashMapNode<V>*>(this->table.FindNode(&tableKey));
+			HashMapKey<K> mapKey;
+			mapKey.value = key;
+			auto node = static_cast<HashMapNode<V>*>(this->table.FindNode(&mapKey));
 			if (node)
 				node->value = value;
 			else
 			{
-				node = new HashMapNode<V>(value);
-				node->SetKey(new HashMapKey<K>(key));
+				node = this->nodeHeap.Allocate();
+				node->value = value;
+				node->SetKey(this->keyHeap.Allocate());
+				static_cast<HashMapKey<K>*>(node->GetKey())->value = key;
 				if (!this->table.InsertNode(node))
 				{
-					delete node;
+					this->keyHeap.Deallocate(static_cast<HashMapKey<K>*>(node->GetKey()));
+					this->nodeHeap.Deallocate(static_cast<HashMapNode<V>*>(node));
 					return false;
 				}
 			}
@@ -81,14 +87,16 @@ namespace UU
 		 */
 		bool Remove(K key, V* value = nullptr)
 		{
-			HashTableKey<K> tableKey(key);
-			HashTableNode* node = this->table.FindNode(&tableKey);
+			HashTableKey<K> mapKey;
+			mapKey.value = key;
+			HashTableNode* node = this->table.FindNode(&mapKey);
 			if (!node)
 				return false;
 			if (value)
 				*value = static_cast<HashMapNode<V>*>(node)->value;
 			this->table.RemoveNode(node);
-			delete node;
+			this->keyHeap.Deallocate(static_cast<HashMapKey<K>*>(node->GetKey()));
+			this->nodeHeap.Deallocate(static_cast<HashMapNode<V>*>(node));
 			return true;
 		}
 
@@ -114,6 +122,8 @@ namespace UU
 
 	private:
 		HashTable table;
+		NH nodeHeap;
+		KH keyHeap;
 	};
 
 	/**
@@ -122,12 +132,6 @@ namespace UU
 	template<typename V>
 	class HashMapNode : public HashTableNode
 	{
-	public:
-		HashMapNode(V value)
-		{
-			this->value = value;
-		}
-
 	public:
 		V value;
 	};

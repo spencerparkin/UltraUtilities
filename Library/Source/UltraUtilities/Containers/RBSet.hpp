@@ -65,9 +65,9 @@ namespace UU
 		 */
 		bool Remove(K key)
 		{
-			RBMapKey<K> mapKey;
-			mapKey.value = key;
-			RBTreeNode* node = this->tree.FindNode(&mapKey);
+			RBMapKey<K> setKey;
+			setKey.value = key;
+			RBTreeNode* node = this->tree.FindNode(&setKey);
 			if (!node)
 				return false;
 			this->tree.RemoveNode(node);

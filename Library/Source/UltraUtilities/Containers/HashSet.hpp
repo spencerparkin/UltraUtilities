@@ -1,6 +1,7 @@
 #pragma once
 
 #include "UltraUtilities/Containers/HashMap.hpp"
+#include "UltraUtilities/Memory/ObjectHeap.hpp"
 
 namespace UU
 {
@@ -13,7 +14,7 @@ namespace UU
 	 * removal than self-balancing binary trees, provided the
 	 * hash table is big enough and the hash function is good.
 	 */
-	template<typename K>
+	template<typename K, typename NH = DefaultObjectHeap<HashTableNode>, typename KH = DefaultObjectHeap<HashMapKey<K>>>
 	class UU_API HashSet
 	{
 	public:
@@ -34,8 +35,9 @@ namespace UU
 		 */
 		bool Find(K key)
 		{
-			HashMapKey<K> tableKey(key);
-			auto node = static_cast<HashMapNode<int>*>(this->table.FindNode(&tableKey));
+			HashMapKey<K> mapKey;
+			mapKey.value = key;
+			auto node = this->table.FindNode(&mapKey);
 			return node != nullptr;
 		}
 
@@ -45,11 +47,14 @@ namespace UU
 		 */
 		bool Insert(K key)
 		{
-			auto node = new HashMapNode();
-			node->SetKey(new HashMapKey<K>(key));
+			auto node = this->nodeHeap.Allocate();
+			auto setKey = this->keyHeap.Allocate();
+			setKey->value = key;
+			node->SetKey(setKey);
 			if (!this->table.InsertNode(node))
 			{
-				delete node;
+				this->keyHeap.Deallocate(static_cast<HashMapKey<K>*>(node->GetKey()));
+				this->nodeHeap.Deallocate(node);
 				return false;
 			}
 			return true;
@@ -61,12 +66,14 @@ namespace UU
 		 */
 		bool Remove(K key)
 		{
-			HashMapKey<K> treeKey(key);
-			HashMapNode* node = this->table.FindNode(&treeKey);
+			HashMapKey<K> setKey;
+			setKey.value = key;
+			HashMapNode* node = this->table.FindNode(&setKey);
 			if (!node)
 				return false;
 			this->table.RemoveNode(node);
-			delete node;
+			this->keyHeap.Deallocate(static_cast<HashMapKey<K>*>(node->GetKey()));
+			this->nodeHeap.Deallocate(node);
 			return true;
 		}
 
@@ -92,5 +99,7 @@ namespace UU
 
 	private:
 		HashTable table;
+		NH nodeHeap;
+		KH keyHeap;
 	};
 }
