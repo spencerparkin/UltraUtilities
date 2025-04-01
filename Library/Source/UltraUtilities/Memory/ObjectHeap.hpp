@@ -12,14 +12,14 @@ namespace UU
 	{
 	public:
 		virtual T* Allocate() = 0;
-		bool Deallocate(T* object) = 0;
+		virtual bool Deallocate(T* object) = 0;
 	};
 
 	/**
 	 * The default implementation just uses the built-in free-store.
 	 */
 	template<typename T>
-	class UU_API DefaultObjectHeap : public ObjectHeap
+	class UU_API DefaultObjectHeap : public ObjectHeap<T>
 	{
 	public:
 		virtual T* Allocate() override
@@ -27,7 +27,7 @@ namespace UU
 			return new T();
 		}
 
-		bool Deallocate(T* object) override
+		virtual bool Deallocate(T* object) override
 		{
 			delete object;
 			return true;
@@ -35,14 +35,14 @@ namespace UU
 	};
 
 	/**
-	 * Object pools have O(1) time allocation and deallocation, but they
+	 * Object pools have O(1) time allocation and deallocation, but
 	 * there is a pre-determined limit to the number of allocations that
 	 * can be made from the heap.  (Well, there always is such a limit,
 	 * but here the bound can't practically be the memory limit of the
 	 * machine.)
 	 */
 	template<typename T>
-	class UU_API ObjectPoolHeap : public ObjectHeap
+	class UU_API ObjectPoolHeap : public ObjectHeap<T>
 	{
 	public:
 		ObjectPoolHeap(unsigned int maxObjects)
@@ -51,7 +51,7 @@ namespace UU
 			this->freeObjectStack = new unsigned int[maxObjects];
 			this->freeObjectStackTop = 0;
 			for (unsigned int i = 0; i < maxObjects; i++)
-				this->freeObjectStack[i] = i;
+				this->freeObjectStack[i] = i * sizeof(T);
 			this->buffer = new unsigned char[maxObjects * sizeof(T)];
 		}
 
@@ -66,19 +66,19 @@ namespace UU
 			if (this->freeObjectStackTop == this->freeObjectStackSize)
 				return nullptr;
 			unsigned int i = this->freeObjectStack[this->freeObjectStackTop++];
-			unsigned char* memory = &this->buffer[i * sizeof(T)];
+			unsigned char* memory = &this->buffer[i];
 			T* object = new (memory) T();
 			return object;
 		}
 
-		bool Deallocate(T* object) override
+		virtual bool Deallocate(T* object) override
 		{
 			if (this->freeObjectStackTop == 0)
 				return false;
 			auto memory = static_cast<unsigned char*>(object);
-			unsigned int i = (memory - this->buffer) / sizeof(T);
-			UU_ASSERT(i < this->freeObjectStackSize);
-			if (i >= this->freeObjectStackSize)
+			unsigned int i = memory - this->buffer;
+			UU_ASSERT(i % sizeof(T) == 0 && i / sizeof(T) < this->freeObjectStackSize);
+			if (i % sizeof(T) != 0 || i / sizeof(T) >= this->freeObjectStackSize)
 				return false;
 			this->freeObjectStack[--this->freeObjectStackTop] = i;
 			object->~T();

@@ -12,7 +12,7 @@ namespace UU
 	 * Note that unlike @ref HashSet, this set imposes an ordering
 	 * on its elements.
 	 */
-	template<typename K>
+	template<typename K, typename NH = DefaultObjectHeap<RBTreeNode>, typename KH = DefaultObjectHeap<RBMapKey<K>>>
 	class UU_API RBSet
 	{
 	public:
@@ -34,8 +34,9 @@ namespace UU
 		 */
 		bool Find(K key)
 		{
-			RBMapKey<K> treeKey(key);
-			auto node = static_cast<RBMapNode<int>*>(this->tree.FindNode(&treeKey));
+			RBMapKey<K> mapKey;
+			mapKey.value = key;
+			auto node = this->tree.FindNode(&mapKey);
 			return node != nullptr;
 		}
 
@@ -45,11 +46,14 @@ namespace UU
 		 */
 		bool Insert(K key)
 		{
-			auto node = new RBTreeNode();
-			node->SetKey(new RBMapKey<K>(key));
+			auto node = this->nodeHeap.Allocate();
+			auto setKey = this->keyHeap.Allocate();
+			setKey->value = key;
+			node->SetKey(setKey);
 			if (!this->tree.InsertNode(node))
 			{
-				delete node;
+				this->keyHeap.Deallocate(static_cast<RBMapKey<K>*>(node->GetKey()));
+				this->nodeHeap.Deallocate(node);
 				return false;
 			}
 			return true;
@@ -61,12 +65,14 @@ namespace UU
 		 */
 		bool Remove(K key)
 		{
-			RBMapKey<K> treeKey(key);
-			RBTreeNode* node = this->tree.FindNode(&treeKey);
+			RBMapKey<K> mapKey;
+			mapKey.value = key;
+			RBTreeNode* node = this->tree.FindNode(&mapKey);
 			if (!node)
 				return false;
 			this->tree.RemoveNode(node);
-			delete node;
+			this->keyHeap.Deallocate(static_cast<RBMapKey<K>*>(node->GetKey()));
+			this->nodeHeap.Deallocate(node);
 			return true;
 		}
 
@@ -115,6 +121,8 @@ namespace UU
 	private:
 		RBTree tree;
 		mutable RBSetIterator<K>::Direction iterationDirection;
+		NH nodeHeap;
+		KH keyHeap;
 	};
 
 	/**

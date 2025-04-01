@@ -445,18 +445,16 @@ RBTreeNode::RBTreeNode()
 
 /*virtual*/ RBTreeNode::~RBTreeNode()
 {
-	delete this->key;
 	delete this->leftChildNode;
 	delete this->rightChildNode;
 }
 
 void RBTreeNode::SetKey(RBTreeKey* key)
 {
-	delete this->key;
 	this->key = key;
 }
 
-const RBTreeKey* RBTreeNode::GetKey() const
+RBTreeKey* RBTreeNode::GetKey()
 {
 	return this->key;
 }

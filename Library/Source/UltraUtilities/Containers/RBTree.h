@@ -217,8 +217,17 @@ namespace UU
 		const RBTreeNode* GetLeftNode() const { return this->leftChildNode; }
 		const RBTreeNode* GetRightNode() const { return this->rightChildNode; }
 
+		/**
+		 * Assign a key to this node.  Note that we do not take ownership of the memory
+		 * here.  The caller needs to make sure that the memory is cleaned up after this
+		 * node goes out of scope.
+		 */
 		void SetKey(RBTreeKey* key);
-		const RBTreeKey* GetKey() const;
+
+		/**
+		 * Get the key assigned to this node or null if none is assigned.
+		 */
+		RBTreeKey* GetKey();
 
 	private:
 		RBTreeNode** FindParentBranchPointer();

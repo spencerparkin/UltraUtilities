@@ -1,6 +1,7 @@
 #pragma once
 
 #include "UltraUtilities/Containers/RBTree.h"
+#include "UltraUtilities/Memory/ObjectHeap.hpp"
 
 namespace UU
 {
@@ -11,10 +12,8 @@ namespace UU
 	/**
 	 * This is a templatized wrapper for the @ref RBTree class.
 	 * It is provided as a more convenient way to use the tree.
-	 * 
-	 * TODO: Add configurable node and key heaps.
 	 */
-	template<typename K, typename V /*, typename NH = DefaultObjectHeap<RBMapNode<V>>, typename KH = DefaultObjectHeap<RBMapKey<V>>*/>
+	template<typename K, typename V, typename NH = DefaultObjectHeap<RBMapNode<V>>, typename KH = DefaultObjectHeap<RBMapKey<K>>>
 	class UU_API RBMap
 	{
 	public:
@@ -44,8 +43,9 @@ namespace UU
 		 */
 		bool Find(K key, V* value = nullptr)
 		{
-			RBMapKey<K> treeKey(key);
-			auto node = static_cast<RBMapNode<V>*>(this->tree.FindNode(&treeKey));
+			RBMapKey<K> mapKey;
+			mapKey.value = key;
+			auto node = static_cast<RBMapNode<V>*>(this->tree.FindNode(&mapKey));
 			if (!node)
 				return false;
 			if (value)
@@ -59,17 +59,21 @@ namespace UU
 		 */
 		bool Insert(K key, V value)
 		{
-			RBMapKey<K> treeKey(key);
-			auto node = static_cast<RBMapNode<V>*>(this->tree.FindNode(&treeKey));
+			RBMapKey<K> mapKey;
+			mapKey.value = key;
+			auto node = static_cast<RBMapNode<V>*>(this->tree.FindNode(&mapKey));
 			if (node)
 				node->value = value;
 			else
 			{
-				node = new RBMapNode<V>(value);
-				node->SetKey(new RBMapKey<K>(key));
+				node = this->nodeHeap.Allocate();
+				node->value = value;
+				node->SetKey(this->keyHeap.Allocate());
+				static_cast<RBMapKey<K>*>(node->GetKey())->value = key;
 				if (!this->tree.InsertNode(node))
 				{
-					delete node;
+					this->keyHeap.Deallocate(static_cast<RBMapKey<K>*>(node->GetKey()));
+					this->nodeHeap.Deallocate(static_cast<RBMapNode<V>*>(node));
 					return false;
 				}
 			}
@@ -82,14 +86,16 @@ namespace UU
 		 */
 		bool Remove(K key, V* value = nullptr)
 		{
-			RBMapKey<K> treeKey(key);
-			RBTreeNode* node = this->tree.FindNode(&treeKey);
+			RBMapKey<K> mapKey;
+			mapKey.value = key;
+			RBTreeNode* node = this->tree.FindNode(&mapKey);
 			if (!node)
 				return false;
 			if (value)
 				*value = static_cast<RBMapNode<V>*>(node)->value;
 			this->tree.RemoveNode(node);
-			delete node;
+			this->keyHeap.Deallocate(static_cast<RBMapKey<K>*>(node->GetKey()));
+			this->nodeHeap.Deallocate(static_cast<RBMapNode<V>*>(node));
 			return true;
 		}
 
@@ -138,6 +144,8 @@ namespace UU
 	private:
 		RBTree tree;
 		mutable RBMapIterator<K, V>::Direction iterationDirection;
+		NH nodeHeap;
+		KH keyHeap;
 	};
 
 	/**
@@ -215,9 +223,9 @@ namespace UU
 	class UU_API RBMapNode : public RBTreeNode
 	{
 	public:
-		RBMapNode(V value)
+		RBMapNode()
 		{
-			this->value = value;
+			// Note that the value is left uninitialized!
 		}
 
 		virtual ~RBMapNode()
@@ -240,9 +248,9 @@ namespace UU
 	class UU_API RBMapKey : public RBTreeKey
 	{
 	public:
-		RBMapKey(K value)
+		RBMapKey()
 		{
-			this->value = value;
+			// Note that the key value is left uninitialized!
 		}
 
 		virtual ~RBMapKey()
