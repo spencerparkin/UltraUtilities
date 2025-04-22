@@ -1,6 +1,6 @@
 #pragma once
 
-#include "UltraUtilities/Containers/DArray.hpp"
+#include "UltraUtilities/Defines.h"
 
 namespace UU
 {
@@ -8,7 +8,7 @@ namespace UU
 	 * These are dynamic arrays.
 	 */
 	template<typename V>
-	class DArray
+	class UU_API DArray
 	{
 	public:
 		DArray(unsigned int size = 0)

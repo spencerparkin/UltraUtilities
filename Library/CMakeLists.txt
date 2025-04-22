@@ -17,6 +17,7 @@ set(ULTRA_UTILITIES_SOURCES
 	Source/UltraUtilities/Containers/HashTable.h
 	Source/UltraUtilities/Containers/HashMap.hpp
 	Source/UltraUtilities/Containers/HashSet.hpp
+	Source/UltraUtilities/Containers/PriorityQueue.hpp
 )
 
 add_library(UltraUtilities SHARED

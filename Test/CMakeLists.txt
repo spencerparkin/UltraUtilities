@@ -6,6 +6,7 @@ set(TEST_SOURCES
 	Source/ListTest.cpp
 	Source/DArrayTest.cpp
 	Source/StringTest.cpp
+	Source/PriorityQueueTest.cpp
 )
 
 add_executable(Test ${TEST_SOURCES})
