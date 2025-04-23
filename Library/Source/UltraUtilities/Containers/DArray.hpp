@@ -4,6 +4,8 @@
 
 namespace UU
 {
+	template<typename V> class DArrayIterator;
+
 	/**
 	 * These are dynamic arrays.
 	 */
@@ -146,9 +148,120 @@ namespace UU
 				this->SetCapacity(capacity);
 		}
 
+		unsigned int Find(const V& value)
+		{
+			for (unsigned int i = 0; i < this->arraySize; i++)
+				if (this->buffer[i] == value)
+					return i;
+
+			return -1;
+		}
+
+		bool QuickRemove(unsigned int i)
+		{
+			if (i >= this->arraySize)
+				return false;
+
+			if (i != this->arraySize - 1)
+				this->buffer[i] = this->buffer[this->arraySize - 1];
+
+			this->arraySize--;
+			return true;
+		}
+
+		bool ShiftRemove(unsigned int i)
+		{
+			if (i >= this->arraySize)
+				return false;
+
+			if (i != this->arraySize - 1)
+				for (unsigned int j = i; j < this->arraySize - 1; j++)
+					this->buffer[j] = this->buffer[j + 1];
+
+			this->arraySize--;
+			return true;
+		}
+
+		bool Remove(const V& value)
+		{
+			unsigned int i = this->Find(value);
+			if (i == -1)
+				return false;
+			return this->ShiftRemove(i);
+		}
+
+		DArrayIterator<V> begin()
+		{
+			return DArrayIterator<V>(this, this->iterationDirection);
+		}
+
+		int end()
+		{
+			return -1;
+		}
+
 	private:
 		V* buffer;
 		unsigned int bufferSize;
 		unsigned int arraySize;
+		mutable DArrayIterator<V>::Direction iterationDirection;
+	};
+
+	/**
+	 * This is used to make the @ref DArray class compatible with the ranged for-loop syntax.
+	 */
+	template<typename V>
+	class DArrayIterator
+	{
+	public:
+		enum Direction
+		{
+			FORWARD,
+			BACKWARD
+		};
+
+		DArrayIterator(DArray<V>* array, Direction direction)
+		{
+			this->array = array;
+			this->direction = direction;
+			this->i = 0;
+
+			switch (direction)
+			{
+			case BACKWARD:
+				this->i = int(array->GetSize()) - 1;
+				break;
+			}
+		}
+
+		void operator++()
+		{
+			switch (this->direction)
+			{
+			case FORWARD:
+				this->i++;
+				if (i == int(this->array->GetSize()))
+					i = -1;
+				break;
+			case BACKWARD:
+				this->i--;
+				break;
+			}
+		}
+
+		bool operator==(int j)
+		{
+			return this->i == j;
+		}
+
+		V& operator*()
+		{
+			return (*this->array)[this->i];
+		}
+
+	private:
+		DArray<V>* array;
+		Direction direction;
+		int i;
 	};
 }
