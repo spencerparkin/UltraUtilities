@@ -117,6 +117,7 @@ void Graph::ClearTraversalFlags()
 
 Graph::Node::Node()
 {
+	this->considered = false;
 }
 
 /*virtual*/ Graph::Node::~Node()

@@ -15,6 +15,7 @@ namespace UU
 	public:
 		DArray(unsigned int size = 0)
 		{
+			this->iterationDirection = DArrayIterator<V>::Direction::FORWARD;
 			this->bufferSize = (size == 0) ? 1 : size;
 			this->buffer = new V[this->bufferSize];
 			this->arraySize = size;
@@ -22,6 +23,7 @@ namespace UU
 
 		DArray(const DArray& array)
 		{
+			this->iterationDirection = DArrayIterator<V>::Direction::FORWARD;
 			this->bufferSize = array.bufferSize;
 			this->arraySize = array.arraySize;
 			this->buffer = new V[array.bufferSize];
@@ -198,6 +200,34 @@ namespace UU
 		int end()
 		{
 			return -1;
+		}
+
+		// This is a super lame/slow bubble sort.
+		// I think the worst-case running time may be when the list is in reverse order.
+		// It is a stable sort, though.
+		template<typename P>
+		void Sort(P predicate)
+		{
+			if (this->arraySize == 0)
+				return;
+			bool sorted = false;
+			while (!sorted)
+			{
+				sorted = true;
+				for (unsigned int i = 0; i < this->arraySize - 1; i++)
+				{
+					V& valueA = this->buffer[i];
+					V& valueB = this->buffer[i + 1];
+					int compare = predicate(valueA, valueB);
+					if (compare > 0)
+					{
+						V valueC = valueA;
+						valueA = valueB;
+						valueB = valueC;
+						sorted = false;
+					}
+				}
+			}
 		}
 
 	private:

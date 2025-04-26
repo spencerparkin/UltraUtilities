@@ -23,5 +23,4 @@
 #	define UU_UU_ASSERT(condition)
 #endif
 
-// TODO: Add priority queue?
 // TODO: Generate doxegen stuff?
