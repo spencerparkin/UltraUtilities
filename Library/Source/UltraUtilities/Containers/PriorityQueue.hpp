@@ -22,16 +22,21 @@ namespace UU
 	 * These are binary trees where the root always has the key of highest priority.
 	 * Efficient insertion is provided as well as removal of the root.
 	 * See chapter 7 of Introduction to Algorithms by Rivest, et. al.
+	 * 
+	 * Note that one weakness of this data-structure is that once a key
+	 * is inserted, it's effective priority cannot be changed without possibly
+	 * invalidating the integrity of the queue.  To overcome this weakness
+	 * (with a less efficient data-structure), use the @ref DynamicPriorityQueue.
 	 */
 	template<typename T, typename C = PriorityQueueComparitor<T>>
-	class UU_API PriorityQueue
+	class UU_API StaticPriorityQueue
 	{
 	public:
-		PriorityQueue()
+		StaticPriorityQueue()
 		{
 		}
 
-		virtual ~PriorityQueue()
+		virtual ~StaticPriorityQueue()
 		{
 		}
 
@@ -199,4 +204,6 @@ namespace UU
 	private:
 		DArray<T> array;
 	};
+
+	// TODO: Make DynamicPriorityQueue class?
 }

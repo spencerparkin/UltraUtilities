@@ -3,9 +3,9 @@
 
 using namespace UU;
 
-TEST_CASE("Priority Queues", "[PriorityQueue]")
+TEST_CASE("Static Priority Queues", "[StaticPriorityQueue]")
 {
-	PriorityQueue<int> queue;
+	StaticPriorityQueue<int> queue;
 
 	SECTION("Load and dump a queue.")
 	{

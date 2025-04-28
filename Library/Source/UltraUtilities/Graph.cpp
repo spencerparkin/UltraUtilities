@@ -141,7 +141,7 @@ bool Graph::DijkstrasAlgorithm(Node* nodeA, Node* nodeB, List<Node*>& shortestPa
 		}
 	};
 
-	PriorityQueue<Node*, NodeCompare> queue;
+	StaticPriorityQueue<Node*, NodeCompare> queue;
 
 	nodeA->distance = 0.0;
 	nodeA->considered = true;
@@ -150,7 +150,7 @@ bool Graph::DijkstrasAlgorithm(Node* nodeA, Node* nodeB, List<Node*>& shortestPa
 	while (queue.GetSize() > 0)
 	{
 		Node* node = nullptr;
-		queue.RemoveHighestPriorityKey(node);
+		queue.RemoveHighestPriorityKey(node);	// TODO: No, this won't work, because we can't mutate the keys in the queue before they are removed.
 
 		for (Edge* edge : node->adjacencyArray)
 		{

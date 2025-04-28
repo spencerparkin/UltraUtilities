@@ -164,6 +164,14 @@ namespace UU
 			return nullptr;
 		}
 
+		/**
+		 * Get at the list that is wrapped by this class template.
+		 */
+		LinkedList* GetList()
+		{
+			return &this->list;
+		}
+
 	private:
 		LinkedList list;
 		ListIterator<V>::Direction iterationDirection;
