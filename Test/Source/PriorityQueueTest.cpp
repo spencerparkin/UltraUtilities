@@ -20,7 +20,7 @@ TEST_CASE("Priority Queues", "[PriorityQueue]")
 		for (int i = count - 1; i >= 0; i--)
 		{
 			int j = 0;
-			bool removed = queue.RemoveMaximumKey(j);
+			bool removed = queue.RemoveHighestPriorityKey(j);
 			REQUIRE(removed);
 			REQUIRE(queue.IsValidHeap());
 			REQUIRE(j == i);

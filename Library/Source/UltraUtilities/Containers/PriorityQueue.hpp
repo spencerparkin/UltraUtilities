@@ -5,11 +5,25 @@
 namespace UU
 {
 	/**
-	 * These are binary trees where the root always has the maximum key.
+	 * This class abstracts the notion of comparing keys in a priority queue
+	 * to see which is of higher priority.
+	 */
+	template<typename T>
+	class UU_API PriorityQueueComparitor
+	{
+	public:
+		static bool FirstOfHigherPriorityThanSecond(const T& keyA, const T& keyB)
+		{
+			return keyA > keyB;
+		}
+	};
+
+	/**
+	 * These are binary trees where the root always has the key of highest priority.
 	 * Efficient insertion is provided as well as removal of the root.
 	 * See chapter 7 of Introduction to Algorithms by Rivest, et. al.
 	 */
-	template<typename T>
+	template<typename T, typename C = PriorityQueueComparitor<T>>
 	class UU_API PriorityQueue
 	{
 	public:
@@ -39,7 +53,7 @@ namespace UU
 			if (LeftChild(i) < this->array.GetSize())
 			{
 				const T& leftKey = this->array[LeftChild(i)];
-				if (leftKey > parentKey)
+				if (C::FirstOfHigherPriorityThanSecond(leftKey, parentKey))
 					return false;
 
 				if (!this->IsValidHeap(LeftChild(i)))
@@ -49,7 +63,7 @@ namespace UU
 			if (RightChild(i) < this->array.GetSize())
 			{
 				const T& rightKey = this->array[RightChild(i)];
-				if (rightKey > parentKey)
+				if (C::FirstOfHigherPriorityThanSecond(rightKey, parentKey))
 					return false;
 
 				if (!this->IsValidHeap(RightChild(i)))
@@ -82,9 +96,9 @@ namespace UU
 		}
 
 		/**
-		 * Return the larget key in the tree.  This is always the root node's key.
+		 * Return the key in the tree with highest priority.  This is always the root node's key.
 		 */
-		bool GetMaximumKey(T& key) const
+		bool GetHighestPriorityKey(T& key) const
 		{
 			if (this->array.GetSize() == 0)
 				return false;
@@ -97,7 +111,7 @@ namespace UU
 		 * Remove the largest key from the tree while maintaining the heap property
 		 * of the tree.  This can fail if the heap is empty.
 		 */
-		bool RemoveMaximumKey(T& key)
+		bool RemoveHighestPriorityKey(T& key)
 		{
 			if (this->array.GetSize() == 0)
 				return false;
@@ -135,20 +149,20 @@ namespace UU
 			if (LeftChild(i) < this->array.GetSize())
 			{
 				const T& leftKey = this->array[LeftChild(i)];
-				if (leftKey > parentKey)
+				if (C::FirstOfHigherPriorityThanSecond(leftKey, parentKey))
 					largerLeft = &leftKey;
 			}
 			
 			if (RightChild(i) < this->array.GetSize())
 			{
 				const T& rightKey = this->array[RightChild(i)];
-				if (rightKey > parentKey)
+				if (C::FirstOfHigherPriorityThanSecond(rightKey, parentKey))
 					largerRight = &rightKey;
 			}
 
 			if (largerLeft && largerRight)
 			{
-				if (*largerLeft > *largerRight)
+				if (C::FirstOfHigherPriorityThanSecond(*largerLeft, *largerRight))
 					j = LeftChild(i);
 				else
 					j = RightChild(i);

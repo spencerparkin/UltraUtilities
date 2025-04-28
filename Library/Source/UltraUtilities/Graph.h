@@ -146,7 +146,8 @@ namespace UU
 			/**
 			 * Some algorithms take edge-weight into account.  For those that do, this
 			 * method can be overridden to provide that weight.  By default, here we
-			 * just return zero.
+			 * just return zero.  Note that if the value returned here is inconsistent,
+			 * that may prevent some algorithms from being correct or even terminating.
 			 */
 			virtual double GetWeight() const;
 
