@@ -175,11 +175,12 @@ bool Graph::DijkstrasAlgorithm(Node* nodeA, Node* nodeB, List<Node*>& shortestPa
 		return false;
 
 	Node* node = nodeB;
+	shortestPath.PushFront(node);
 
 	do
 	{
-		shortestPath.PushFront(node);
 		node = node->parentNode;
+		shortestPath.PushFront(node);
 	} while (node != nodeA);
 
 	return true;
