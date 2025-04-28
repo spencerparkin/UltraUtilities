@@ -119,6 +119,9 @@ namespace UU
 			 */
 			virtual double GetWeight() const;
 
+		public:
+			mutable double distance;
+
 		protected:
 
 			/**
@@ -129,7 +132,6 @@ namespace UU
 			DArray<Edge*> adjacencyArray;
 			mutable bool considered;
 			mutable Node* parentNode;
-			mutable double distance;
 		};
 
 		/**

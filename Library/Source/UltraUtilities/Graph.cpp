@@ -1,5 +1,6 @@
 #include "UltraUtilities/Graph.h"
 #include "UltraUtilities/Containers/List.hpp"
+#include "UltraUtilities/Containers/PriorityQueue.hpp"
 
 using namespace UU;
 
@@ -131,16 +132,25 @@ bool Graph::DijkstrasAlgorithm(Node* nodeA, Node* nodeB, List<Node*>& shortestPa
 		node->considered = false;
 	}
 
+	class NodeCompare
+	{
+	public:
+		static bool FirstOfHigherPriorityThanSecond(const Node*& keyA, const Node*& keyB)
+		{
+			return keyA->distance < keyB->distance;
+		}
+	};
+
+	PriorityQueue<Node*> queue;
+
 	nodeA->distance = 0.0;
 	nodeA->considered = true;
+	queue.InsertKey(nodeA);
 
-	List<Node*> queue;	// TODO: Replace with priority queue.
-	queue.PushBack(nodeA);
-
-	while (queue.GetNumValues() > 0)
+	while (queue.GetSize() > 0)
 	{
 		Node* node = nullptr;
-		queue.PopBack(&node);	// TODO: No, must get closest node.
+		queue.RemoveHighestPriorityKey(node);
 
 		for (Edge* edge : node->adjacencyArray)
 		{
@@ -155,8 +165,8 @@ bool Graph::DijkstrasAlgorithm(Node* nodeA, Node* nodeB, List<Node*>& shortestPa
 
 			if (!adjacentNode->considered)
 			{
-				queue.PushBack(adjacentNode);
 				adjacentNode->considered = true;
+				queue.InsertKey(adjacentNode);
 			}
 		}
 	}
