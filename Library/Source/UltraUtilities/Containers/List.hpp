@@ -28,6 +28,14 @@ namespace UU
 		}
 
 		/**
+		 * Remove all values from this list.
+		 */
+		void Clear()
+		{
+			this->list.Clear();
+		}
+
+		/**
 		 * Append a value to the list.
 		 */
 		void PushFront(V value)

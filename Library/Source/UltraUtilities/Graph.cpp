@@ -113,11 +113,75 @@ void Graph::ClearTraversalFlags()
 		node->considered = false;
 }
 
+bool Graph::DijkstrasAlgorithm(Node* nodeA, Node* nodeB, List<Node*>& shortestPath, double& shortestDistance)
+{
+	shortestPath.Clear();
+	shortestDistance = 0.0;
+
+	if (nodeA == nodeB)
+	{
+		shortestPath.PushBack(nodeA);
+		return true;
+	}
+
+	for (Node* node : this->nodeArray)
+	{
+		node->parentNode = nullptr;
+		node->distance = 1.7976931348623158e+308;
+		node->considered = false;
+	}
+
+	nodeA->distance = 0.0;
+	nodeA->considered = true;
+
+	List<Node*> queue;	// TODO: Replace with priority queue.
+	queue.PushBack(nodeA);
+
+	while (queue.GetNumValues() > 0)
+	{
+		Node* node = nullptr;
+		queue.PopBack(&node);	// TODO: No, must get closest node.
+
+		for (Edge* edge : node->adjacencyArray)
+		{
+			double edgeLength = edge->GetWeight();
+			Node* adjacentNode = edge->Follow(node);
+
+			if (adjacentNode->distance > node->distance + edgeLength)
+			{
+				adjacentNode->distance = node->distance + edgeLength;
+				adjacentNode->parentNode = node;
+			}
+
+			if (!adjacentNode->considered)
+			{
+				queue.PushBack(adjacentNode);
+				adjacentNode->considered = true;
+			}
+		}
+	}
+
+	if (nodeB->parentNode == nullptr)
+		return false;
+
+	Node* node = nodeB;
+
+	do
+	{
+		shortestPath.PushFront(node);
+		node = node->parentNode;
+	} while (node != nodeA);
+
+	return true;
+}
+
 //------------------------------------ Graph::Node ------------------------------------
 
 Graph::Node::Node()
 {
 	this->considered = false;
+	this->distance = 0.0;
+	this->parentNode = nullptr;
 }
 
 /*virtual*/ Graph::Node::~Node()

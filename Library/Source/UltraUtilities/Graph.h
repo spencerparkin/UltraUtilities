@@ -2,6 +2,7 @@
 
 #include "UltraUtilities/Defines.h"
 #include "UltraUtilities/Containers/DArray.hpp"
+#include "UltraUtilities/Containers/List.hpp"
 
 namespace UU
 {
@@ -81,6 +82,24 @@ namespace UU
 		bool BreadthFirstSearch(Node* node, NodeVisitor* visitor);
 
 		/**
+		 * @brief Calculate the shortest path between the two given nodes.
+		 * 
+		 * The algorithm proceeds by finding all shortest paths from nodeA to all nodes reachable from nodeA.
+		 * Once complete, if nodeB is amoung those found, the shortest path can be quickly computed and returned.
+		 * Note that edge weights are used as distances between nodes.
+		 * 
+		 * Also note that no check is made to make sure that nodeA and nodeB are actually members of this graph.
+		 * If this is not the case, we leave our result here as undefined.
+		 * 
+		 * @param[in] nodeA This is the first of the two given nodes and will always be the first node in the shortest path returned.
+		 * @param[in] nodeB This is the second of the two given nodes and will always be the last node in the shortest path returned.
+		 * @param[out] shortestPath This will get populated with a sequence of nodes forming a path from nodeA to nodeB, if the algorithm is successful.
+		 * @param[out] shortestDistance This is assigned the distance of the path found between nodeA and nodeB.
+		 * @return True is returned on success.  False can be returned if, for example, there is no path from nodeA to nodeB.
+		 */
+		bool DijkstrasAlgorithm(Node* nodeA, Node* nodeB, List<Node*>& shortestPath, double& shortestDistance);
+
+		/**
 		 * These are the nodes (or vertices) of the graph.  Typically, the user will
 		 * define a derivative of this class so as to provide satalite data or override
 		 * virtual methods.
@@ -109,6 +128,8 @@ namespace UU
 
 			DArray<Edge*> adjacencyArray;
 			mutable bool considered;
+			mutable Node* parentNode;
+			mutable double distance;
 		};
 
 		/**
