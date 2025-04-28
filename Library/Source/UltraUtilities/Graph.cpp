@@ -135,13 +135,13 @@ bool Graph::DijkstrasAlgorithm(Node* nodeA, Node* nodeB, List<Node*>& shortestPa
 	class NodeCompare
 	{
 	public:
-		static bool FirstOfHigherPriorityThanSecond(const Node*& keyA, const Node*& keyB)
+		static bool FirstOfHigherPriorityThanSecond(const Node* keyA, const Node* keyB)
 		{
 			return keyA->distance < keyB->distance;
 		}
 	};
 
-	PriorityQueue<Node*> queue;
+	PriorityQueue<Node*, NodeCompare> queue;
 
 	nodeA->distance = 0.0;
 	nodeA->considered = true;
