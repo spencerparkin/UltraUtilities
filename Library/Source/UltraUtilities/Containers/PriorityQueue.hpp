@@ -113,7 +113,7 @@ namespace UU
 		}
 
 		/**
-		 * Remove the largest key from the tree while maintaining the heap property
+		 * Remove the key of highest priority from the tree while maintaining the heap property
 		 * of the tree.  This can fail if the heap is empty.
 		 */
 		bool RemoveHighestPriorityKey(T& key)
@@ -205,5 +205,78 @@ namespace UU
 		DArray<T> array;
 	};
 
-	// TODO: Make DynamicPriorityQueue class?
+	/**
+	 * Unlike @ref StaticDynamicPriority queue, here the stored keys of
+	 * the queue can change priority while present in the queue.
+	 */
+	template<typename T, typename C = PriorityQueueComparitor<T>>
+	class DynamicPriorityQueue
+	{
+	public:
+		DynamicPriorityQueue()
+		{
+		}
+
+		virtual ~DynamicPriorityQueue()
+		{
+		}
+
+		/**
+		 * Add a key to this priority queue.
+		 */
+		void InsertKey(T key)
+		{
+			this->array.Push(key);
+		}
+
+		/**
+		 * Return the key in this priority queue of highest priority without removing it.
+		 * This can fail if the queue is empty.
+		 */
+		bool GetHighestPriorityKey(T& key) const
+		{
+			if (this->array.GetSize() == 0)
+				return false;
+
+			this->Sort();
+			key = this->array[this->array.GetSize() - 1];
+			return true;
+		}
+
+		/**
+		 * Remove the key of highest priority from this priority queue.
+		 * This can fail if the queue is empty.
+		 */
+		bool RemoveHighestPriorityKey(T& key)
+		{
+			if (this->array.GetSize() == 0)
+				return false;
+
+			this->Sort();
+			this->array.Pop(&key);
+			return true;
+		}
+
+		/**
+		 * Return the number of nodes/keys in this priority queue.
+		 */
+		unsigned int GetSize() const
+		{
+			return this->array.GetSize();
+		}
+
+	private:
+
+		void Sort() const
+		{
+			// This has average running time O(n) is the list is already almost sorted.
+			// That is, if an efficient bubble sort is being used here.
+			const_cast<DArray<T>*>(&this->array)->Sort([](const T& keyA, const T& keyB) -> int
+				{
+					return C::FirstOfHigherPriorityThanSecond(keyA, keyB) ? 1 : -1;
+				});
+		}
+
+		DArray<T> array;
+	};
 }
