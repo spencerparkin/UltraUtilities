@@ -27,3 +27,26 @@ TEST_CASE("Static Priority Queues", "[StaticPriorityQueue]")
 		}
 	}
 }
+
+TEST_CASE("Dynamic Priority Queues", "[DynamicPriorityQueue]")
+{
+	DynamicPriorityQueue<int> queue;
+
+	SECTION("Load and dump queue.")
+	{
+		int count = 100;
+
+		for (int i = 0; i < count; i++)
+		{
+			queue.InsertKey(i);
+		}
+
+		for (int i = count - 1; i >= 0; i--)
+		{
+			int j = 0;
+			bool removed = queue.RemoveHighestPriorityKey(j);
+			REQUIRE(removed);
+			REQUIRE(j == i);
+		}
+	}
+}
