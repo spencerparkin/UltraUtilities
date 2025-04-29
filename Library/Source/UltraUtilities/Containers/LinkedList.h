@@ -54,8 +54,16 @@ namespace UU
 		 */
 		LinkedListNode* GetNodeAt(unsigned int i);
 
+		const LinkedListNode* GetNodeAt(unsigned int i) const
+		{
+			return const_cast<LinkedList*>(this)->GetNodeAt(i);
+		}
+
 		LinkedListNode* GetHead() { return this->headNode; }
 		LinkedListNode* GetTail() { return this->tailNode; }
+
+		const LinkedListNode* GetHead() const { return this->headNode; }
+		const LinkedListNode* GetTail() const { return this->tailNode; }
 
 		unsigned int GetNumNodes() const { return this->numNodes; }
 
@@ -81,7 +89,13 @@ namespace UU
 
 		LinkedListNode* GetNext() { return this->nextNode; }
 		LinkedListNode* GetPrev() { return this->prevNode; }
+
+		const LinkedListNode* GetNext() const { return this->nextNode; }
+		const LinkedListNode* GetPrev() const { return this->prevNode; }
+
 		LinkedList* GetList() { return this->list; }
+
+		const LinkedList* GetList() const { return this->list; }
 
 	private:
 		LinkedList* list;

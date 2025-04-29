@@ -1,6 +1,7 @@
 #pragma once
 
 #include "UltraUtilities/Containers/DArray.hpp"
+#include "UltraUtilities/Containers/LinkedList.h"
 
 namespace UU
 {
@@ -207,11 +208,13 @@ namespace UU
 
 	/**
 	 * Unlike @ref StaticDynamicPriority queue, here the stored keys of
-	 * the queue can change priority while present in the queue.
+	 * the queue can change priority while being present in the queue.
 	 */
 	template<typename T, typename C = PriorityQueueComparitor<T>>
 	class DynamicPriorityQueue
 	{
+		class Node;
+
 	public:
 		DynamicPriorityQueue()
 		{
@@ -226,7 +229,9 @@ namespace UU
 		 */
 		void InsertKey(T key)
 		{
-			this->array.Push(key);
+			auto node = new Node();
+			node->key = key;
+			this->linkedList.InsertAfter(node);
 		}
 
 		/**
@@ -235,11 +240,10 @@ namespace UU
 		 */
 		bool GetHighestPriorityKey(T& key) const
 		{
-			if (this->array.GetSize() == 0)
+			auto node = this->FindHighestPriorityNode();
+			if (!node)
 				return false;
-
-			this->Sort();
-			key = this->array[this->array.GetSize() - 1];
+			key = node->key;
 			return true;
 		}
 
@@ -249,11 +253,12 @@ namespace UU
 		 */
 		bool RemoveHighestPriorityKey(T& key)
 		{
-			if (this->array.GetSize() == 0)
+			auto node = const_cast<Node*>(this->FindHighestPriorityNode());
+			if (!node)
 				return false;
-
-			this->Sort();
-			this->array.Pop(&key);
+			key = node->key;
+			this->linkedList.Remove(node);
+			delete node;
 			return true;
 		}
 
@@ -262,21 +267,36 @@ namespace UU
 		 */
 		unsigned int GetSize() const
 		{
-			return this->array.GetSize();
+			return this->linkedList.GetNumNodes();
 		}
 
 	private:
 
-		void Sort() const
+		/**
+		 * Find and return the node having the key in this queue of highest priority.
+		 */
+		const Node* FindHighestPriorityNode() const
 		{
-			// This has average running time O(n) is the list is already almost sorted.
-			// That is, if an efficient bubble sort is being used here.
-			const_cast<DArray<T>*>(&this->array)->Sort([](const T& keyA, const T& keyB) -> int
-				{
-					return C::FirstOfHigherPriorityThanSecond(keyA, keyB) ? 1 : -1;
-				});
+			const Node* foundNode = nullptr;
+			auto node = static_cast<const Node*>(this->linkedList.GetHead());
+			while (node)
+			{
+				if (!foundNode || C::FirstOfHigherPriorityThanSecond(node->key, foundNode->key))
+					foundNode = node;
+				node = static_cast<const Node*>(node->GetNext());
+			}
+			return foundNode;
 		}
 
-		DArray<T> array;
+		/**
+		 * Each node in the linked list owns a key, and each key has a priority in the queue.
+		 */
+		class Node : public LinkedListNode
+		{
+		public:
+			T key;
+		};
+
+		LinkedList linkedList;
 	};
 }
