@@ -70,7 +70,7 @@ bool LinkedList::Remove(LinkedListNode* oldNode)
 	if (this->headNode == oldNode)
 		this->headNode = oldNode->nextNode;
 
-	if (this->tailNode = oldNode)
+	if (this->tailNode == oldNode)
 		this->tailNode = oldNode->prevNode;
 
 	oldNode->SpliceOut();

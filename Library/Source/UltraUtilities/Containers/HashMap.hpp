@@ -227,7 +227,7 @@ namespace UU
 	};
 
 	/**
-	 * Provide a specialization that uses the division method of hashing.
+	 * Provide a specialization that uses integers and the division method of hashing.
 	 */
 	template<>
 	class UU_API HashMapKey<int> : public HashTableKey
@@ -235,7 +235,7 @@ namespace UU
 	public:
 		virtual unsigned int Hash(unsigned int tableSize) const override
 		{
-			return this->value % tableSize;
+			return static_cast<unsigned int>(this->value) % tableSize;
 		}
 
 		virtual bool operator==(const HashTableKey& key) const override
@@ -245,5 +245,27 @@ namespace UU
 
 	public:
 		int value;
+	};
+
+	/**
+	 * Provide a specialization that uses characters and the division method of hashing.
+	 */
+	template<>
+	class UU_API HashMapKey<char> : public HashTableKey
+	{
+	public:
+	public:
+		virtual unsigned int Hash(unsigned int tableSize) const override
+		{
+			return static_cast<unsigned int>(this->value) % tableSize;
+		}
+
+		virtual bool operator==(const HashTableKey& key) const override
+		{
+			return this->value == static_cast<const HashMapKey<char>*>(&key)->value;
+		}
+
+	public:
+		char value;
 	};
 }

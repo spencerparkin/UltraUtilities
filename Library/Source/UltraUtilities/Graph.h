@@ -198,9 +198,8 @@ namespace UU
 		class UU_API NodeLambdaVisitor : public NodeVisitor
 		{
 		public:
-			NodeLambdaVisitor(L lambda)
+			NodeLambdaVisitor(L lambda) : lambda(lambda)
 			{
-				this->lambda = lambda;
 			}
 
 			virtual bool VisitNode(Node* node) override

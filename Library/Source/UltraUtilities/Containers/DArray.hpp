@@ -199,7 +199,15 @@ namespace UU
 
 		int end()
 		{
-			return -1;
+			switch (this->iterationDirection)
+			{
+			case DArrayIterator<V>::Direction::FORWARD:
+				return this->arraySize;
+			case DArrayIterator<V>::Direction::BACKWARD:
+				return -1;
+			}
+
+			return 0;
 		}
 
 		/**
@@ -256,10 +264,12 @@ namespace UU
 		{
 			this->array = array;
 			this->direction = direction;
-			this->i = 0;
 
 			switch (direction)
 			{
+			case FORWARD:
+				this->i = 0;
+				break;
 			case BACKWARD:
 				this->i = int(array->GetSize()) - 1;
 				break;
@@ -272,8 +282,6 @@ namespace UU
 			{
 			case FORWARD:
 				this->i++;
-				if (i == int(this->array->GetSize()))
-					i = -1;
 				break;
 			case BACKWARD:
 				this->i--;
