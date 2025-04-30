@@ -7,6 +7,9 @@ set(TEST_SOURCES
 	Source/DArrayTest.cpp
 	Source/StringTest.cpp
 	Source/PriorityQueueTest.cpp
+	Source/GraphTest.cpp
+	Source/HashMapTest.cpp
+	Source/HashSetTest.cpp
 )
 
 add_executable(Test ${TEST_SOURCES})

@@ -50,6 +50,7 @@ bool HashTable::InsertNode(HashTableNode* newNode)
 	LinkedList* list = &this->table[i];
 	list->InsertAfter(newNode);
 	newNode->table = this;
+	this->numNodes++;
 	return true;
 }
 
@@ -61,6 +62,7 @@ HashTableNode* HashTable::RemoveNode(const HashTableKey* key)
 
 	oldNode->GetList()->Remove(oldNode);
 	oldNode->table = nullptr;
+	this->numNodes--;
 	return oldNode;
 }
 
@@ -71,6 +73,7 @@ bool HashTable::RemoveNode(HashTableNode* oldNode)
 
 	oldNode->GetList()->Remove(oldNode);
 	oldNode->table = nullptr;
+	this->numNodes--;
 	return true;
 }
 
@@ -88,6 +91,8 @@ void HashTable::Clear()
 {
 	for (unsigned int i = 0; i < this->tableSize; i++)
 		this->table[i].Clear();
+
+	this->numNodes = 0;
 }
 
 //------------------------------ HashTableNode ------------------------------
@@ -100,12 +105,10 @@ HashTableNode::HashTableNode()
 
 /*virtual*/ HashTableNode::~HashTableNode()
 {
-	delete this->key;
 }
 
 void HashTableNode::SetKey(HashTableKey* key)
 {
-	delete this->key;
 	this->key = key;
 }
 

@@ -11,7 +11,7 @@ namespace UU
 	/**
 	 * 
 	 */
-	class HashTable
+	class UU_API HashTable
 	{
 	public:
 		HashTable(unsigned int tableSize = 2048);
@@ -57,6 +57,10 @@ namespace UU
 
 		unsigned int GetNumNodes() const { return this->numNodes; }
 
+		unsigned int GetTableSize() const { return this->tableSize; }
+
+		LinkedList* GetTable() { return this->table; }
+
 	private:
 		LinkedList* table;
 		unsigned int tableSize;
@@ -66,7 +70,7 @@ namespace UU
 	/**
 	 * 
 	 */
-	class HashTableKey
+	class UU_API HashTableKey
 	{
 	public:
 		virtual unsigned int Hash(unsigned int tableSize) const = 0;
@@ -76,7 +80,7 @@ namespace UU
 	/**
 	 * 
 	 */
-	class HashTableNode : public LinkedListNode
+	class UU_API HashTableNode : public LinkedListNode
 	{
 		friend class HashTable;
 

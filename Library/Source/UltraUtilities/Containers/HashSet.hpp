@@ -5,6 +5,8 @@
 
 namespace UU
 {
+	template<typename K> class HashSetIterator;
+
 	/**
 	 * This is a templatized wrapper for the @ref HashTable class.
 	 * It is provided as a more convenient way to use the table.
@@ -68,7 +70,7 @@ namespace UU
 		{
 			HashMapKey<K> setKey;
 			setKey.value = key;
-			HashMapNode* node = this->table.FindNode(&setKey);
+			HashTableNode* node = this->table.FindNode(&setKey);
 			if (!node)
 				return false;
 			this->table.RemoveNode(node);
@@ -82,24 +84,83 @@ namespace UU
 		 */
 		void Clear()
 		{
-			this->tree.Clear();
+			this->table.Clear();
 		}
 
 		/**
 		 * Indicate how many keys are stored in the set.
 		 */
-		unsigned int GetNumKeys() const { return this->tree.GetNumNodes(); }
+		unsigned int GetNumKeys() const { return this->table.GetNumNodes(); }
 
 		/**
 		 * Provide access to the hash table being wrapped by this template class.
 		 */
 		HashTable& GetHashTree() { return this->table; }
 
-		// TODO: Provide support for ranged-for loop syntax.
+		/**
+		 * This is provided to support the ranged for-loop syntax.
+		 */
+		HashSetIterator<K> begin()
+		{
+			return HashSetIterator<K>(&this->table);
+		}
+
+		/**
+		 * This is the end sentinal for the ranged for-loop support.
+		 */
+		int end()
+		{
+			return int(this->table.GetTableSize()) - 1;
+		}
 
 	private:
 		HashTable table;
 		NH nodeHeap;
 		KH keyHeap;
+	};
+
+	/**
+	 * This is used internally by the @ref HashSet class to
+	 * support the ranged for-loop syntax of C++.
+	 */
+	template<typename K>
+	class UU_API HashSetIterator
+	{
+	public:
+		HashSetIterator(HashTable* hashTable)
+		{
+			this->hashTable = hashTable;
+			this->node = nullptr;
+			this->i = -1;
+			this->Advance();
+		}
+
+		void operator++()
+		{
+			this->Advance();
+		}
+
+		bool operator==(int i)
+		{
+			return this->i == i;
+		}
+
+		K operator*()
+		{
+			return static_cast<HashMapKey<K>*>(this->node->GetKey())->value;
+		}
+
+	private:
+		void Advance()
+		{
+			if (this->node)
+				this->node = static_cast<HashTableNode*>(this->node->GetNext());
+			while (!this->node && this->i < int(this->hashTable->GetTableSize()) - 1)
+				this->node = static_cast<HashTableNode*>(hashTable->GetTable()[++this->i].GetHead());
+		}
+
+		int i;
+		HashTableNode* node;
+		HashTable* hashTable;
 	};
 }

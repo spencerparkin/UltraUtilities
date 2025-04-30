@@ -7,12 +7,13 @@ namespace UU
 {
 	template<typename K> class HashMapKey;
 	template<typename V> class HashMapNode;
+	template<typename K, typename V> class HashMapIterator;
 
 	/**
 	 * This is a template wrapper around the @ref HashTable class.
 	 */
 	template<typename K, typename V, typename NH = DefaultObjectHeap<HashMapNode<V>>, typename KH = DefaultObjectHeap<HashMapKey<K>>>
-	class HashMap
+	class UU_API HashMap
 	{
 	public:
 		HashMap()
@@ -45,7 +46,7 @@ namespace UU
 		bool Find(K key, V* value = nullptr)
 		{
 			HashMapKey<K> mapKey;
-			key.value = key;
+			mapKey.value = key;
 			auto node = static_cast<HashMapNode<V>*>(this->table.FindNode(&mapKey));
 			if (!node)
 				return false;
@@ -87,7 +88,7 @@ namespace UU
 		 */
 		bool Remove(K key, V* value = nullptr)
 		{
-			HashTableKey<K> mapKey;
+			HashMapKey<K> mapKey;
 			mapKey.value = key;
 			HashTableNode* node = this->table.FindNode(&mapKey);
 			if (!node)
@@ -118,7 +119,21 @@ namespace UU
 		 */
 		HashTable& GetHashTable() { return this->table; }
 
-		// TODO: Provide support for ranged-for loop syntax.
+		/**
+		 * This is provided to support the ranged for-loop syntax.
+		 */
+		HashMapIterator<K, V> begin()
+		{
+			return HashMapIterator<K, V>(&this->table);
+		}
+
+		/**
+		 * This is the end sentinal for the ranged for-loop support.
+		 */
+		int end()
+		{
+			return int(this->table.GetTableSize()) - 1;
+		}
 
 	private:
 		HashTable table;
@@ -127,10 +142,64 @@ namespace UU
 	};
 
 	/**
+	 * This is used internally by the @ref HashMap class to
+	 * support ranged for-loop syntax in C++.
+	 */
+	template<typename K, typename V>
+	class UU_API HashMapIterator
+	{
+	public:
+		struct Pair
+		{
+			K key;
+			V value;
+		};
+
+		HashMapIterator(HashTable* hashTable)
+		{
+			this->hashTable = hashTable;
+			this->node = nullptr;
+			this->i = -1;
+			this->Advance();
+		}
+
+		void operator++()
+		{
+			this->Advance();
+		}
+
+		bool operator==(int i)
+		{
+			return this->i == i;
+		}
+
+		Pair operator*()
+		{
+			Pair pair;
+			pair.key = static_cast<HashMapKey<K>*>(this->node->GetKey())->value;
+			pair.value = static_cast<HashMapNode<V>*>(this->node)->value;
+			return pair;
+		}
+
+	private:
+		void Advance()
+		{
+			if (this->node)
+				this->node = static_cast<HashTableNode*>(this->node->GetNext());
+			while (!this->node && this->i < int(this->hashTable->GetTableSize()) - 1)
+				this->node = static_cast<HashTableNode*>(hashTable->GetTable()[++this->i].GetHead());
+		}
+
+		int i;
+		HashTableNode* node;
+		HashTable* hashTable;
+	};
+
+	/**
 	 * This is used internally by the @ref HashMap class.
 	 */
 	template<typename V>
-	class HashMapNode : public HashTableNode
+	class UU_API HashMapNode : public HashTableNode
 	{
 	public:
 		V value;
@@ -140,7 +209,7 @@ namespace UU
 	 * This is used internally by the @ref HashMap class.
 	 */
 	template<typename K>
-	class HashMapKey : public HashTableKey
+	class UU_API HashMapKey : public HashTableKey
 	{
 	public:
 		virtual unsigned int Hash(unsigned int tableSize) override
@@ -150,7 +219,7 @@ namespace UU
 
 		virtual bool operator==(const HashTableKey& key) const override
 		{
-			return K::Equal(this->value, static_cast<const HashMapKey<V>*>(&key)->value);
+			return K::Equal(this->value, static_cast<const HashMapKey<K>*>(&key)->value);
 		}
 
 	public:
@@ -161,7 +230,7 @@ namespace UU
 	 * Provide a specialization that uses the division method of hashing.
 	 */
 	template<>
-	class HashMapKey<int> : public HashTableKey
+	class UU_API HashMapKey<int> : public HashTableKey
 	{
 	public:
 		virtual unsigned int Hash(unsigned int tableSize) const override
