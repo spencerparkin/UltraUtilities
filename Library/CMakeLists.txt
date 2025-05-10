@@ -6,6 +6,8 @@ set(ULTRA_UTILITIES_SOURCES
 	Source/UltraUtilities/String.h
 	Source/UltraUtilities/Graph.cpp
 	Source/UltraUtilities/Graph.h
+	Source/UltraUtilities/DisjointSetForest.cpp
+	Source/UltraUtilities/DisjointSetForest.h
 	Source/UltraUtilities/Memory/ObjectHeap.hpp
 	Source/UltraUtilities/Containers/RBTree.cpp
 	Source/UltraUtilities/Containers/RBTree.h
