@@ -97,6 +97,8 @@ namespace UU
 
 		const LinkedList* GetList() const { return this->list; }
 
+		unsigned int GetPosition() const;
+
 	private:
 		LinkedList* list;
 		LinkedListNode* prevNode;

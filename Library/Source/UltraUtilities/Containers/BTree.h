@@ -1,7 +1,7 @@
 #pragma once
 
 #include "UltraUtilities/Defines.h"
-#include "UltraUtilities/Containers/LinkedList.h"
+#include "UltraUtilities/Containers/DArray.hpp"
 
 namespace UU
 {
@@ -62,7 +62,7 @@ namespace UU
 	 * These serve as the nodes of a B-tree.  User's of the @ref BTree class
 	 * should never have to use this class directly.
 	 */
-	class UU_API BTreeNode : public LinkedListNode
+	class UU_API BTreeNode
 	{
 	public:
 		BTreeNode();
@@ -76,10 +76,13 @@ namespace UU
 
 		BTreeKey* FindKey(BTreeKeyValue keyValue);
 
+		bool Split();
+
 	private:
 		BTree* tree;
-		LinkedList childNodeList;
-		LinkedList keyList;
+		DArray<BTreeNode*> childNodeArray;
+		DArray<BTreeKey*> keyArray;
+		BTreeNode* parentNode;
 	};
 
 	/**
@@ -87,7 +90,7 @@ namespace UU
 	 * A derivative of this class should be made so as to provide
 	 * satellite data in the tree.
 	 */
-	class UU_API BTreeKey : public LinkedListNode
+	class UU_API BTreeKey
 	{
 	public:
 		BTreeKey();
@@ -98,7 +101,7 @@ namespace UU
 		 * Note that for the tree to function correctly, the result
 		 * returned here should never very from call to call.
 		 */
-		virtual BTreeKeyValue GetKey() = 0;
+		virtual BTreeKeyValue GetKeyValue() = 0;
 	};
 
 	/**
@@ -123,7 +126,7 @@ namespace UU
 		 * Note that the type for the template could implement a cast operator which
 		 * would get called here to provide the key.
 		 */
-		virtual BTreeKeyValue GetKey() override
+		virtual BTreeKeyValue GetKeyValue() override
 		{
 			return BTreeKeyValue(this->value);
 		}

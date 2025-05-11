@@ -47,10 +47,16 @@ bool BTree::RemoveKey(BTreeKeyValue keyValue)
 BTreeNode::BTreeNode()
 {
 	this->tree = nullptr;
+	this->parentNode = nullptr;
 }
 
 /*virtual*/ BTreeNode::~BTreeNode()
 {
+	for (BTreeNode* childNode : this->childNodeArray)
+		delete childNode;
+
+	for (BTreeKey* key : this->keyArray)
+		delete key;
 }
 
 BTree* BTreeNode::GetTree()
@@ -65,7 +71,7 @@ void BTreeNode::SetTree(BTree* tree)
 
 bool BTreeNode::IsLeaf() const
 {
-	return this->childNodeList.GetNumNodes() == 0;
+	return this->childNodeArray.GetSize() == 0;
 }
 
 bool BTreeNode::IsFull() const
@@ -73,51 +79,49 @@ bool BTreeNode::IsFull() const
 	if (!this->tree)
 		return false;
 
-	return this->keyList.GetNumNodes() == this->tree->GetMaxDegree() - 1;
+	return this->keyArray.GetSize() == this->tree->GetMaxDegree() - 1;
 }
 
 BTreeKey* BTreeNode::FindKey(BTreeKeyValue keyValue)
 {
-	for (LinkedListNode* keyNode = this->keyList.GetHead(); keyNode != nullptr; keyNode = keyNode->GetNext())
-	{
-		auto key = static_cast<BTreeKey*>(keyNode);
-		if (key->GetKey() == keyValue)
-			return key;
-	}
+	for (unsigned int i = 0; i < this->keyArray.GetSize(); i++)
+		if (this->keyArray[i]->GetKeyValue() == keyValue)
+			return this->keyArray[i];
 
 	if (this->IsLeaf())
 		return nullptr;
 
-	LinkedListNode* keyNode = nullptr;
-	LinkedListNode* childNode = nullptr;
+	if (keyValue < this->keyArray[0]->GetKeyValue())
+		return this->childNodeArray[0]->FindKey(keyValue);
 
-	keyNode = this->keyList.GetHead();
-	childNode = this->childNodeList.GetHead();
-	if (keyValue < static_cast<BTreeKey*>(keyNode)->GetKey())
-		return static_cast<BTreeNode*>(childNode)->FindKey(keyValue);
+	if (keyValue > this->keyArray[this->keyArray.GetSize() - 1]->GetKeyValue())
+		return this->childNodeArray[this->childNodeArray.GetSize() - 1]->FindKey(keyValue);
 
-	keyNode = this->keyList.GetTail();
-	childNode = this->childNodeList.GetTail();
-	if (keyValue > static_cast<BTreeKey*>(keyNode)->GetKey())
-		return static_cast<BTreeNode*>(childNode)->FindKey(keyValue);
-
-	LinkedListNode* keyNodeA = this->keyList.GetHead();
-	LinkedListNode* keyNodeB = keyNodeA->GetNext();
-	childNode = this->childNodeList.GetHead()->GetNext();
-	while (keyNodeA && keyNodeB)
+	for (unsigned int i = 0; i + 1 < this->keyArray.GetSize(); i++)
 	{
-		BTreeKeyValue keyValueA = static_cast<BTreeKey*>(keyNodeA)->GetKey();
-		BTreeKeyValue keyValueB = static_cast<BTreeKey*>(keyNodeB)->GetKey();
+		BTreeKey* keyA = this->keyArray[i];
+		BTreeKey* keyB = this->keyArray[i + 1];
 
-		if (keyValueA < keyValue && keyValue < keyValueB)
-			return static_cast<BTreeNode*>(childNode)->FindKey(keyValue);
-
-		keyNodeA = keyNodeB;
-		keyNodeB = keyNodeB->GetNext();
-		childNode = childNode->GetNext();
+		if (keyA->GetKeyValue() < keyValue && keyValue < keyB->GetKeyValue())
+			return this->childNodeArray[i + 1]->FindKey(keyValue);
 	}
 
 	return nullptr;
+}
+
+bool BTreeNode::Split()
+{
+	if (!this->tree || !this->parentNode)
+		return false;
+
+	if (this->parentNode->IsFull())
+		return false;
+
+	if (!this->IsFull())
+		return false;
+
+	//...move a key into the parent, and move keys into a new sibling...
+	return false;
 }
 
 //--------------------------------------------- BTreeKey ---------------------------------------------

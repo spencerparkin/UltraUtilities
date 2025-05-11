@@ -79,6 +79,9 @@ namespace UU
 			return this->buffer[i % this->arraySize];
 		}
 
+		/**
+		 * Append the given value to the end of this array.
+		 */
 		void Push(V value)
 		{
 			if (this->arraySize == this->bufferSize)
@@ -87,6 +90,9 @@ namespace UU
 			this->buffer[this->arraySize++] = value;
 		}
 
+		/**
+		 * Remove the value at the end of this array.
+		 */
 		bool Pop(V* value = nullptr)
 		{
 			if (this->arraySize == 0)
@@ -114,11 +120,19 @@ namespace UU
 			return this->buffer;
 		}
 
+		/**
+		 * Return the number of elements in this array.
+		 */
 		unsigned int GetSize() const
 		{
 			return this->arraySize;
 		}
 
+		/**
+		 * Set the number of elements in this array.  If the new size is smaller,
+		 * elements are lost.  If the new size is larger, then uninitialized
+		 * elements are added to the array.
+		 */
 		void SetSize(unsigned int size)
 		{
 			if (size > this->bufferSize)
@@ -150,6 +164,9 @@ namespace UU
 				this->SetCapacity(capacity);
 		}
 
+		/**
+		 * Find the position of the given value in this array.
+		 */
 		unsigned int Find(const V& value)
 		{
 			for (unsigned int i = 0; i < this->arraySize; i++)
@@ -159,6 +176,9 @@ namespace UU
 			return -1;
 		}
 
+		/**
+		 * Remove the value at the given position from this array while not preserving array order.
+		 */
 		bool QuickRemove(unsigned int i)
 		{
 			if (i >= this->arraySize)
@@ -171,6 +191,9 @@ namespace UU
 			return true;
 		}
 
+		/**
+		 * Remove the value at the given position from this array while preserving array order.
+		 */
 		bool ShiftRemove(unsigned int i)
 		{
 			if (i >= this->arraySize)
@@ -184,12 +207,54 @@ namespace UU
 			return true;
 		}
 
+		/**
+		 * Find and remove the given value from this array.
+		 */
 		bool Remove(const V& value)
 		{
 			unsigned int i = this->Find(value);
 			if (i == -1)
 				return false;
 			return this->ShiftRemove(i);
+		}
+
+		/**
+		 * Quickly insert the given value at the given position while not preserving array order.
+		 */
+		bool QuickInsert(unsigned int i, V value)
+		{
+			if (i > this->arraySize)
+				return false;
+
+			if (this->arraySize == this->bufferSize)
+				this->SetCapacity(this->bufferSize * 2);
+
+			this->arraySize++;
+
+			if (this->arraySize - 1 != i)
+				this->buffer[this->arraySize - 1] = this->buffer[i];
+
+			this->buffer[i] = value;
+			return true;
+		}
+
+		/**
+		 * Insert the given value at the given position while preserving array order.
+		 */
+		bool ShiftInsert(unsigned int i, V value)
+		{
+			if (i > this->arraySize)
+				return false;
+
+			if (this->arraySize == this->bufferSize)
+				this->SetCapacity(this->bufferSize * 2);
+
+			this->arraySize++;
+			for (unsigned int j = this->arraySize - 1; j > i; j--)
+				this->buffer[j] = this->buffer[j - 1];
+
+			this->buffer[i] = value;
+			return true;
 		}
 
 		DArrayIterator<V> begin()

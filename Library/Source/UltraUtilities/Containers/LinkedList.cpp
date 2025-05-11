@@ -138,3 +138,16 @@ void LinkedListNode::SpliceOut()
 	this->nextNode = nullptr;
 	this->prevNode = nullptr;
 }
+
+unsigned int LinkedListNode::GetPosition() const
+{
+	unsigned int i = 0;
+	const LinkedListNode* node = this;
+	while (node->prevNode)
+	{
+		i++;
+		node = node->prevNode;
+	}
+
+	return i;
+}
