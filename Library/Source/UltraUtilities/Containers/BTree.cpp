@@ -29,15 +29,15 @@ bool BTree::InsertKey(BTreeKey* key)
 	return false;
 }
 
-BTreeKey* BTree::FindKey(BTreeKeyValue keyValue)
+BTreeKey* BTree::FindKey(BTreeKey* givenKey)
 {
 	if (!this->rootNode)
 		return nullptr;
 
-	return this->rootNode->FindKey(keyValue);
+	return this->rootNode->FindKey(givenKey);
 }
 
-bool BTree::RemoveKey(BTreeKeyValue keyValue)
+bool BTree::RemoveKey(BTreeKey* givenKey)
 {
 	return false;
 }
@@ -82,28 +82,28 @@ bool BTreeNode::IsFull() const
 	return this->keyArray.GetSize() == this->tree->GetMaxDegree() - 1;
 }
 
-BTreeKey* BTreeNode::FindKey(BTreeKeyValue keyValue)
+BTreeKey* BTreeNode::FindKey(BTreeKey* givenKey)
 {
 	for (unsigned int i = 0; i < this->keyArray.GetSize(); i++)
-		if (this->keyArray[i]->GetKeyValue() == keyValue)
+		if (this->keyArray[i]->IsEqualTo(givenKey))
 			return this->keyArray[i];
 
 	if (this->IsLeaf())
 		return nullptr;
 
-	if (keyValue < this->keyArray[0]->GetKeyValue())
-		return this->childNodeArray[0]->FindKey(keyValue);
+	if (givenKey->IsLessThan(this->keyArray[0]))
+		return this->childNodeArray[0]->FindKey(givenKey);
 
-	if (keyValue > this->keyArray[this->keyArray.GetSize() - 1]->GetKeyValue())
-		return this->childNodeArray[this->childNodeArray.GetSize() - 1]->FindKey(keyValue);
+	if (givenKey->IsGreaterThan(this->keyArray[this->keyArray.GetSize() - 1]))
+		return this->childNodeArray[this->childNodeArray.GetSize() - 1]->FindKey(givenKey);
 
 	for (unsigned int i = 0; i + 1 < this->keyArray.GetSize(); i++)
 	{
 		BTreeKey* keyA = this->keyArray[i];
 		BTreeKey* keyB = this->keyArray[i + 1];
 
-		if (keyA->GetKeyValue() < keyValue && keyValue < keyB->GetKeyValue())
-			return this->childNodeArray[i + 1]->FindKey(keyValue);
+		if (givenKey->IsGreaterThan(keyA) && givenKey->IsLessThan(keyB))
+			return this->childNodeArray[i + 1]->FindKey(givenKey);
 	}
 
 	return nullptr;

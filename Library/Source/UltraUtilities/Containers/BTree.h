@@ -8,8 +8,6 @@ namespace UU
 	class BTreeNode;
 	class BTreeKey;
 
-	typedef long long BTreeKeyValue;
-
 	/**
 	 * This is an implementation of B-tree.  This is a
 	 * type of self-balancing search tree with an arbitrary
@@ -34,10 +32,14 @@ namespace UU
 		unsigned int GetMaxDegree() const;
 
 		/**
-		 * Find the key in this tree having the given value.  Null is returned
+		 * Find the key in this tree that is equal to the given key.  Null is returned
 		 * here if no such key can be found.
+		 * 
+		 * One might ask: why look for a key when you already have it?  The idea is that
+		 * the key stored in the tree has the desired satellite data, while the given
+		 * key does not.
 		 */
-		BTreeKey* FindKey(BTreeKeyValue keyValue);
+		BTreeKey* FindKey(BTreeKey* givenKey);
 
 		/**
 		 * Insert the given key into this tree.  The given key should be allocated
@@ -48,10 +50,10 @@ namespace UU
 		bool InsertKey(BTreeKey* key);
 
 		/**
-		 * Remove the key from this tree having the given value.  Failure occurs
+		 * Remove the key from this tree that is equal to the given key.  Failure occurs
 		 * here if no such key exists within the tree.
 		 */
-		bool RemoveKey(BTreeKeyValue keyValue);
+		bool RemoveKey(BTreeKey* givenKey);
 
 	private:
 		unsigned int minDegree;			///< This is the minimum number of children per internal node of the tree.  The maximum is always twice this.
@@ -74,7 +76,7 @@ namespace UU
 		bool IsLeaf() const;
 		bool IsFull() const;
 
-		BTreeKey* FindKey(BTreeKeyValue keyValue);
+		BTreeKey* FindKey(BTreeKey* givenKey);
 
 		bool Split();
 
@@ -96,42 +98,8 @@ namespace UU
 		BTreeKey();
 		virtual ~BTreeKey();
 
-		/**
-		 * Override this method to provide a key for the tree.
-		 * Note that for the tree to function correctly, the result
-		 * returned here should never very from call to call.
-		 */
-		virtual BTreeKeyValue GetKeyValue() = 0;
-	};
-
-	/**
-	 * This template is provided for convenience in creating B-tree keys
-	 * based on a custom user type.  This type could not only provide the
-	 * key's integer value, but could also represent the satellite data.
-	 */
-	template<typename T>
-	class UU_API BTreeTypedKey : public BTreeKey
-	{
-	public:
-		BTreeTypedKey(T value)
-		{
-			this->value = value;
-		}
-
-		virtual ~BTreeTypedKey()
-		{
-		}
-
-		/**
-		 * Note that the type for the template could implement a cast operator which
-		 * would get called here to provide the key.
-		 */
-		virtual BTreeKeyValue GetKeyValue() override
-		{
-			return BTreeKeyValue(this->value);
-		}
-
-	protected:
-		T value;
+		virtual bool IsEqualTo(const BTreeKey* key) const = 0;
+		virtual bool IsLessThan(const BTreeKey* key) const = 0;
+		virtual bool IsGreaterThan(const BTreeKey* key) const = 0;
 	};
 }
