@@ -9,6 +9,8 @@ set(ULTRA_UTILITIES_SOURCES
 	Source/UltraUtilities/DisjointSetForest.cpp
 	Source/UltraUtilities/DisjointSetForest.h
 	Source/UltraUtilities/Memory/ObjectHeap.hpp
+	Source/UltraUtilities/Containers/BTree.cpp
+	Source/UltraUtilities/Containers/BTree.h
 	Source/UltraUtilities/Containers/RBTree.cpp
 	Source/UltraUtilities/Containers/RBTree.h
 	Source/UltraUtilities/Containers/RBMap.hpp
