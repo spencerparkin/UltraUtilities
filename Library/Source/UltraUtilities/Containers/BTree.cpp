@@ -26,7 +26,44 @@ unsigned int BTree::GetMaxDegree() const
 
 bool BTree::InsertKey(BTreeKey* key)
 {
-	return false;
+	if (!this->rootNode)
+	{
+		this->rootNode = new BTreeNode();
+		this->rootNode->tree = this;
+		this->rootNode->keyArray.Push(key);
+		return true;
+	}
+
+	auto node = this->rootNode;
+
+	while (true)
+	{
+		if (node->IsFull())
+		{
+			bool nodeSplit = node->Split();
+			UU_ASSERT(nodeSplit);
+			node = node->parentNode;
+			UU_ASSERT(node != nullptr);
+		}
+
+		unsigned int i = 0;
+		if (node->FindKeyIndex(key, i))
+			return false;
+		
+		bool childIndexFound = node->FindChildIndex(key, i);
+		UU_ASSERT(childIndexFound);
+
+		if (node->IsLeaf())
+		{
+			node->keyArray.ShiftInsert(i, key);
+			break;
+		}
+		
+		node = node->childNodeArray[i];
+		UU_ASSERT(node != nullptr);
+	}
+
+	return true;
 }
 
 BTreeKey* BTree::FindKey(BTreeKey* givenKey)
@@ -39,6 +76,7 @@ BTreeKey* BTree::FindKey(BTreeKey* givenKey)
 
 bool BTree::RemoveKey(BTreeKey* givenKey)
 {
+	// TODO: Write this.
 	return false;
 }
 
@@ -84,44 +122,103 @@ bool BTreeNode::IsFull() const
 
 BTreeKey* BTreeNode::FindKey(BTreeKey* givenKey)
 {
-	for (unsigned int i = 0; i < this->keyArray.GetSize(); i++)
-		if (this->keyArray[i]->IsEqualTo(givenKey))
-			return this->keyArray[i];
+	unsigned int i = 0;
 
-	if (this->IsLeaf())
-		return nullptr;
+	if (this->FindKeyIndex(givenKey, i))
+		return this->keyArray[i];
 
-	if (givenKey->IsLessThan(this->keyArray[0]))
-		return this->childNodeArray[0]->FindKey(givenKey);
-
-	if (givenKey->IsGreaterThan(this->keyArray[this->keyArray.GetSize() - 1]))
-		return this->childNodeArray[this->childNodeArray.GetSize() - 1]->FindKey(givenKey);
-
-	for (unsigned int i = 0; i + 1 < this->keyArray.GetSize(); i++)
-	{
-		BTreeKey* keyA = this->keyArray[i];
-		BTreeKey* keyB = this->keyArray[i + 1];
-
-		if (givenKey->IsGreaterThan(keyA) && givenKey->IsLessThan(keyB))
-			return this->childNodeArray[i + 1]->FindKey(givenKey);
-	}
+	if (this->FindChildIndex(givenKey, i))
+		return this->childNodeArray[i]->FindKey(givenKey);
 
 	return nullptr;
 }
 
-bool BTreeNode::Split()
+bool BTreeNode::FindKeyIndex(BTreeKey* givenKey, unsigned int& i)
 {
-	if (!this->tree || !this->parentNode)
+	for (i = 0; i < this->keyArray.GetSize(); i++)
+		if (this->keyArray[i]->IsEqualTo(givenKey))
+			return true;
+
+	return false;
+}
+
+bool BTreeNode::FindChildIndex(BTreeKey* givenKey, unsigned int& i)
+{
+	if (this->IsLeaf())
 		return false;
 
-	if (this->parentNode->IsFull())
+	if (givenKey->IsLessThan(this->keyArray[0]))
+		i = 0;
+	else if (givenKey->IsGreaterThan(this->keyArray[this->keyArray.GetSize() - 1]))
+		i = this->keyArray.GetSize();
+	else
+	{
+		for (i = 0; i + 1 < this->keyArray.GetSize(); i++)
+		{
+			BTreeKey* keyA = this->keyArray[i];
+			BTreeKey* keyB = this->keyArray[i + 1];
+
+			if (givenKey->IsGreaterThan(keyA) && givenKey->IsLessThan(keyB))
+			{
+				i++;
+				break;
+			}
+		}
+	}
+
+	return true;
+}
+
+bool BTreeNode::Split()
+{
+	if (!this->tree)
 		return false;
 
 	if (!this->IsFull())
 		return false;
 
-	//...move a key into the parent, and move keys into a new sibling...
-	return false;
+	if (this->parentNode && this->parentNode->IsFull())
+		return false;
+
+	auto liftedKey = this->keyArray[this->tree->GetMinDegree() - 1];
+
+	auto newNode = new BTreeNode();
+	newNode->tree = this->tree;
+	newNode->parentNode = this->parentNode;
+
+	for (unsigned int j = 0; j < this->tree->GetMinDegree() - 1; j++)
+	{
+		auto movedKey = this->keyArray[this->tree->GetMinDegree() + j];
+		newNode->keyArray.Push(movedKey);
+	}
+
+	this->keyArray.SetSize(this->tree->GetMinDegree() - 1);
+
+	for (unsigned int j = 0; j < this->tree->GetMinDegree(); j++)
+	{
+		auto movedChild = this->childNodeArray[this->tree->GetMinDegree() + j];
+		newNode->childNodeArray.Push(movedChild);
+	}
+
+	this->childNodeArray.SetSize(this->tree->GetMinDegree());
+
+	if (this->parentNode)
+	{
+		unsigned int i = this->parentNode->childNodeArray.Find(this);
+		this->parentNode->childNodeArray.ShiftInsert(i + 1, newNode);
+		this->parentNode->keyArray.ShiftInsert(i, liftedKey);
+	}
+	else
+	{
+		auto newRoot = new BTreeNode();
+		this->tree->rootNode = newRoot;
+		newRoot->tree = this->tree;
+		newRoot->childNodeArray.Push(this);
+		newRoot->childNodeArray.Push(newNode);
+		newRoot->keyArray.Push(liftedKey);
+	}
+
+	return true;
 }
 
 //--------------------------------------------- BTreeKey ---------------------------------------------

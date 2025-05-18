@@ -17,6 +17,8 @@ namespace UU
 	 */
 	class UU_API BTree
 	{
+		friend class BTreeNode;
+
 	public:
 		BTree(unsigned int minDegree = 2);
 		virtual ~BTree();
@@ -35,7 +37,7 @@ namespace UU
 		 * Find the key in this tree that is equal to the given key.  Null is returned
 		 * here if no such key can be found.
 		 * 
-		 * One might ask: why look for a key when you already have it?  The idea is that
+		 * One might ask: Why look for a key when you already have it?  The idea is that
 		 * the key stored in the tree has the desired satellite data, while the given
 		 * key does not.
 		 */
@@ -66,6 +68,8 @@ namespace UU
 	 */
 	class UU_API BTreeNode
 	{
+		friend class BTree;
+
 	public:
 		BTreeNode();
 		virtual ~BTreeNode();
@@ -77,6 +81,8 @@ namespace UU
 		bool IsFull() const;
 
 		BTreeKey* FindKey(BTreeKey* givenKey);
+		bool FindKeyIndex(BTreeKey* givenKey, unsigned int& i);
+		bool FindChildIndex(BTreeKey* givenKey, unsigned int& i);
 
 		bool Split();
 
