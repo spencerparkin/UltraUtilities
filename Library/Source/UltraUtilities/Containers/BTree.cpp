@@ -204,13 +204,16 @@ bool BTreeNode::Split()
 
 	this->keyArray.SetSize(this->tree->GetMinDegree() - 1);
 
-	for (unsigned int j = 0; j < this->tree->GetMinDegree(); j++)
+	if (!this->IsLeaf())
 	{
-		auto movedChild = this->childNodeArray[this->tree->GetMinDegree() + j];
-		newNode->childNodeArray.Push(movedChild);
-	}
+		for (unsigned int j = 0; j < this->tree->GetMinDegree(); j++)
+		{
+			auto movedChild = this->childNodeArray[this->tree->GetMinDegree() + j];
+			newNode->childNodeArray.Push(movedChild);
+		}
 
-	this->childNodeArray.SetSize(this->tree->GetMinDegree());
+		this->childNodeArray.SetSize(this->tree->GetMinDegree());
+	}
 
 	if (this->parentNode)
 	{
@@ -226,6 +229,8 @@ bool BTreeNode::Split()
 		newRoot->childNodeArray.Push(this);
 		newRoot->childNodeArray.Push(newNode);
 		newRoot->keyArray.Push(liftedKey);
+		this->parentNode = newRoot;
+		newNode->parentNode = newRoot;
 	}
 
 	return true;
