@@ -10,6 +10,7 @@ set(TEST_SOURCES
 	Source/GraphTest.cpp
 	Source/HashMapTest.cpp
 	Source/HashSetTest.cpp
+	Source/BTreeTest.cpp
 )
 
 add_executable(Test ${TEST_SOURCES})

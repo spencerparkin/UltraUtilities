@@ -80,6 +80,16 @@ bool BTree::RemoveKey(BTreeKey* givenKey)
 	return false;
 }
 
+bool BTree::IsBalanced() const
+{
+	if (!this->rootNode)
+		return true;
+
+	unsigned int maxDepth = 0;
+	unsigned int currentDepth = 1;
+	return this->rootNode->IsBalanced(maxDepth, currentDepth);
+}
+
 //--------------------------------------------- BTreeNode ---------------------------------------------
 
 BTreeNode::BTreeNode()
@@ -216,6 +226,29 @@ bool BTreeNode::Split()
 		newRoot->childNodeArray.Push(this);
 		newRoot->childNodeArray.Push(newNode);
 		newRoot->keyArray.Push(liftedKey);
+	}
+
+	return true;
+}
+
+bool BTreeNode::IsBalanced(unsigned int& maxDepth, unsigned int currentDepth) const
+{
+	if (this->IsLeaf())
+	{
+		if (maxDepth == 0)
+			maxDepth = currentDepth;
+
+		if (maxDepth != currentDepth)
+			return false;
+
+		return true;
+	}
+
+	for (unsigned int i = 0; i < this->childNodeArray.GetSize(); i++)
+	{
+		const BTreeNode* childNode = this->childNodeArray[i];
+		if (!childNode->IsBalanced(maxDepth, currentDepth + 1))
+			return false;
 	}
 
 	return true;

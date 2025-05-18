@@ -57,6 +57,12 @@ namespace UU
 		 */
 		bool RemoveKey(BTreeKey* givenKey);
 
+		/**
+		 * Used only for diagnostic purposes, here we verify that all leaf nodes of
+		 * the tree are at the same depth.
+		 */
+		bool IsBalanced() const;
+
 	private:
 		unsigned int minDegree;			///< This is the minimum number of children per internal node of the tree.  The maximum is always twice this.
 		BTreeNode* rootNode;
@@ -85,6 +91,8 @@ namespace UU
 		bool FindChildIndex(BTreeKey* givenKey, unsigned int& i);
 
 		bool Split();
+
+		bool IsBalanced(unsigned int& maxDepth, unsigned int currentDepth) const;
 
 	private:
 		BTree* tree;
