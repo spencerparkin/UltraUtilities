@@ -88,7 +88,7 @@ namespace UU
 
 		BTreeKey* FindKey(BTreeKey* givenKey);
 		bool FindKeyIndex(BTreeKey* givenKey, unsigned int& i);
-		bool FindChildIndex(BTreeKey* givenKey, unsigned int& i);
+		bool FindChildOrKeyInsertionIndex(BTreeKey* givenKey, unsigned int& i);
 
 		bool Split();
 

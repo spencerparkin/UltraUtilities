@@ -50,8 +50,8 @@ bool BTree::InsertKey(BTreeKey* key)
 		if (node->FindKeyIndex(key, i))
 			return false;
 		
-		bool childIndexFound = node->FindChildIndex(key, i);
-		UU_ASSERT(childIndexFound);
+		bool indexFound = node->FindChildOrKeyInsertionIndex(key, i);
+		UU_ASSERT(indexFound);
 
 		if (node->IsLeaf())
 		{
@@ -137,7 +137,10 @@ BTreeKey* BTreeNode::FindKey(BTreeKey* givenKey)
 	if (this->FindKeyIndex(givenKey, i))
 		return this->keyArray[i];
 
-	if (this->FindChildIndex(givenKey, i))
+	if (this->IsLeaf())
+		return nullptr;
+
+	if (this->FindChildOrKeyInsertionIndex(givenKey, i))
 		return this->childNodeArray[i]->FindKey(givenKey);
 
 	return nullptr;
@@ -152,11 +155,8 @@ bool BTreeNode::FindKeyIndex(BTreeKey* givenKey, unsigned int& i)
 	return false;
 }
 
-bool BTreeNode::FindChildIndex(BTreeKey* givenKey, unsigned int& i)
+bool BTreeNode::FindChildOrKeyInsertionIndex(BTreeKey* givenKey, unsigned int& i)
 {
-	if (this->IsLeaf())
-		return false;
-
 	if (givenKey->IsLessThan(this->keyArray[0]))
 		i = 0;
 	else if (givenKey->IsGreaterThan(this->keyArray[this->keyArray.GetSize() - 1]))
