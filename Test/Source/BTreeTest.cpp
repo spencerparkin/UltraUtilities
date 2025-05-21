@@ -45,6 +45,7 @@ TEST_CASE("B-Trees", "[btree]")
 		{
 			tree.InsertKey(new Key(i));
 			REQUIRE(tree.IsBalanced());
+			REQUIRE(tree.DegreesValid());
 		}
 	}
 

@@ -90,6 +90,14 @@ bool BTree::IsBalanced() const
 	return this->rootNode->IsBalanced(maxDepth, currentDepth);
 }
 
+bool BTree::DegreesValid() const
+{
+	if (!this->rootNode)
+		return true;
+
+	return this->rootNode->DegreesValid();
+}
+
 //--------------------------------------------- BTreeNode ---------------------------------------------
 
 BTreeNode::BTreeNode()
@@ -257,6 +265,24 @@ bool BTreeNode::IsBalanced(unsigned int& maxDepth, unsigned int currentDepth) co
 	}
 
 	return true;
+}
+
+bool BTreeNode::DegreesValid() const
+{
+	if (this == this->tree->rootNode)
+		return true;
+
+	if (this->tree->GetMinDegree() <= this->childNodeArray.GetSize() && this->childNodeArray.GetSize() <= this->tree->GetMaxDegree())
+		return true;
+
+	for (unsigned int i = 0; i < this->childNodeArray.GetSize(); i++)
+	{
+		const BTreeNode* childNode = this->childNodeArray[i];
+		if (!childNode->DegreesValid())
+			return false;
+	}
+
+	return false;
 }
 
 //--------------------------------------------- BTreeKey ---------------------------------------------

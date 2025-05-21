@@ -63,6 +63,12 @@ namespace UU
 		 */
 		bool IsBalanced() const;
 
+		/**
+		 * Used only for diagnostic purposes, here we verify that all nodes (except
+		 * for the root) have a branch-factor within the minimum and maximum degree.
+		 */
+		bool DegreesValid() const;
+
 	private:
 		unsigned int minDegree;			///< This is the minimum number of children per internal node of the tree.  The maximum is always twice this.
 		BTreeNode* rootNode;
@@ -93,6 +99,7 @@ namespace UU
 		bool Split();
 
 		bool IsBalanced(unsigned int& maxDepth, unsigned int currentDepth) const;
+		bool DegreesValid() const;
 
 	private:
 		BTree* tree;
