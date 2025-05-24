@@ -14,6 +14,14 @@ namespace UU
 	 * branching factor.
 	 *
 	 * See: Introduction to Algorithms by Cormen, et. al.
+	 * 
+	 * Note that B-tree structures are not unique in terms of key sets.  That is, if
+	 * two B-trees contain the exact same set of keys, then this does not imply that
+	 * their structure is the same.  This is easily proven simply by realizing that
+	 * all B-tree properties can be preserved through some manipulations of the tree.
+	 * In particular, if a key's left and right child have minimal degree, then the
+	 * key can be pushed down into a node that merges the left and right child.  This
+	 * is sometimes done during key removal, but I don't see any reason to do it.
 	 */
 	class UU_API BTree
 	{
@@ -77,6 +85,8 @@ namespace UU
 		bool DegreesValid() const;
 
 	private:
+		bool RemoveKeyInNode(BTreeKey* givenKey, BTreeKey** removedKey, BTreeNode* node);
+
 		unsigned int numKeys;
 		unsigned int minDegree;			///< This is the minimum number of children per internal node of the tree.  The maximum is always twice this.
 		BTreeNode* rootNode;
@@ -104,13 +114,13 @@ namespace UU
 		bool IsRoot() const;
 		bool IsFull() const;
 
-		BTreeKey* FindKey(BTreeKey* givenKey);
+		BTreeKey* FindKey(BTreeKey* givenKey, BTreeNode** node = nullptr);
 		bool FindKeyIndex(BTreeKey* givenKey, unsigned int& i);
 		bool FindChildOrKeyInsertionIndex(BTreeKey* givenKey, unsigned int& i);
 
 		bool Split();
 
-		static void MergeRightIntoLeft(BTreeNode* leftchild, BTreeNode* rightChild);
+		static void Merge(BTreeNode* destinationNode, BTreeNode* sourceNode);
 
 		bool IsBalanced(unsigned int& maxDepth, unsigned int currentDepth) const;
 		bool DegreesValid() const;

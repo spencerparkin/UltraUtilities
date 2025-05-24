@@ -87,121 +87,118 @@ bool BTree::RemoveKey(BTreeKey* givenKey, BTreeKey** removedKey /*= nullptr*/)
 	if (!this->rootNode)
 		return false;
 
+	BTreeNode* node = nullptr;
+	if (!this->rootNode->FindKey(givenKey, &node))
+		return false;
+
+	return this->RemoveKeyInNode(givenKey, removedKey, node);
+}
+
+bool BTree::RemoveKeyInNode(BTreeKey* givenKey, BTreeKey** removedKey, BTreeNode* node)
+{
 	BTreeKey* freeThisKey = nullptr;
 	if (!removedKey)
 		removedKey = &freeThisKey;
 
-	auto node = this->rootNode;
+	unsigned int i = -1;
+	bool found = node->FindKeyIndex(givenKey, i);
+	UU_ASSERT(found);
 
-	while (true)
+	if (node->IsInternal())
 	{
-		unsigned int i = -1;
-		if (node->FindKeyIndex(givenKey, i))
+		// Note that a predecessor or successor in this case will always be a leaf node.
+		// Arbitrarily choose the predecessor.  Both should exist, because a key with no
+		// predecessor is in a leaf, and the same is true with the successor.
+		BTreeNode* leafNode = node->childNodeArray[i];
+		while (!leafNode->IsLeaf())
+			leafNode = leafNode->childNodeArray[leafNode->childNodeArray.GetSize() - 1];
+		BTreeKey* lastKey = leafNode->keyArray[leafNode->keyArray.GetSize() - 1];
+		BTreeKey* lastKeyRemoved = nullptr;
+		bool removed = this->RemoveKeyInNode(lastKey, &lastKeyRemoved, leafNode);
+		UU_ASSERT(removed);
+		*removedKey = node->keyArray[i];
+		node->keyArray[i] = lastKey;
+	}
+	else
+	{
+		UU_ASSERT(node->IsLeaf());
+
+		bool removalOkay = node->IsRoot() || node->GetNumKeys() > this->minDegree - 1;
+
+		*removedKey = node->keyArray[i];
+		node->keyArray.ShiftRemove(i);
+
+		if (!removalOkay)
 		{
-			if (node->IsInternal())
+			BTreeNode* parentNode = node->parentNode;
+			UU_ASSERT(parentNode != nullptr);
+
+			unsigned int j = -1;
+			bool childFound = parentNode->FindChildOrKeyInsertionIndex(givenKey, j);
+			UU_ASSERT(childFound);
+
+			BTreeNode* leftSibling = (j - 1 >= 0) ? parentNode->childNodeArray[j - 1] : nullptr;
+			BTreeNode* rightSibling = (j + 1 < parentNode->childNodeArray.GetSize()) ? parentNode->childNodeArray[j + 1] : nullptr;
+			UU_ASSERT(!leftSibling || leftSibling->IsLeaf());
+			UU_ASSERT(!rightSibling || rightSibling->IsLeaf());
+
+			if (leftSibling)
 			{
-				BTreeNode* leftChild = node->childNodeArray[i];
-				BTreeNode* rightChild = node->childNodeArray[i + 1];
-				if (leftChild->GetNumKeys() + rightChild->GetNumKeys() <= 2 * this->minDegree - 1)
+				node->keyArray.ShiftInsert(0, parentNode->keyArray[j]);
+
+				if (leftSibling->GetNumKeys() > this->minDegree - 1)
 				{
-					*removedKey = node->keyArray[i];
-					node->keyArray.ShiftRemove(i);
-					BTreeNode::MergeRightIntoLeft(leftChild, rightChild);
-					node->childNodeArray.ShiftRemove(i + 1);
+					parentNode->keyArray[j] = leftSibling->keyArray[leftSibling->keyArray.GetSize() - 1];
+					leftSibling->keyArray.Pop();
 				}
 				else
 				{
-					// Note that a predecessor or successor in this case will always be a leaf node.
-					// Arbitrarily choose the predecessor.  Both should exist, because a key with no
-					// predecessor is in a leaf, and the same with successor.
-					BTreeNode* leafNode = leftChild;
-					while (!leafNode->IsLeaf())
-						leafNode = leafNode->childNodeArray[leafNode->childNodeArray.GetSize() - 1];
-					BTreeKey* lastKey = leafNode->keyArray[leafNode->keyArray.GetSize() - 1];
-					BTreeKey* lastKeyRemoved = nullptr;
-					bool removed = this->RemoveKey(lastKey, &lastKeyRemoved);
-					UU_ASSERT(removed);
-					*removedKey = node->keyArray[i];
-					node->keyArray[i] = lastKey;
-					this->numKeys++;
+					BTreeNode::Merge(leftSibling, node);
+					parentNode->keyArray.ShiftRemove(j);
+					parentNode->childNodeArray.ShiftRemove(j);
+				}
+			}
+			else if (rightSibling)
+			{
+				node->keyArray.Push(parentNode->keyArray[j]);
+
+				if (rightSibling->GetNumKeys() > this->minDegree - 1)
+				{
+					parentNode->keyArray[j] = rightSibling->keyArray[0];
+					rightSibling->keyArray.ShiftRemove(0);
+				}
+				else
+				{
+					BTreeNode::Merge(node, rightSibling);
+					parentNode->keyArray.ShiftRemove(j + 1);
+					parentNode->childNodeArray.ShiftRemove(j + 1);
 				}
 			}
 			else
 			{
-				UU_ASSERT(node->IsLeaf());
-
-				bool removalOkay = node->IsRoot() || node->GetNumKeys() > this->minDegree - 1;
-
-				*removedKey = node->keyArray[i];
-				node->keyArray.ShiftRemove(i);
-
-				if (!removalOkay)
-				{
-					BTreeNode* parentNode = node->parentNode;
-					UU_ASSERT(parentNode != nullptr);
-
-					unsigned int j = -1;
-					bool childFound = parentNode->FindChildOrKeyInsertionIndex(givenKey, j);
-					UU_ASSERT(childFound);
-
-					BTreeNode* leftSibling = (j - 1 >= 0) ? parentNode->childNodeArray[j - 1] : nullptr;
-					BTreeNode* rightSibling = (j + 1 < parentNode->childNodeArray.GetSize()) ? parentNode->childNodeArray[j + 1] : nullptr;
-					UU_ASSERT(!leftSibling || leftSibling->IsLeaf());
-					UU_ASSERT(!rightSibling || rightSibling->IsLeaf());
-
-					if (leftSibling)
-					{
-						node->keyArray.ShiftInsert(0, parentNode->keyArray[j]);
-
-						if (leftSibling->GetNumKeys() > this->minDegree - 1)
-						{
-							parentNode->keyArray[j] = leftSibling->keyArray[leftSibling->keyArray.GetSize() - 1];
-							leftSibling->keyArray.Pop();
-						}
-						else
-						{
-							BTreeNode::MergeRightIntoLeft(leftSibling, node);
-							parentNode->keyArray.ShiftRemove(j);
-							parentNode->childNodeArray.ShiftRemove(j);
-						}
-					}
-					else if (rightSibling)
-					{
-						node->keyArray.Push(parentNode->keyArray[j]);
-
-						if (rightSibling->GetNumKeys() > this->minDegree - 1)
-						{
-							parentNode->keyArray[j] = rightSibling->keyArray[0];
-							rightSibling->keyArray.ShiftRemove(0);
-						}
-						else
-						{
-							BTreeNode::MergeRightIntoLeft(node, rightSibling);
-							parentNode->keyArray.ShiftRemove(j + 1);
-							parentNode->childNodeArray.ShiftRemove(j + 1);
-						}
-					}
-					else
-					{
-						UU_ASSERT(false);
-						return false;
-					}
-				}
+				UU_ASSERT(false);
+				return false;
 			}
+		}
 
-			break;
-		}
-		else if(node->FindChildOrKeyInsertionIndex(givenKey, i))
-			node = node->childNodeArray[i];
-		else
+		if (this->rootNode->childNodeArray.GetSize() == 1)
 		{
-			// The key we've been asked to delete doesn't exist in the tree.
-			return false;
+			UU_ASSERT(this->rootNode->keyArray.GetSize() == 0);
+			node = this->rootNode;
+			this->rootNode = this->rootNode->childNodeArray[0];
+			node->childNodeArray.SetSize(0);
+			delete node;
 		}
+		else if (this->rootNode->childNodeArray.GetSize() == 0 && this->rootNode->keyArray.GetSize() == 0)
+		{
+			delete this->rootNode;
+			this->rootNode = nullptr;
+		}
+
+		this->numKeys--;
 	}
 
 	delete freeThisKey;
-	this->numKeys--;
 	return true;
 }
 
@@ -284,12 +281,17 @@ bool BTreeNode::IsFull() const
 	return this->keyArray.GetSize() == this->tree->GetMaxDegree() - 1;
 }
 
-BTreeKey* BTreeNode::FindKey(BTreeKey* givenKey)
+BTreeKey* BTreeNode::FindKey(BTreeKey* givenKey, BTreeNode** node /*= nullptr*/)
 {
 	unsigned int i = 0;
 
 	if (this->FindKeyIndex(givenKey, i))
+	{
+		if (node)
+			*node = this;
+
 		return this->keyArray[i];
+	}
 
 	if (this->IsLeaf())
 		return nullptr;
@@ -390,17 +392,17 @@ bool BTreeNode::Split()
 	return true;
 }
 
-/*static*/ void BTreeNode::MergeRightIntoLeft(BTreeNode* leftChild, BTreeNode* rightChild)
+/*static*/ void BTreeNode::Merge(BTreeNode* destinationNode, BTreeNode* sourceNode)
 {
-	for (unsigned int i = 0; i < rightChild->keyArray.GetSize(); i++)
-		leftChild->keyArray.Push(rightChild->keyArray[i]);
+	for (unsigned int i = 0; i < sourceNode->keyArray.GetSize(); i++)
+		destinationNode->keyArray.Push(sourceNode->keyArray[i]);
 
-	for (unsigned int i = 0; i < rightChild->childNodeArray.GetSize(); i++)
-		leftChild->childNodeArray.Push(rightChild->childNodeArray[i]);
+	for (unsigned int i = 0; i < sourceNode->childNodeArray.GetSize(); i++)
+		destinationNode->childNodeArray.Push(sourceNode->childNodeArray[i]);
 
-	rightChild->keyArray.SetSize(0);
-	rightChild->childNodeArray.SetSize(0);
-	delete rightChild;
+	sourceNode->keyArray.SetSize(0);
+	sourceNode->childNodeArray.SetSize(0);
+	delete sourceNode;
 }
 
 bool BTreeNode::IsBalanced(unsigned int& maxDepth, unsigned int currentDepth) const
