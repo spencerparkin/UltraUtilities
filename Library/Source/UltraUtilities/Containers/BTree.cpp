@@ -186,6 +186,7 @@ bool BTree::RemoveKeyInNode(BTreeKey* givenKey, BTreeKey** removedKey, BTreeNode
 			UU_ASSERT(this->rootNode->keyArray.GetSize() == 0);
 			node = this->rootNode;
 			this->rootNode = this->rootNode->childNodeArray[0];
+			this->rootNode->parentNode = nullptr;
 			node->childNodeArray.SetSize(0);
 			delete node;
 		}
@@ -297,7 +298,7 @@ BTreeKey* BTreeNode::FindKey(BTreeKey* givenKey, BTreeNode** node /*= nullptr*/)
 		return nullptr;
 
 	if (this->FindChildOrKeyInsertionIndex(givenKey, i))
-		return this->childNodeArray[i]->FindKey(givenKey);
+		return this->childNodeArray[i]->FindKey(givenKey, node);
 
 	return nullptr;
 }

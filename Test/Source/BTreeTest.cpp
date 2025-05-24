@@ -36,33 +36,39 @@ public:
 
 TEST_CASE("B-Trees", "[btree]")
 {
-	BTree tree(8);
+	BTree tree(4);
 
 	SECTION("Test tree key insertion.")
 	{
-		int j = 1000;
-		for (int i = 0; i < j; i++)
+		int numKeys = 1000;
+		for (int i = 0; i < numKeys; i++)
 		{
 			tree.InsertKey(new Key(i));
 			REQUIRE(tree.IsBalanced());
 			REQUIRE(tree.DegreesValid());
 			REQUIRE(tree.GetNumKeys() == i + 1);
+			
+			for (int j = 0; j <= i; j++)
+			{
+				Key key(j);
+				REQUIRE(tree.FindKey(&key) != nullptr);
+			}
 		}
 	}
 
 	SECTION("Test tree key removal.")
 	{
-		int j = 1000;
-		for (int i = 0; i < j; i++)
+		int numKeys = 1000;
+		for (int i = 0; i < numKeys; i++)
 			tree.InsertKey(new Key(i));
 
-		for (int i = 0; i < j; i++)
+		for (int i = 0; i < numKeys; i++)
 		{
 			Key key(i);
 			tree.RemoveKey(&key);
 			REQUIRE(tree.IsBalanced());
 			REQUIRE(tree.DegreesValid());
-			REQUIRE(tree.GetNumKeys() == j - i - 1);
+			REQUIRE(tree.GetNumKeys() == numKeys - i - 1);
 		}
 	}
 }
