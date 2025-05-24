@@ -24,6 +24,11 @@ namespace UU
 		virtual ~BTree();
 
 		/**
+		 * Return the number of keys currently present in this tree.
+		 */
+		unsigned int GetNumKeys() const;
+
+		/**
 		 * Return the minimum number of child nodes per internal node.
 		 */
 		unsigned int GetMinDegree() const;
@@ -70,6 +75,7 @@ namespace UU
 		bool DegreesValid() const;
 
 	private:
+		unsigned int numKeys;
 		unsigned int minDegree;			///< This is the minimum number of children per internal node of the tree.  The maximum is always twice this.
 		BTreeNode* rootNode;
 	};

@@ -6,12 +6,18 @@ using namespace UU;
 
 BTree::BTree(unsigned int minDegree /*= 2*/)
 {
+	this->numKeys = 0;
 	this->minDegree = minDegree;
 	this->rootNode = nullptr;
 }
 
 /*virtual*/ BTree::~BTree()
 {
+}
+
+unsigned int BTree::GetNumKeys() const
+{
+	return this->numKeys;
 }
 
 unsigned int BTree::GetMinDegree() const
@@ -31,6 +37,7 @@ bool BTree::InsertKey(BTreeKey* key)
 		this->rootNode = new BTreeNode();
 		this->rootNode->tree = this;
 		this->rootNode->keyArray.Push(key);
+		this->numKeys++;
 		return true;
 	}
 
@@ -63,6 +70,7 @@ bool BTree::InsertKey(BTreeKey* key)
 		UU_ASSERT(node != nullptr);
 	}
 
+	this->numKeys++;
 	return true;
 }
 
