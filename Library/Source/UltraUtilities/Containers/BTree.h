@@ -59,8 +59,10 @@ namespace UU
 		/**
 		 * Remove the key from this tree that is equal to the given key.  Failure occurs
 		 * here if no such key exists within the tree.
+		 * 
+		 * @param[out] removedKey If given, the removed key is returned here.  If not given, the memory is freed.
 		 */
-		bool RemoveKey(BTreeKey* givenKey);
+		bool RemoveKey(BTreeKey* givenKey, BTreeKey** removedKey = nullptr);
 
 		/**
 		 * Used only for diagnostic purposes, here we verify that all leaf nodes of
@@ -95,7 +97,11 @@ namespace UU
 		BTree* GetTree();
 		void SetTree(BTree* tree);
 
+		unsigned int GetNumKeys() const;
+
 		bool IsLeaf() const;
+		bool IsInternal() const;
+		bool IsRoot() const;
 		bool IsFull() const;
 
 		BTreeKey* FindKey(BTreeKey* givenKey);
@@ -103,6 +109,8 @@ namespace UU
 		bool FindChildOrKeyInsertionIndex(BTreeKey* givenKey, unsigned int& i);
 
 		bool Split();
+
+		static void MergeRightIntoLeft(BTreeNode* leftchild, BTreeNode* rightChild);
 
 		bool IsBalanced(unsigned int& maxDepth, unsigned int currentDepth) const;
 		bool DegreesValid() const;
