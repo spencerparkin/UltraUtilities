@@ -367,6 +367,7 @@ bool BTreeNode::Split()
 		{
 			auto movedChild = this->childNodeArray[this->tree->GetMinDegree() + j];
 			newNode->childNodeArray.Push(movedChild);
+			movedChild->parentNode = newNode;
 		}
 
 		this->childNodeArray.SetSize(this->tree->GetMinDegree());
@@ -375,6 +376,7 @@ bool BTreeNode::Split()
 	if (this->parentNode)
 	{
 		unsigned int i = this->parentNode->childNodeArray.Find(this);
+		UU_ASSERT(i != -1);
 		this->parentNode->childNodeArray.ShiftInsert(i + 1, newNode);
 		this->parentNode->keyArray.ShiftInsert(i, liftedKey);
 	}
