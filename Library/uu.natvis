@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <Type Name="UU::DArray&lt;*&gt;">
+	  <DisplayString>{{ size={arraySize} }}</DisplayString>
+	  <Expand>
+		  <Item Name="[size]" ExcludeView="simple">arraySize</Item>
+		  <Item Name="[capacity]" ExcludeView="simple">bufferSize</Item>
+		  <ArrayItems>
+			  <Size>arraySize</Size>
+			  <ValuePointer>buffer</ValuePointer>
+		  </ArrayItems>
+	  </Expand>
+  </Type>
+</AutoVisualizer>

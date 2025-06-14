@@ -24,6 +24,7 @@ set(ULTRA_UTILITIES_SOURCES
 	Source/UltraUtilities/Containers/HashMap.hpp
 	Source/UltraUtilities/Containers/HashSet.hpp
 	Source/UltraUtilities/Containers/PriorityQueue.hpp
+	uu.natvis
 )
 
 add_library(UltraUtilities SHARED
