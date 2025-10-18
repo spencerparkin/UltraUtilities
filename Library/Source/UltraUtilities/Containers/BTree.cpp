@@ -137,7 +137,7 @@ bool BTree::RemoveKeyInNode(BTreeKey* givenKey, BTreeKey** removedKey, BTreeNode
 			bool childFound = parentNode->FindChildOrKeyInsertionIndex(givenKey, j);
 			UU_ASSERT(childFound);
 
-			BTreeNode* leftSibling = (j - 1 >= 0) ? parentNode->childNodeArray[j - 1] : nullptr;
+			BTreeNode* leftSibling = (j >= 1) ? parentNode->childNodeArray[j - 1] : nullptr;
 			BTreeNode* rightSibling = (j + 1 < parentNode->childNodeArray.GetSize()) ? parentNode->childNodeArray[j + 1] : nullptr;
 			UU_ASSERT(!leftSibling || leftSibling->IsLeaf());
 			UU_ASSERT(!rightSibling || rightSibling->IsLeaf());
@@ -170,7 +170,7 @@ bool BTree::RemoveKeyInNode(BTreeKey* givenKey, BTreeKey** removedKey, BTreeNode
 				else
 				{
 					BTreeNode::Merge(node, rightSibling);
-					parentNode->keyArray.ShiftRemove(j + 1);
+					parentNode->keyArray.ShiftRemove(j);		// STPTODO: Oops!  Here we might violate the definition of the tree!  Go back to the textbook and review.
 					parentNode->childNodeArray.ShiftRemove(j + 1);
 				}
 			}
@@ -203,14 +203,14 @@ bool BTree::RemoveKeyInNode(BTreeKey* givenKey, BTreeKey** removedKey, BTreeNode
 	return true;
 }
 
-bool BTree::IsBalanced() const
+bool BTree::AllLeafNodesAtSameDepth() const
 {
 	if (!this->rootNode)
 		return true;
 
 	unsigned int maxDepth = 0;
 	unsigned int currentDepth = 1;
-	return this->rootNode->IsBalanced(maxDepth, currentDepth);
+	return this->rootNode->AllLeafNodesAtSameDepth(maxDepth, currentDepth);
 }
 
 bool BTree::DegreesValid() const
@@ -408,7 +408,7 @@ bool BTreeNode::Split()
 	delete sourceNode;
 }
 
-bool BTreeNode::IsBalanced(unsigned int& maxDepth, unsigned int currentDepth) const
+bool BTreeNode::AllLeafNodesAtSameDepth(unsigned int& maxDepth, unsigned int currentDepth) const
 {
 	if (this->IsLeaf())
 	{
@@ -424,7 +424,7 @@ bool BTreeNode::IsBalanced(unsigned int& maxDepth, unsigned int currentDepth) co
 	for (unsigned int i = 0; i < this->childNodeArray.GetSize(); i++)
 	{
 		const BTreeNode* childNode = this->childNodeArray[i];
-		if (!childNode->IsBalanced(maxDepth, currentDepth + 1))
+		if (!childNode->AllLeafNodesAtSameDepth(maxDepth, currentDepth + 1))
 			return false;
 	}
 
@@ -433,11 +433,9 @@ bool BTreeNode::IsBalanced(unsigned int& maxDepth, unsigned int currentDepth) co
 
 bool BTreeNode::DegreesValid() const
 {
-	if (this == this->tree->rootNode)
-		return true;
-
-	if (this->tree->GetMinDegree() <= this->childNodeArray.GetSize() && this->childNodeArray.GetSize() <= this->tree->GetMaxDegree())
-		return true;
+	if (!this->IsRoot() && !this->IsLeaf())
+		if (!(this->tree->GetMinDegree() <= this->childNodeArray.GetSize() && this->childNodeArray.GetSize() <= this->tree->GetMaxDegree()))
+			return false;
 
 	for (unsigned int i = 0; i < this->childNodeArray.GetSize(); i++)
 	{
@@ -446,7 +444,7 @@ bool BTreeNode::DegreesValid() const
 			return false;
 	}
 
-	return false;
+	return true;
 }
 
 //--------------------------------------------- BTreeKey ---------------------------------------------

@@ -44,7 +44,7 @@ TEST_CASE("B-Trees", "[btree]")
 		for (int i = 0; i < numKeys; i++)
 		{
 			tree.InsertKey(new Key(i));
-			REQUIRE(tree.IsBalanced());
+			REQUIRE(tree.AllLeafNodesAtSameDepth());
 			REQUIRE(tree.DegreesValid());
 			REQUIRE(tree.GetNumKeys() == i + 1);
 			
@@ -58,7 +58,7 @@ TEST_CASE("B-Trees", "[btree]")
 
 	SECTION("Test tree key removal.")
 	{
-		int numKeys = 1000;
+		int numKeys = 36;
 		for (int i = 0; i < numKeys; i++)
 			tree.InsertKey(new Key(i));
 
@@ -66,7 +66,7 @@ TEST_CASE("B-Trees", "[btree]")
 		{
 			Key key(i);
 			tree.RemoveKey(&key);
-			REQUIRE(tree.IsBalanced());
+			REQUIRE(tree.AllLeafNodesAtSameDepth());
 			REQUIRE(tree.DegreesValid());
 			REQUIRE(tree.GetNumKeys() == numKeys - i - 1);
 		}

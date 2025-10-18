@@ -76,11 +76,13 @@ namespace UU
 		 * Used only for diagnostic purposes, here we verify that all leaf nodes of
 		 * the tree are at the same depth.
 		 */
-		bool IsBalanced() const;
+		bool AllLeafNodesAtSameDepth() const;
 
 		/**
 		 * Used only for diagnostic purposes, here we verify that all nodes (except
 		 * for the root) have a branch-factor within the minimum and maximum degree.
+		 * If this is true and all leaf nodes are at the same depth, then we can
+		 * conclude that the tree is balanced, I believe.
 		 */
 		bool DegreesValid() const;
 
@@ -122,7 +124,7 @@ namespace UU
 
 		static void Merge(BTreeNode* destinationNode, BTreeNode* sourceNode);
 
-		bool IsBalanced(unsigned int& maxDepth, unsigned int currentDepth) const;
+		bool AllLeafNodesAtSameDepth(unsigned int& maxDepth, unsigned int currentDepth) const;
 		bool DegreesValid() const;
 
 	private:
