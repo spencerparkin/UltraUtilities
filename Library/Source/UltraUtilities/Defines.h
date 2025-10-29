@@ -9,7 +9,9 @@
 #endif
 
 #if defined _WIN32
-#	define WIN32_LEAN_AND_MEAN
+#	if !defined WIN32_LEAN_AND_MEAN
+#		define WIN32_LEAN_AND_MEAN
+#	endif
 #	include <Windows.h>
 #	include <debugapi.h>
 #	define UU_ASSERT(condition) \
