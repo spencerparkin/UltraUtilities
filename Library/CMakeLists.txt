@@ -6,6 +6,7 @@ set(ULTRA_UTILITIES_SOURCES
 	Source/UltraUtilities/String.h
 	Source/UltraUtilities/Graph.cpp
 	Source/UltraUtilities/Graph.h
+	Source/UltraUtilities/MulticastDelegate.hpp
 	Source/UltraUtilities/DisjointSetForest.cpp
 	Source/UltraUtilities/DisjointSetForest.h
 	Source/UltraUtilities/Memory/ObjectHeap.hpp
