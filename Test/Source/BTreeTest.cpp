@@ -59,7 +59,7 @@ TEST_CASE("B-Trees", "[btree]")
 
 	SECTION("Test tree key removal.")
 	{
-		int numKeys = 36;
+		int numKeys = 1000;
 		for (int i = 0; i < numKeys; i++)
 			tree.InsertKey(new Key(i));
 

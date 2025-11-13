@@ -4,7 +4,7 @@ using namespace UU;
 
 //--------------------------------------------- BTree ---------------------------------------------
 
-BTree::BTree(unsigned int minDegree /*= 2*/)
+BTree::BTree(int minDegree /*= 2*/)
 {
 	this->numKeys = 0;
 	this->minDegree = minDegree;
@@ -15,17 +15,17 @@ BTree::BTree(unsigned int minDegree /*= 2*/)
 {
 }
 
-unsigned int BTree::GetNumKeys() const
+int BTree::GetNumKeys() const
 {
 	return this->numKeys;
 }
 
-unsigned int BTree::GetMinDegree() const
+int BTree::GetMinDegree() const
 {
 	return this->minDegree;
 }
 
-unsigned int BTree::GetMaxDegree() const
+int BTree::GetMaxDegree() const
 {
 	return 2 * this->minDegree;
 }
@@ -53,7 +53,7 @@ bool BTree::InsertKey(BTreeKey* key)
 			UU_ASSERT(node != nullptr);
 		}
 
-		unsigned int i = 0;
+		int i = 0;
 		if (node->FindKeyIndex(key, i))
 			return false;
 		
@@ -91,7 +91,7 @@ bool BTree::RemoveKey(BTreeKey* givenKey, BTreeKey** removedKey /*= nullptr*/)
 
 	while (true)
 	{
-		unsigned int i = -1;
+		int i = -1;
 		if (node->FindKeyIndex(givenKey, i))
 		{
 			if (node->IsLeaf())
@@ -126,8 +126,11 @@ bool BTree::RemoveKey(BTreeKey* givenKey, BTreeKey** removedKey /*= nullptr*/)
 				for (int j = 0; j < (int)nodeB->childNodeArray.GetSize(); j++)
 					nodeA->childNodeArray.Push(nodeB->childNodeArray[j]);
 
-				node = nodeA;
+				nodeB->keyArray.SetSize(0);
+				nodeB->childNodeArray.SetSize(0);
 				delete nodeB;
+
+				node = nodeA;
 			}
 			else
 			{
@@ -198,6 +201,7 @@ bool BTree::RemoveKey(BTreeKey* givenKey, BTreeKey** removedKey /*= nullptr*/)
 						BTreeNode* grandChild = siblingNode->childNodeArray[siblingNode->childNodeArray.GetSize() - 1];
 						siblingNode->childNodeArray.Pop();
 						childNode->childNodeArray.ShiftInsert(0, grandChild);
+						grandChild->parentNode = childNode;
 					}
 				}
 				else if (i + 1 < (int)node->childNodeArray.GetSize() && node->childNodeArray[i + 1]->keyArray.GetSize() >= this->minDegree)
@@ -217,6 +221,7 @@ bool BTree::RemoveKey(BTreeKey* givenKey, BTreeKey** removedKey /*= nullptr*/)
 						BTreeNode* grandChild = siblingNode->childNodeArray[0];
 						siblingNode->childNodeArray.ShiftRemove(0);
 						childNode->childNodeArray.Push(grandChild);
+						grandChild->parentNode = childNode;
 					}
 				}
 				else if (i - 1 >= 0)
@@ -234,8 +239,10 @@ bool BTree::RemoveKey(BTreeKey* givenKey, BTreeKey** removedKey /*= nullptr*/)
 					for (int j = 0; j < (int)childNode->childNodeArray.GetSize(); j++)
 						siblingNode->childNodeArray.Push(childNode->childNodeArray[j]);
 
+					childNode->keyArray.SetSize(0);
 					childNode->childNodeArray.SetSize(0);
 					delete childNode;
+
 					childNode = siblingNode;
 				}
 				else if (i + 1 < (int)node->childNodeArray.GetSize())
@@ -253,6 +260,7 @@ bool BTree::RemoveKey(BTreeKey* givenKey, BTreeKey** removedKey /*= nullptr*/)
 					for (int j = 0; j < (int)siblingNode->childNodeArray.GetSize(); j++)
 						childNode->childNodeArray.Push(siblingNode->childNodeArray[j]);
 
+					siblingNode->keyArray.SetSize(0);
 					siblingNode->childNodeArray.SetSize(0);
 					delete siblingNode;
 				}
@@ -268,8 +276,11 @@ bool BTree::RemoveKey(BTreeKey* givenKey, BTreeKey** removedKey /*= nullptr*/)
 			this->rootNode = nullptr;
 		else
 		{
-			delete this->rootNode;
+			node = this->rootNode;
 			this->rootNode = node->childNodeArray[0];
+			node->childNodeArray.SetSize(0);
+			delete node;
+			this->rootNode->parentNode = nullptr;
 		}
 	}
 
@@ -281,8 +292,8 @@ bool BTree::AllLeafNodesAtSameDepth() const
 	if (!this->rootNode)
 		return true;
 
-	unsigned int maxDepth = 0;
-	unsigned int currentDepth = 1;
+	int maxDepth = 0;
+	int currentDepth = 1;
 	return this->rootNode->AllLeafNodesAtSameDepth(maxDepth, currentDepth);
 }
 
@@ -321,7 +332,7 @@ void BTreeNode::SetTree(BTree* tree)
 	this->tree = tree;
 }
 
-unsigned int BTreeNode::GetNumKeys() const
+int BTreeNode::GetNumKeys() const
 {
 	return this->keyArray.GetSize();
 }
@@ -357,7 +368,7 @@ bool BTreeNode::IsFull() const
 
 BTreeKey* BTreeNode::FindKey(BTreeKey* givenKey, BTreeNode** node /*= nullptr*/)
 {
-	unsigned int i = 0;
+	int i = 0;
 
 	if (this->FindKeyIndex(givenKey, i))
 	{
@@ -376,7 +387,7 @@ BTreeKey* BTreeNode::FindKey(BTreeKey* givenKey, BTreeNode** node /*= nullptr*/)
 	return nullptr;
 }
 
-bool BTreeNode::FindKeyIndex(BTreeKey* givenKey, unsigned int& i)
+bool BTreeNode::FindKeyIndex(BTreeKey* givenKey, int& i)
 {
 	for (i = 0; i < this->keyArray.GetSize(); i++)
 		if (this->keyArray[i]->IsEqualTo(givenKey))
@@ -385,7 +396,7 @@ bool BTreeNode::FindKeyIndex(BTreeKey* givenKey, unsigned int& i)
 	return false;
 }
 
-bool BTreeNode::FindChildOrKeyInsertionIndex(BTreeKey* givenKey, unsigned int& i)
+bool BTreeNode::FindChildOrKeyInsertionIndex(BTreeKey* givenKey, int& i)
 {
 	if (givenKey->IsLessThan(this->keyArray[0]))
 		i = 0;
@@ -426,7 +437,7 @@ bool BTreeNode::Split()
 	newNode->tree = this->tree;
 	newNode->parentNode = this->parentNode;
 
-	for (unsigned int j = 0; j < this->tree->GetMinDegree() - 1; j++)
+	for (int j = 0; j < this->tree->GetMinDegree() - 1; j++)
 	{
 		auto movedKey = this->keyArray[this->tree->GetMinDegree() + j];
 		newNode->keyArray.Push(movedKey);
@@ -436,7 +447,7 @@ bool BTreeNode::Split()
 
 	if (!this->IsLeaf())
 	{
-		for (unsigned int j = 0; j < this->tree->GetMinDegree(); j++)
+		for (int j = 0; j < this->tree->GetMinDegree(); j++)
 		{
 			auto movedChild = this->childNodeArray[this->tree->GetMinDegree() + j];
 			newNode->childNodeArray.Push(movedChild);
@@ -448,7 +459,7 @@ bool BTreeNode::Split()
 
 	if (this->parentNode)
 	{
-		unsigned int i = this->parentNode->childNodeArray.Find(this);
+		int i = this->parentNode->childNodeArray.Find(this);
 		UU_ASSERT(i != -1);
 		this->parentNode->childNodeArray.ShiftInsert(i + 1, newNode);
 		this->parentNode->keyArray.ShiftInsert(i, liftedKey);
@@ -470,10 +481,10 @@ bool BTreeNode::Split()
 
 /*static*/ void BTreeNode::Merge(BTreeNode* destinationNode, BTreeNode* sourceNode)
 {
-	for (unsigned int i = 0; i < sourceNode->keyArray.GetSize(); i++)
+	for (int i = 0; i < sourceNode->keyArray.GetSize(); i++)
 		destinationNode->keyArray.Push(sourceNode->keyArray[i]);
 
-	for (unsigned int i = 0; i < sourceNode->childNodeArray.GetSize(); i++)
+	for (int i = 0; i < sourceNode->childNodeArray.GetSize(); i++)
 		destinationNode->childNodeArray.Push(sourceNode->childNodeArray[i]);
 
 	sourceNode->keyArray.SetSize(0);
@@ -481,7 +492,7 @@ bool BTreeNode::Split()
 	delete sourceNode;
 }
 
-bool BTreeNode::AllLeafNodesAtSameDepth(unsigned int& maxDepth, unsigned int currentDepth) const
+bool BTreeNode::AllLeafNodesAtSameDepth(int& maxDepth, int currentDepth) const
 {
 	if (this->IsLeaf())
 	{
@@ -494,7 +505,7 @@ bool BTreeNode::AllLeafNodesAtSameDepth(unsigned int& maxDepth, unsigned int cur
 		return true;
 	}
 
-	for (unsigned int i = 0; i < this->childNodeArray.GetSize(); i++)
+	for (int i = 0; i < this->childNodeArray.GetSize(); i++)
 	{
 		const BTreeNode* childNode = this->childNodeArray[i];
 		if (!childNode->AllLeafNodesAtSameDepth(maxDepth, currentDepth + 1))
@@ -510,7 +521,7 @@ bool BTreeNode::DegreesValid() const
 		if (!(this->tree->GetMinDegree() <= this->childNodeArray.GetSize() && this->childNodeArray.GetSize() <= this->tree->GetMaxDegree()))
 			return false;
 
-	for (unsigned int i = 0; i < this->childNodeArray.GetSize(); i++)
+	for (int i = 0; i < this->childNodeArray.GetSize(); i++)
 	{
 		const BTreeNode* childNode = this->childNodeArray[i];
 		if (!childNode->DegreesValid())

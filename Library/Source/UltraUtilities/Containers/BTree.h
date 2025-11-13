@@ -28,23 +28,23 @@ namespace UU
 		friend class BTreeNode;
 
 	public:
-		BTree(unsigned int minDegree = 2);
+		BTree(int minDegree = 2);
 		virtual ~BTree();
 
 		/**
 		 * Return the number of keys currently present in this tree.
 		 */
-		unsigned int GetNumKeys() const;
+		int GetNumKeys() const;
 
 		/**
 		 * Return the minimum number of child nodes per internal node.
 		 */
-		unsigned int GetMinDegree() const;
+		int GetMinDegree() const;
 
 		/**
 		 * Return the maximum number of child nodes per internal node.
 		 */
-		unsigned int GetMaxDegree() const;
+		int GetMaxDegree() const;
 
 		/**
 		 * Find the key in this tree that is equal to the given key.  Null is returned
@@ -87,8 +87,8 @@ namespace UU
 		bool DegreesValid() const;
 
 	private:
-		unsigned int numKeys;
-		unsigned int minDegree;			///< This is the minimum number of children per internal node of the tree.  The maximum is always twice this.
+		int numKeys;
+		int minDegree;			///< This is the minimum number of children per internal node of the tree.  The maximum is always twice this.
 		BTreeNode* rootNode;
 	};
 
@@ -107,7 +107,7 @@ namespace UU
 		BTree* GetTree();
 		void SetTree(BTree* tree);
 
-		unsigned int GetNumKeys() const;
+		int GetNumKeys() const;
 
 		bool IsLeaf() const;
 		bool IsInternal() const;
@@ -115,14 +115,14 @@ namespace UU
 		bool IsFull() const;
 
 		BTreeKey* FindKey(BTreeKey* givenKey, BTreeNode** node = nullptr);
-		bool FindKeyIndex(BTreeKey* givenKey, unsigned int& i);
-		bool FindChildOrKeyInsertionIndex(BTreeKey* givenKey, unsigned int& i);
+		bool FindKeyIndex(BTreeKey* givenKey, int& i);
+		bool FindChildOrKeyInsertionIndex(BTreeKey* givenKey, int& i);
 
 		bool Split();
 
 		static void Merge(BTreeNode* destinationNode, BTreeNode* sourceNode);
 
-		bool AllLeafNodesAtSameDepth(unsigned int& maxDepth, unsigned int currentDepth) const;
+		bool AllLeafNodesAtSameDepth(int& maxDepth, int currentDepth) const;
 		bool DegreesValid() const;
 
 	private:
