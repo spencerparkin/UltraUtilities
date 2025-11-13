@@ -9,6 +9,9 @@ using namespace UU;
 
 /*static*/ bool HuffmanCode::Compress(ByteStream* inputStream, ByteStream* outputStream)
 {
+	if (inputStream == outputStream)
+		return false;
+
 	const char* inputBuffer = inputStream->GetBuffer();
 	if (!inputBuffer)
 		return false;
@@ -106,6 +109,9 @@ using namespace UU;
 
 /*static*/ bool HuffmanCode::Decompress(ByteStream* inputStream, ByteStream* outputStream)
 {
+	if (inputStream == outputStream)
+		return false;
+
 	UniquePtr<Node> rootNode(Node::Deserialize(inputStream));
 	if (!rootNode.Get())
 		return false;

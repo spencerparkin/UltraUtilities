@@ -34,6 +34,9 @@ namespace UU
 
 		/**
 		 * Return the amount of memory in the stream in bytes.
+		 * This doesn't have to be supported by the stream since
+		 * some streams are essentially of infinite size or are of
+		 * an indeterminant size.
 		 */
 		virtual unsigned int GetSize() = 0;
 
@@ -45,14 +48,14 @@ namespace UU
 	};
 
 	/**
-	 * Provide a convenient way to read/write from an in-memory buffer.  Note that
+	 * Provide a convenient way to read/write from/to an in-memory buffer.  Note that
 	 * we do not take ownership of the buffer here.
 	 */
-	class UU_API MemoryStream : public ByteStream
+	class UU_API MemoryBufferStream : public ByteStream
 	{
 	public:
-		MemoryStream(char* memoryBuffer, unsigned int memoryBufferSize);
-		virtual ~MemoryStream();
+		MemoryBufferStream(char* memoryBuffer, unsigned int memoryBufferSize);
+		virtual ~MemoryBufferStream();
 
 		virtual unsigned int WriteBytes(const char* buffer, unsigned int bufferSize) override;
 		virtual unsigned int ReadBytes(char* buffer, unsigned int bufferSize) override;
@@ -62,6 +65,30 @@ namespace UU
 	private:
 		char* memoryBuffer;
 		unsigned int memoryBufferSize;
+		unsigned int readOffset;
+		unsigned int writeOffset;
+	};
+
+	/**
+	 * This class provides a buffer to which you can perpetually write,
+	 * and from which you can perpetually read, provided the amount of
+	 * data in the stream at any one given time never goes over a pre-
+	 * determined size limit.
+	 */
+	class UU_API RingBufferStream : public ByteStream
+	{
+	public:
+		RingBufferStream(unsigned int size);
+		virtual ~RingBufferStream();
+
+		virtual unsigned int WriteBytes(const char* buffer, unsigned int bufferSize) override;
+		virtual unsigned int ReadBytes(char* buffer, unsigned int bufferSize) override;
+		virtual unsigned int GetSize() override;
+		virtual const char* GetBuffer() const override;
+
+	private:
+		char* ringBuffer;
+		unsigned int ringBufferSize;
 		unsigned int readOffset;
 		unsigned int writeOffset;
 	};
