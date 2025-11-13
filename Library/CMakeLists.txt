@@ -10,6 +10,9 @@ set(ULTRA_UTILITIES_SOURCES
 	Source/UltraUtilities/DisjointSetForest.cpp
 	Source/UltraUtilities/DisjointSetForest.h
 	Source/UltraUtilities/Memory/ObjectHeap.hpp
+	Source/UltraUtilities/Memory/Pointer.hpp
+	Source/UltraUtilities/Memory/ByteStream.cpp
+	Source/UltraUtilities/Memory/ByteStream.h
 	Source/UltraUtilities/Containers/BTree.cpp
 	Source/UltraUtilities/Containers/BTree.h
 	Source/UltraUtilities/Containers/RBTree.cpp
@@ -25,6 +28,8 @@ set(ULTRA_UTILITIES_SOURCES
 	Source/UltraUtilities/Containers/HashMap.hpp
 	Source/UltraUtilities/Containers/HashSet.hpp
 	Source/UltraUtilities/Containers/PriorityQueue.hpp
+	Source/UltraUtilities/Compression/HuffmanCode.cpp
+	Source/UltraUtilities/Compression/HuffmanCode.h
 	uu.natvis
 )
 

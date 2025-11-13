@@ -56,6 +56,20 @@ namespace UU
 		}
 
 		/**
+		 * Find a pointer to a value by key.
+		 */
+		bool FindPtr(K key, V*& value)
+		{
+			HashMapKey<K> mapKey;
+			mapKey.value = key;
+			auto node = static_cast<HashMapNode<V>*>(this->table.FindNode(&mapKey));
+			if (!node)
+				return false;
+			value = &node->value;
+			return true;
+		}
+
+		/**
 		 * Insert a value at the given key.  If a value already
 		 * exists at the given key, it is replaced.
 		 */
