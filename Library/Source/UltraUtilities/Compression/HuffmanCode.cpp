@@ -78,7 +78,7 @@ using namespace UU;
 	{
 		char character = inputBuffer[i];
 		DArray<char>* charTreePath = nullptr;
-		codeMap.Find(character, charTreePath);
+		codeMap.FindPtr(character, charTreePath);
 
 		for (int j = 0; j < charTreePath->GetSize(); j++)
 		{

@@ -19,12 +19,12 @@ ByteStream::ByteStream()
 
 //---------------------------------- MemoryBufferStream ----------------------------------
 
-MemoryBufferStream::MemoryBufferStream(char* memoryBuffer, unsigned int memoryBufferSize)
+MemoryBufferStream::MemoryBufferStream(char* memoryBuffer, unsigned int memoryBufferSize, bool isFull)
 {
 	this->memoryBuffer = memoryBuffer;
 	this->memoryBufferSize = memoryBufferSize;
 	this->readOffset = 0;
-	this->writeOffset = 0;
+	this->writeOffset = isFull ? memoryBufferSize : 0;
 }
 
 /*virtual*/ MemoryBufferStream::~MemoryBufferStream()
@@ -116,7 +116,7 @@ RingBufferStream::RingBufferStream(unsigned int size)
 
 /*virtual*/ unsigned int RingBufferStream::GetSize()
 {
-	if (this->readOffset < this->writeOffset)
+	if (this->readOffset <= this->writeOffset)
 		return this->writeOffset - this->readOffset;
 
 	return this->ringBufferSize - this->readOffset + this->writeOffset;

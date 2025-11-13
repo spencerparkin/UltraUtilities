@@ -108,7 +108,8 @@ bool RBTree::InsertNode(RBTreeNode* newNode)
 
 			grandParentNode->Rotate(grandParentRotationDirection);
 			grandParentNode->color = RBTreeNode::RED;
-			node->parentNode->color = RBTreeNode::BLACK;
+			if (node->parentNode)
+				node->parentNode->color = RBTreeNode::BLACK;
 			node = node->parentNode;
 		}
 		else

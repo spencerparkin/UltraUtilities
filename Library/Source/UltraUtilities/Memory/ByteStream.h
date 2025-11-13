@@ -54,7 +54,7 @@ namespace UU
 	class UU_API MemoryBufferStream : public ByteStream
 	{
 	public:
-		MemoryBufferStream(char* memoryBuffer, unsigned int memoryBufferSize);
+		MemoryBufferStream(char* memoryBuffer, unsigned int memoryBufferSize, bool isFull);
 		virtual ~MemoryBufferStream();
 
 		virtual unsigned int WriteBytes(const char* buffer, unsigned int bufferSize) override;
