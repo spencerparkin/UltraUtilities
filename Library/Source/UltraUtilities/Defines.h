@@ -22,7 +22,7 @@
 							} \
 						} while(false)
 #else
-#	define UU_UU_ASSERT(condition)
+#	define UU_ASSERT(condition)
 #endif
 
 // TODO: Generate doxegen stuff?

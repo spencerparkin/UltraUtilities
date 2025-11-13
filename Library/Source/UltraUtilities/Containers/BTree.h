@@ -87,8 +87,6 @@ namespace UU
 		bool DegreesValid() const;
 
 	private:
-		bool RemoveKeyInNode(BTreeKey* givenKey, BTreeKey** removedKey, BTreeNode* node);
-
 		unsigned int numKeys;
 		unsigned int minDegree;			///< This is the minimum number of children per internal node of the tree.  The maximum is always twice this.
 		BTreeNode* rootNode;
