@@ -1,4 +1,4 @@
-#include "UltraUtilities/Compression/HuffmanCode.h"
+#include "UltraUtilities/Compression/HuffmanCompression.h"
 #include <catch2/catch_test_macros.hpp>
 
 using namespace UU;
@@ -23,12 +23,14 @@ TEST_CASE("Huffman", "[huffman]")
 
 		RingBufferStream compressedDataStream(2048);
 
-		bool compressed = HuffmanCode::Compress(&originalDataStream, &compressedDataStream);
+		HuffmanCompression compression;
+
+		bool compressed = compression.Compress(&originalDataStream, &compressedDataStream);
 		REQUIRE(compressed);
 
 		RingBufferStream decompressedDataStream(2024);
 
-		bool decompressed = HuffmanCode::Decompress(&compressedDataStream, &decompressedDataStream);
+		bool decompressed = compression.Decompress(&compressedDataStream, &decompressedDataStream);
 		REQUIRE(decompressed);
 
 		REQUIRE(decompressedDataStream.GetSize() == originalDataLength);

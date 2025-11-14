@@ -147,6 +147,7 @@ namespace UU
 
 		bool SetCapacity(unsigned int capacity)
 		{
+			// STPTODO: A realloc here would be much more efficient if possible.
 			if (capacity < this->arraySize)
 				return false;
 			V* newBuffer = new V[capacity];

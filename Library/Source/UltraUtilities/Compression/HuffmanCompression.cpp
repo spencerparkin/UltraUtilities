@@ -1,13 +1,21 @@
-#include "UltraUtilities/Compression/HuffmanCode.h"
+#include "UltraUtilities/Compression/HuffmanCompression.h"
 #include "UltraUtilities/Containers/RBMap.hpp"
 #include "UltraUtilities/Containers/PriorityQueue.hpp"
 #include "UltraUtilities/Memory/Pointer.hpp"
 
 using namespace UU;
 
-//----------------------------- HuffmanCode -----------------------------
+//----------------------------- HuffmanCompression -----------------------------
 
-/*static*/ bool HuffmanCode::Compress(ByteStream* inputStream, ByteStream* outputStream)
+HuffmanCompression::HuffmanCompression()
+{
+}
+
+/*virtual*/ HuffmanCompression::~HuffmanCompression()
+{
+}
+
+/*virtual*/ bool HuffmanCompression::Compress(ByteStream* inputStream, ByteStream* outputStream)
 {
 	if (inputStream == outputStream)
 		return false;
@@ -107,7 +115,7 @@ using namespace UU;
 	return true;
 }
 
-/*static*/ bool HuffmanCode::Decompress(ByteStream* inputStream, ByteStream* outputStream)
+/*virtual*/ bool HuffmanCompression::Decompress(ByteStream* inputStream, ByteStream* outputStream)
 {
 	if (inputStream == outputStream)
 		return false;
@@ -155,16 +163,16 @@ using namespace UU;
 	return true;
 }
 
-//----------------------------- HuffmanCode::Node -----------------------------
+//----------------------------- HuffmanCompression::Node -----------------------------
 
-HuffmanCode::Node::Node()
+HuffmanCompression::Node::Node()
 {
 	this->frequency = 0;
 	this->type = Type::LEAF;
 	this->character = '\0';
 }
 
-/*virtual*/ HuffmanCode::Node::~Node()
+/*virtual*/ HuffmanCompression::Node::~Node()
 {
 	if (this->type == Type::INTERNAL)
 	{
@@ -173,7 +181,7 @@ HuffmanCode::Node::Node()
 	}
 }
 
-bool HuffmanCode::Node::Serialize(ByteStream* byteStream) const
+bool HuffmanCompression::Node::Serialize(ByteStream* byteStream) const
 {
 	byteStream->WriteBytes((char*)&this->type, 1);
 
@@ -201,7 +209,7 @@ bool HuffmanCode::Node::Serialize(ByteStream* byteStream) const
 	return true;
 }
 
-/*static*/ HuffmanCode::Node* HuffmanCode::Node::Deserialize(ByteStream* byteStream)
+/*static*/ HuffmanCompression::Node* HuffmanCompression::Node::Deserialize(ByteStream* byteStream)
 {
 	UniquePtr<Node> node(new Node());
 
@@ -234,7 +242,7 @@ bool HuffmanCode::Node::Serialize(ByteStream* byteStream) const
 	return node.Release();
 }
 
-void HuffmanCode::Node::PopulateCodeMap(HashMap<char, DArray<char>>& codeMap, DArray<char>& treePath) const
+void HuffmanCompression::Node::PopulateCodeMap(HashMap<char, DArray<char>>& codeMap, DArray<char>& treePath) const
 {
 	switch (this->type)
 	{

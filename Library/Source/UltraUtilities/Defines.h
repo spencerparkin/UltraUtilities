@@ -25,4 +25,7 @@
 #	define UU_ASSERT(condition)
 #endif
 
+#define UU_MIN(a,b)			((a) < (b) ? (a) : (b))
+#define UU_MAX(a,b)			((a) > (b) ? (a) : (b))
+
 // TODO: Generate doxegen stuff?

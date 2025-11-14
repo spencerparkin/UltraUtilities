@@ -28,8 +28,12 @@ set(ULTRA_UTILITIES_SOURCES
 	Source/UltraUtilities/Containers/HashMap.hpp
 	Source/UltraUtilities/Containers/HashSet.hpp
 	Source/UltraUtilities/Containers/PriorityQueue.hpp
-	Source/UltraUtilities/Compression/HuffmanCode.cpp
-	Source/UltraUtilities/Compression/HuffmanCode.h
+	Source/UltraUtilities/Compression/Compression.cpp
+	Source/UltraUtilities/Compression/Compression.h
+	Source/UltraUtilities/Compression/HuffmanCompression.cpp
+	Source/UltraUtilities/Compression/HuffmanCompression.h
+	Source/UltraUtilities/Compression/LZ77Compression.cpp
+	Source/UltraUtilities/Compression/LZ77Compression.h
 	uu.natvis
 )
 
