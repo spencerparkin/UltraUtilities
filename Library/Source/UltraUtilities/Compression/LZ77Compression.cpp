@@ -27,6 +27,9 @@ LZ77Compression::LZ77Compression(unsigned int windowSize)
 
 	unsigned int currentPosition = 0;
 
+	if (outputStream->WriteBytes((const char*)&inputBufferSize, sizeof(inputBufferSize)) != sizeof(inputBufferSize))
+		return false;
+
 	if (outputStream->WriteBytes((const char*)&this->windowSize, sizeof(this->windowSize)) != sizeof(this->windowSize))
 		return false;
 
@@ -65,10 +68,14 @@ LZ77Compression::LZ77Compression(unsigned int windowSize)
 
 /*virtual*/ bool LZ77Compression::Decompress(ByteStream* inputStream, ByteStream* outputStream)
 {
+	unsigned int originalBufferSize = 0;
+	if (inputStream->ReadBytes((char*)&originalBufferSize, sizeof(originalBufferSize)) != sizeof(originalBufferSize))
+		return false;
+
 	if (inputStream->ReadBytes((char*)&this->windowSize, sizeof(this->windowSize)) != sizeof(this->windowSize))
 		return false;
 
-	DArray<char> outputBuffer;
+	DArray<char> outputBuffer(originalBufferSize);
 	unsigned int currentPosition = 0;
 
 	while (true)
@@ -79,8 +86,6 @@ LZ77Compression::LZ77Compression(unsigned int windowSize)
 
 		if (currentPosition < packet.offset)
 			return false;
-
-		outputBuffer.SetSize(outputBuffer.GetSize() + packet.length + 1);
 
 		unsigned int i;
 		for (i = 0; i < packet.length; i++)
