@@ -31,6 +31,16 @@ TEST_CASE("Huffman", "[huffman]")
 		bool decompressed = HuffmanCode::Decompress(&compressedDataStream, &decompressedDataStream);
 		REQUIRE(decompressed);
 
-		// STPTODO: Make sure that the decompressed data matches the original data.
+		REQUIRE(decompressedDataStream.GetSize() == originalDataLength);
+		if (decompressedDataStream.GetSize() == originalDataLength)
+		{
+			char* decompressedData = new char[originalDataLength];
+			decompressedDataStream.ReadBytes(decompressedData, originalDataLength);
+
+			int compareResult = ::memcmp(originalData, decompressedData, originalDataLength);
+			REQUIRE(compareResult == 0);
+
+			delete[] decompressedData;
+		}
 	}
 }
