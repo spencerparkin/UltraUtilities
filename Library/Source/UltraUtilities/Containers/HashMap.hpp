@@ -262,6 +262,27 @@ namespace UU
 	};
 
 	/**
+	 * Provide a specialization that uses long integers and the division method of hashing.
+	 */
+	template<>
+	class UU_API HashMapKey<unsigned long long> : public HashTableKey
+	{
+	public:
+		virtual unsigned int Hash(unsigned int tableSize) const override
+		{
+			return static_cast<unsigned int>(this->value % static_cast<unsigned long long>(tableSize));
+		}
+
+		virtual bool operator==(const HashTableKey& key) const override
+		{
+			return this->value == static_cast<const HashMapKey<int>*>(&key)->value;
+		}
+
+	public:
+		unsigned long long value;
+	};
+
+	/**
 	 * Provide a specialization that uses characters and the division method of hashing.
 	 */
 	template<>

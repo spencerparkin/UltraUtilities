@@ -11,6 +11,7 @@ set(ULTRA_UTILITIES_SOURCES
 	Source/UltraUtilities/DisjointSetForest.h
 	Source/UltraUtilities/Memory/ObjectHeap.hpp
 	Source/UltraUtilities/Memory/Pointer.hpp
+	Source/UltraUtilities/Memory/Pointer.cpp
 	Source/UltraUtilities/Memory/ByteStream.cpp
 	Source/UltraUtilities/Memory/ByteStream.h
 	Source/UltraUtilities/Containers/BTree.cpp
