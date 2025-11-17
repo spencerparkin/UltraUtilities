@@ -38,7 +38,7 @@ set(ULTRA_UTILITIES_SOURCES
 	uu.natvis
 )
 
-add_library(UltraUtilities SHARED
+add_library(UltraUtilities STATIC
 	${ULTRA_UTILITIES_SOURCES}
 )
 

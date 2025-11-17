@@ -22,17 +22,17 @@ bool LinkedList::InsertBefore(LinkedListNode* newNode, LinkedListNode* afterNode
 		return false;
 
 	if (!afterNode)
-	{
 		afterNode = this->headNode;
-		this->headNode = newNode;
-	}
 	else if (afterNode->list != this)
 		return false;
 	
-	if (this->numNodes > 0)
+	if (afterNode)
 		newNode->SpliceIn(afterNode->prevNode, afterNode);
 	else
 		this->tailNode = newNode;
+
+	if (!newNode->prevNode)
+		this->headNode = newNode;
 
 	newNode->list = this;
 	this->numNodes++;
@@ -45,17 +45,17 @@ bool LinkedList::InsertAfter(LinkedListNode* newNode, LinkedListNode* beforeNode
 		return false;
 
 	if (!beforeNode)
-	{
 		beforeNode = this->tailNode;
-		this->tailNode = newNode;
-	}
 	else if (beforeNode->list != this)
 		return false;
 
-	if (this->numNodes > 0)
+	if (beforeNode)
 		newNode->SpliceIn(beforeNode, beforeNode->nextNode);
 	else
 		this->headNode = newNode;
+
+	if (!newNode->nextNode)
+		this->tailNode = newNode;
 
 	newNode->list = this;
 	this->numNodes++;
