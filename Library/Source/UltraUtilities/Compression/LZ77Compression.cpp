@@ -1,5 +1,6 @@
 #include "UltraUtilities/Compression/LZ77Compression.h"
 #include "UltraUtilities/Containers/DArray.hpp"
+#include "UltraUtilities/Memory/BitStream.hpp"
 
 using namespace UU;
 
@@ -25,84 +26,158 @@ LZ77Compression::LZ77Compression(unsigned int windowSize)
 	if (inputBufferSize == 0)
 		return false;
 
-	unsigned int currentPosition = 0;
+	BitStream outputBitStream(outputStream);
 
-	if (outputStream->WriteBytes((const char*)&inputBufferSize, sizeof(inputBufferSize)) != sizeof(inputBufferSize))
+	unsigned int numBits = this->CalcMaxBitsForOffsetOrLength();
+	if (numBits >= sizeof(unsigned int) * 8)
 		return false;
 
-	if (outputStream->WriteBytes((const char*)&this->windowSize, sizeof(this->windowSize)) != sizeof(this->windowSize))
-		return false;
-
-	while (currentPosition < inputBufferSize)
+	unsigned int i;
+	for (i = 0; i < windowSize; i++)
 	{
-		unsigned int currentWindowSize = UU_MIN(currentPosition, this->windowSize);
+		if (i >= inputBufferSize)
+			return true;
 
-		Packet packet{ 0, 0, 0 };
+		if (!outputBitStream.WriteBits(char(0), 1))
+			return false;
 
-		for (unsigned int i = 0; i < currentWindowSize; i++)
+		if (!outputBitStream.WriteAllBits(inputBuffer[i]))
+			return false;
+	}
+
+	while (i < inputBufferSize)
+	{
+		bool emitNextByte = true;
+
+		unsigned int availableWindowSize = UU_MIN(windowSize, inputBufferSize - i);
+
+		for (unsigned int j = 0; j < availableWindowSize; j++)
 		{
-			unsigned int j;
-			for (j = 0; j < currentWindowSize - i && currentPosition + j < inputBufferSize - 1; j++)
-				if (inputBuffer[currentPosition - currentWindowSize + i + j] != inputBuffer[currentPosition + j])
-					break;
-			
-			if (j > packet.length)
+			const char* patternBuffer = &inputBuffer[i];
+			unsigned int patternBufferSize = availableWindowSize - j;	// Look for patterns from biggest to smallest.
+
+			// If the pattern buffer isn't large enough, then it's not worth it.
+			if (patternBufferSize < 3)
+				break;
+
+			const char* searchBuffer = &inputBuffer[i - windowSize];
+			unsigned int searchBufferSize = windowSize;
+			unsigned int foundPatternOffset = 0;
+
+			if (this->FindPattern(patternBuffer, patternBufferSize, searchBuffer, searchBufferSize, foundPatternOffset))
 			{
-				packet.length = j;
-				packet.offset = currentWindowSize - i;
-				packet.byte = inputBuffer[currentPosition + j];
+				if (!outputBitStream.WriteBits(char(1), 1))
+					return false;
+
+				unsigned int relativeOffset = searchBufferSize - foundPatternOffset;
+				
+				if (!outputBitStream.WriteBits(relativeOffset, numBits))
+					return false;
+
+				if (!outputBitStream.WriteBits(patternBufferSize, numBits))
+					return false;
+
+				i += patternBufferSize;
+				emitNextByte = false;
+				break;
 			}
 		}
 
-		if (packet.length == 0)
-			packet.byte = inputBuffer[currentPosition];
+		if (emitNextByte)
+		{
+			if (!outputBitStream.WriteBits(char(0), 1))
+				return false;
 
-		if (outputStream->WriteBytes((const char*)&packet, sizeof(packet)) != sizeof(packet))
-			return false;
+			if (!outputBitStream.WriteAllBits(inputBuffer[i]))
+				return false;
 
-		currentPosition += packet.length + 1;
+			i++;
+		}
 	}
 
 	return true;
 }
 
+bool LZ77Compression::FindPattern(const char* patternBuffer, unsigned int patternBufferSize, const char* searchBuffer, unsigned int searchBufferSize, unsigned int& foundPatternOffset)
+{
+	for (unsigned int i = 0; i < searchBufferSize; i++)
+	{
+		if (searchBufferSize - i < patternBufferSize)
+			return false;
+
+		unsigned int j;
+		for (j = 0; j < patternBufferSize; j++)
+			if (patternBuffer[j] != searchBuffer[i + j])
+				break;
+
+		if (j == patternBufferSize)
+		{
+			foundPatternOffset = i;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+unsigned int LZ77Compression::CalcMaxBitsForOffsetOrLength()
+{
+	unsigned int numBits = 0;
+	while ((1 << numBits) <= this->windowSize)
+		numBits++;
+
+	return numBits;
+}
+
 /*virtual*/ bool LZ77Compression::Decompress(ByteStream* inputStream, ByteStream* outputStream)
 {
-	unsigned int originalBufferSize = 0;
-	if (inputStream->ReadBytes((char*)&originalBufferSize, sizeof(originalBufferSize)) != sizeof(originalBufferSize))
+	unsigned int numBits = this->CalcMaxBitsForOffsetOrLength();
+	if (numBits >= sizeof(unsigned int) * 8)
 		return false;
 
-	if (inputStream->ReadBytes((char*)&this->windowSize, sizeof(this->windowSize)) != sizeof(this->windowSize))
-		return false;
+	DArray<char> outputBuffer;
+	outputBuffer.SetCapacity(10 * 1024);
 
-	DArray<char> outputBuffer(originalBufferSize);
-	unsigned int currentPosition = 0;
+	BitStream inputBitStream(inputStream);
 
 	while (true)
 	{
-		Packet packet;
-		if (inputStream->ReadBytes((char*)&packet, sizeof(packet)) != sizeof(packet))
+		char typeBit = 0;
+		if (!inputBitStream.ReadBits(typeBit, 1))
 			break;
 
-		if (currentPosition < packet.offset)
-			return false;
-
-		unsigned int i;
-		for (i = 0; i < packet.length; i++)
+		switch (typeBit)
 		{
-			unsigned int j = currentPosition - packet.offset + i;
-			if (j >= currentPosition)
-				return false;
+			case 0:
+			{
+				char byte = 0;
+				if (!inputBitStream.ReadAllBits(byte))
+					return false;
 
-			outputBuffer[currentPosition + i] = outputBuffer[j];
+				outputBuffer.Push(byte);
+				break;
+			}
+			case 1:
+			{
+				unsigned int relativeOffset = 0;
+				if (!inputBitStream.ReadBits(relativeOffset, numBits))
+					return false;
+
+				unsigned int patternLength = 0;
+				if (!inputBitStream.ReadBits(patternLength, numBits))
+					return false;
+
+				if (relativeOffset > outputBuffer.GetSize() || patternLength > relativeOffset)
+					return false;		// Malformed data.
+
+				unsigned int i = outputBuffer.GetSize() - relativeOffset;
+				for (unsigned int j = 0; j < patternLength; j++)
+					outputBuffer.Push(outputBuffer[i + j]);
+
+				break;
+			}
 		}
-
-		outputBuffer[currentPosition + i] = packet.byte;
-		currentPosition += i + 1;
 	}
-
-	if (outputStream->WriteBytes(outputBuffer.GetBuffer(), outputBuffer.GetSize()) != outputBuffer.GetSize())
-		return false;
 
 	return true;
 }

@@ -17,13 +17,10 @@ namespace UU
 		virtual bool Decompress(ByteStream* inputStream, ByteStream* outputStream) override;
 
 	private:
-		unsigned int windowSize;
+		bool FindPattern(const char* patternBuffer, unsigned int patternBufferSize, const char* searchBuffer, unsigned int searchBufferSize, unsigned int& foundPatternOffset);
 
-		struct Packet
-		{
-			unsigned short offset;
-			unsigned short length;
-			unsigned char byte;
-		};
+		unsigned int CalcMaxBitsForOffsetOrLength();
+
+		unsigned int windowSize;
 	};
 }

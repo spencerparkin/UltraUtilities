@@ -3,6 +3,7 @@
 #include "UltraUtilities/Compression/Compression.h"
 #include "UltraUtilities/Containers/DArray.hpp"
 #include "UltraUtilities/Containers/HashMap.hpp"
+#include "UltraUtilities/Memory/BitStream.hpp"
 
 namespace UU
 {
@@ -24,8 +25,8 @@ namespace UU
 			Node();
 			virtual ~Node();
 
-			bool Serialize(ByteStream* byteStream) const;
-			static Node* Deserialize(ByteStream* byteStream);
+			bool Serialize(BitStream* bitStream) const;
+			static Node* Deserialize(BitStream* bitStream);
 
 			void PopulateCodeMap(HashMap<char, DArray<char>>& codeMap, DArray<char>& treePath) const;
 

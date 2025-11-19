@@ -72,15 +72,14 @@ HuffmanCompression::HuffmanCompression()
 	
 	UniquePtr<Node> nodeTree(rootNode);
 
-	if (!rootNode->Serialize(outputStream))
+	BitStream outputBitStream(outputStream);
+
+	if (!rootNode->Serialize(&outputBitStream))
 		return false;
 
 	HashMap<char, DArray<char>> codeMap;
 	DArray<char> treePath;
 	rootNode->PopulateCodeMap(codeMap, treePath);
-
-	unsigned int bitOffset = 0;
-	char byte = 0;
 
 	for (int i = 0; i < inputStream->GetSize(); i++)
 	{
@@ -90,27 +89,14 @@ HuffmanCompression::HuffmanCompression()
 
 		for (int j = 0; j < charTreePath->GetSize(); j++)
 		{
-			if (bitOffset == 8)
-			{
-				bitOffset = 0;
-				if (outputStream->WriteBytes(&byte, 1) != 1)
-					return false;
-
-				byte = 0;
-			}
-
-			if ((*charTreePath)[j] != 0)
-				byte |= (1 << bitOffset);
-
-			bitOffset++;
+			char pathBit = (*charTreePath)[j];
+			if (!outputBitStream.WriteBits(pathBit, 1))
+				return false;
 		}
 	}
 
-	if (bitOffset != 0)
-	{
-		if (outputStream->WriteBytes(&byte, 1) != 1)
-			return false;
-	}
+	if (!outputBitStream.Flush())
+		return false;
 
 	return true;
 }
@@ -120,39 +106,30 @@ HuffmanCompression::HuffmanCompression()
 	if (inputStream == outputStream)
 		return false;
 
-	UniquePtr<Node> rootNode(Node::Deserialize(inputStream));
+	BitStream inputBitStream(inputStream);
+
+	UniquePtr<Node> rootNode(Node::Deserialize(&inputBitStream));
 	if (!rootNode.Get())
 		return false;
 
-	char byte = 0;
-	if (inputStream->ReadBytes(&byte, 1) != 1)
-		return false;
-
-	unsigned int bitOffset = 0;
 	Node* node = rootNode;
 
 	while (true)
 	{
 		if (node->type == Node::Type::LEAF)
 		{
-			if (outputStream->WriteBytes(&node->character, 1) != 1)
+			if (!inputBitStream.ReadAllBits(node->character))
 				return false;
 
 			node = rootNode;
 		}
 		else if (node->type == Node::Type::INTERNAL)
 		{
-			if ((byte & (1 << bitOffset)) == 0)
-				node = node->node[0];
-			else
-				node = node->node[1];
+			char pathBit = 0;
+			if (!inputBitStream.ReadBits(pathBit, 1))
+				return false;
 
-			if (++bitOffset == 8)
-			{
-				bitOffset = 0;
-				if (inputStream->ReadBytes(&byte, 1) != 1)
-					break;
-			}
+			node = node->node[pathBit];
 		}
 		else
 		{
@@ -181,25 +158,25 @@ HuffmanCompression::Node::Node()
 	}
 }
 
-bool HuffmanCompression::Node::Serialize(ByteStream* byteStream) const
+bool HuffmanCompression::Node::Serialize(BitStream* bitStream) const
 {
-	byteStream->WriteBytes((char*)&this->type, 1);
+	bitStream->WriteBits(this->type, 1);
 
 	switch (this->type)
 	{
 		case Type::INTERNAL:
 		{
-			if (!this->node[0]->Serialize(byteStream))
+			if (!this->node[0]->Serialize(bitStream))
 				return false;
 
-			if (!this->node[1]->Serialize(byteStream))
+			if (!this->node[1]->Serialize(bitStream))
 				return false;
 
 			break;
 		}
 		case Type::LEAF:
 		{
-			if (byteStream->WriteBytes(&this->character, 1) != 1)
+			if (bitStream->WriteAllBits(this->character))
 				return false;
 
 			break;
@@ -209,22 +186,22 @@ bool HuffmanCompression::Node::Serialize(ByteStream* byteStream) const
 	return true;
 }
 
-/*static*/ HuffmanCompression::Node* HuffmanCompression::Node::Deserialize(ByteStream* byteStream)
+/*static*/ HuffmanCompression::Node* HuffmanCompression::Node::Deserialize(BitStream* bitStream)
 {
 	UniquePtr<Node> node(new Node());
 
-	if (byteStream->ReadBytes((char*)&node->type, 1) != 1)
+	if (!bitStream->ReadBits(*(reinterpret_cast<char*>(&node->type)), 1))
 		return nullptr;
 
 	switch (node->type)
 	{
 		case Type::INTERNAL:
 		{
-			node->node[0] = Node::Deserialize(byteStream);
+			node->node[0] = Node::Deserialize(bitStream);
 			if (!node->node[0])
 				return nullptr;
 
-			node->node[1] = Node::Deserialize(byteStream);
+			node->node[1] = Node::Deserialize(bitStream);
 			if (!node->node[1])
 				return nullptr;
 
@@ -232,7 +209,7 @@ bool HuffmanCompression::Node::Serialize(ByteStream* byteStream) const
 		}
 		case Type::LEAF:
 		{
-			if (byteStream->ReadBytes(&node->character, 1) != 1)
+			if (!bitStream->ReadAllBits(node->character))
 				return nullptr;
 
 			break;

@@ -14,6 +14,7 @@ set(ULTRA_UTILITIES_SOURCES
 	Source/UltraUtilities/Memory/Pointer.cpp
 	Source/UltraUtilities/Memory/ByteStream.cpp
 	Source/UltraUtilities/Memory/ByteStream.h
+	Source/UltraUtilities/Memory/BitStream.hpp
 	Source/UltraUtilities/Containers/BTree.cpp
 	Source/UltraUtilities/Containers/BTree.h
 	Source/UltraUtilities/Containers/RBTree.cpp
