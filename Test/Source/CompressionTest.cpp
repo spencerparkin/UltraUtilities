@@ -32,7 +32,7 @@ TEST_CASE("Compression", "[compression]")
 
 		DArray<SharedPtr<Compression>> compressionArray;
 		compressionArray.Push(SharedPtr<HuffmanCompression>::Make());
-		compressionArray.Push(SharedPtr<LZ77Compression>::Make(1024));
+		compressionArray.Push(SharedPtr<LZ77Compression>::Make(64));
 
 		for (unsigned int i = 0; i < compressionArray.GetSize(); i++)
 		{

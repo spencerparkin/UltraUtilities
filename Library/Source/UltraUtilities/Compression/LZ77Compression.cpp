@@ -167,8 +167,6 @@ unsigned int LZ77Compression::CalcMaxBitsForOffsetOrLength()
 				return false;
 
 			outputBuffer.Push(byte);
-			if (outputBuffer.GetSize() == originalSize)
-				break;
 		}
 		else if(typeBit == 1)
 		{
@@ -187,6 +185,12 @@ unsigned int LZ77Compression::CalcMaxBitsForOffsetOrLength()
 			for (unsigned int j = 0; j < patternLength; j++)
 				outputBuffer.Push(outputBuffer[i + j]);
 		}
+
+		if (outputBuffer.GetSize() > originalSize)
+			return false;	// Something went wrong in our math.
+
+		if (outputBuffer.GetSize() == originalSize)
+			break;
 	}
 
 	if (outputStream->WriteBytes(outputBuffer.GetBuffer(), outputBuffer.GetSize()) != outputBuffer.GetSize())
