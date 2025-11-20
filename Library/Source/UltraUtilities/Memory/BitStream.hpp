@@ -46,7 +46,10 @@ namespace UU
 				if (++this->bitOffsetWrite == 8)
 				{
 					if (this->byteStream->WriteBytes((const char*)&this->currentByteWrite, 1) != 1)
+					{
+						this->bitOffsetWrite--;
 						return false;
+					}
 
 					this->bitOffsetWrite = 0;
 					this->currentByteWrite = 0;
@@ -86,7 +89,10 @@ namespace UU
 				if (++this->bitOffsetRead == 8)
 				{
 					if (this->byteStream->ReadBytes((char*)&this->currentByteRead, 1) != 1)
+					{
+						this->bitOffsetRead--;
 						return false;
+					}
 
 					this->bitOffsetRead = 0;
 				}

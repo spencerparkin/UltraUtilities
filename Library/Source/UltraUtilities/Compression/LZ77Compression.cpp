@@ -27,6 +27,8 @@ LZ77Compression::LZ77Compression(unsigned int windowSize)
 		return false;
 
 	BitStream outputBitStream(outputStream);
+	if (!outputBitStream.WriteAllBits(inputBufferSize))
+		return false;
 
 	unsigned int numBits = this->CalcMaxBitsForOffsetOrLength();
 	if (numBits >= sizeof(unsigned int) * 8)
@@ -36,7 +38,12 @@ LZ77Compression::LZ77Compression(unsigned int windowSize)
 	for (i = 0; i < windowSize; i++)
 	{
 		if (i >= inputBufferSize)
+		{
+			if (!outputBitStream.Flush())
+				return false;
+
 			return true;
+		}
 
 		if (!outputBitStream.WriteBits(char(0), 1))
 			return false;
@@ -95,6 +102,9 @@ LZ77Compression::LZ77Compression(unsigned int windowSize)
 		}
 	}
 
+	if (!outputBitStream.Flush())
+		return false;
+
 	return true;
 }
 
@@ -123,7 +133,7 @@ bool LZ77Compression::FindPattern(const char* patternBuffer, unsigned int patter
 unsigned int LZ77Compression::CalcMaxBitsForOffsetOrLength()
 {
 	unsigned int numBits = 0;
-	while ((1 << numBits) <= this->windowSize)
+	while ((1 << numBits) < this->windowSize)
 		numBits++;
 
 	return numBits;
@@ -135,10 +145,14 @@ unsigned int LZ77Compression::CalcMaxBitsForOffsetOrLength()
 	if (numBits >= sizeof(unsigned int) * 8)
 		return false;
 
-	DArray<char> outputBuffer;
-	outputBuffer.SetCapacity(10 * 1024);
-
 	BitStream inputBitStream(inputStream);
+
+	unsigned int originalSize = 0;
+	if (!inputBitStream.ReadAllBits(originalSize))
+		return false;
+
+	DArray<char> outputBuffer;
+	outputBuffer.SetCapacity(originalSize);
 
 	while (true)
 	{
@@ -146,38 +160,37 @@ unsigned int LZ77Compression::CalcMaxBitsForOffsetOrLength()
 		if (!inputBitStream.ReadBits(typeBit, 1))
 			break;
 
-		switch (typeBit)
+		if (typeBit == 0)
 		{
-			case 0:
-			{
-				char byte = 0;
-				if (!inputBitStream.ReadAllBits(byte))
-					return false;
+			char byte = 0;
+			if (!inputBitStream.ReadAllBits(byte))
+				return false;
 
-				outputBuffer.Push(byte);
+			outputBuffer.Push(byte);
+			if (outputBuffer.GetSize() == originalSize)
 				break;
-			}
-			case 1:
-			{
-				unsigned int relativeOffset = 0;
-				if (!inputBitStream.ReadBits(relativeOffset, numBits))
-					return false;
+		}
+		else if(typeBit == 1)
+		{
+			unsigned int relativeOffset = 0;
+			if (!inputBitStream.ReadBits(relativeOffset, numBits))
+				return false;
 
-				unsigned int patternLength = 0;
-				if (!inputBitStream.ReadBits(patternLength, numBits))
-					return false;
+			unsigned int patternLength = 0;
+			if (!inputBitStream.ReadBits(patternLength, numBits))
+				return false;
 
-				if (relativeOffset > outputBuffer.GetSize() || patternLength > relativeOffset)
-					return false;		// Malformed data.
+			if (relativeOffset > outputBuffer.GetSize() || patternLength > relativeOffset)
+				return false;		// Malformed data.
 
-				unsigned int i = outputBuffer.GetSize() - relativeOffset;
-				for (unsigned int j = 0; j < patternLength; j++)
-					outputBuffer.Push(outputBuffer[i + j]);
-
-				break;
-			}
+			unsigned int i = outputBuffer.GetSize() - relativeOffset;
+			for (unsigned int j = 0; j < patternLength; j++)
+				outputBuffer.Push(outputBuffer[i + j]);
 		}
 	}
+
+	if (outputStream->WriteBytes(outputBuffer.GetBuffer(), outputBuffer.GetSize()) != outputBuffer.GetSize())
+		return false;
 
 	return true;
 }
