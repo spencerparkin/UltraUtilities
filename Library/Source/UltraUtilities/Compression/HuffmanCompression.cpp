@@ -74,6 +74,10 @@ HuffmanCompression::HuffmanCompression()
 
 	BitStream outputBitStream(outputStream);
 
+	unsigned int inputBufferSize = inputStream->GetSize();
+	if (!outputBitStream.WriteAllBits(inputBufferSize))
+		return false;
+
 	if (!rootNode->Serialize(&outputBitStream))
 		return false;
 
@@ -108,6 +112,10 @@ HuffmanCompression::HuffmanCompression()
 
 	BitStream inputBitStream(inputStream);
 
+	unsigned int originalSize = 0;
+	if (!inputBitStream.ReadAllBits(originalSize))
+		return false;
+
 	UniquePtr<Node> rootNode(Node::Deserialize(&inputBitStream));
 	if (!rootNode.Get())
 		return false;
@@ -118,8 +126,11 @@ HuffmanCompression::HuffmanCompression()
 	{
 		if (node->type == Node::Type::LEAF)
 		{
-			if (!inputBitStream.ReadAllBits(node->character))
+			if (outputStream->WriteBytes(&node->character, 1) != 1)
 				return false;
+
+			if (outputStream->GetSize() == originalSize)
+				break;
 
 			node = rootNode;
 		}
@@ -176,7 +187,7 @@ bool HuffmanCompression::Node::Serialize(BitStream* bitStream) const
 		}
 		case Type::LEAF:
 		{
-			if (bitStream->WriteAllBits(this->character))
+			if (!bitStream->WriteAllBits(this->character))
 				return false;
 
 			break;

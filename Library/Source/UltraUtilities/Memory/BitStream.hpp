@@ -35,7 +35,7 @@ namespace UU
 		template<typename T>
 		bool WriteBits(T dataIn, unsigned int numBits)
 		{
-			if (numBits / 8 >= sizeof(T))
+			if (numBits / 8 > sizeof(T))
 				return false;
 
 			for (unsigned int i = 0; i < numBits; i++)
@@ -76,8 +76,10 @@ namespace UU
 		template<typename T>
 		bool ReadBits(T& dataOut, unsigned int numBits)
 		{
-			if (numBits / 8 >= sizeof(T))
+			if (numBits / 8 > sizeof(T))
 				return false;
+
+			dataOut = (T)0;
 
 			for (unsigned int i = 0; i < numBits; i++)
 			{
