@@ -30,6 +30,9 @@ set(ULTRA_UTILITIES_SOURCES
 	Source/UltraUtilities/Containers/HashMap.hpp
 	Source/UltraUtilities/Containers/HashSet.hpp
 	Source/UltraUtilities/Containers/PriorityQueue.hpp
+	Source/UltraUtilities/Containers/Queue.hpp
+	Source/UltraUtilities/Containers/BinomialHeap.cpp
+	Source/UltraUtilities/Containers/BinomialHeap.h
 	Source/UltraUtilities/Compression/Compression.cpp
 	Source/UltraUtilities/Compression/Compression.h
 	Source/UltraUtilities/Compression/HuffmanCompression.cpp

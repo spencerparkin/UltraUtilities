@@ -226,7 +226,7 @@ namespace UU
 	class UU_API HashMapKey : public HashTableKey
 	{
 	public:
-		virtual unsigned int Hash(unsigned int tableSize) override
+		virtual unsigned int Hash(unsigned int tableSize) const override
 		{
 			return K::Hash(this->value, tableSize);
 		}
@@ -238,6 +238,27 @@ namespace UU
 
 	public:
 		K value;
+	};
+
+	/**
+	 * Provide a specialization that uses unsigned integers and the division method of hashing.
+	 */
+	template<>
+	class UU_API HashMapKey<unsigned int> : public HashTableKey
+	{
+	public:
+		virtual unsigned int Hash(unsigned int tableSize) const override
+		{
+			return this->value % tableSize;
+		}
+
+		virtual bool operator==(const HashTableKey& key) const override
+		{
+			return this->value == static_cast<const HashMapKey<unsigned int>*>(&key)->value;
+		}
+
+	public:
+		unsigned int value;
 	};
 
 	/**
@@ -275,7 +296,7 @@ namespace UU
 
 		virtual bool operator==(const HashTableKey& key) const override
 		{
-			return this->value == static_cast<const HashMapKey<int>*>(&key)->value;
+			return this->value == static_cast<const HashMapKey<unsigned long long>*>(&key)->value;
 		}
 
 	public:
