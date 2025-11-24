@@ -130,6 +130,7 @@ namespace UU
 		};
 
 	private:
+
 		Node* rootNode;
 	};
 }

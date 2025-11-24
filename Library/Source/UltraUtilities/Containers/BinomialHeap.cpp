@@ -61,13 +61,110 @@ void BinomialHeap::Clear()
 
 bool BinomialHeap::Merge(BinomialHeap* heapA, BinomialHeap* heapB)
 {
-	return false;
+	this->Clear();
+
+	Node* currentNode = nullptr;
+
+	while (true)
+	{
+		Node* nodeA = heapA->rootNode;
+		Node* nodeB = heapB->rootNode;
+
+		if (!nodeA || !nodeB)
+			break;
+
+		if (nodeA->degree <= nodeB->degree)
+		{
+			heapA->rootNode = nodeA->siblingNode;
+			nodeA->siblingNode = nullptr;
+			if (currentNode)
+				currentNode->siblingNode = nodeA;
+			else
+				this->rootNode = nodeA;
+			currentNode = nodeA;
+		}
+		else
+		{
+			heapB->rootNode = nodeB->siblingNode;
+			nodeB->siblingNode = nullptr;
+			if (currentNode)
+				currentNode->siblingNode = nodeB;
+			else
+				this->rootNode = nodeB;
+			currentNode = nodeB;
+		}
+	}
+
+	currentNode = this->rootNode;
+	Node* previousNode = nullptr;
+
+	enum Action
+	{
+		Unknown,
+		Advance,
+		Combine
+	};
+
+	while (currentNode && currentNode->siblingNode)
+	{
+		Action action = Action::Unknown;
+
+		if (currentNode->degree != currentNode->siblingNode->degree)
+			action = Action::Advance;
+		else if (!currentNode->siblingNode->siblingNode)
+			action = Action::Combine;
+		else if (currentNode->degree == currentNode->siblingNode->siblingNode->degree)
+			action = Action::Advance;
+		else
+			action = Action::Combine;
+		
+		switch (action)
+		{
+			case Action::Advance:
+			{
+				previousNode = currentNode;
+				currentNode = currentNode->siblingNode;
+				break;
+			}
+			case Action::Combine:
+			{
+				Node* childNode = nullptr;
+				Node* parentNode = nullptr;
+
+				if (currentNode->IsLessThan(currentNode->siblingNode))
+				{
+					childNode = currentNode->siblingNode;
+					parentNode = currentNode;
+					currentNode->siblingNode = currentNode->siblingNode->siblingNode;
+				}
+				else
+				{
+					childNode = currentNode;
+					parentNode = currentNode->siblingNode;
+					if (previousNode)
+						previousNode->siblingNode = currentNode->siblingNode;
+				}
+
+				childNode->parentNode = parentNode;
+				childNode->siblingNode = parentNode->childNode;
+				parentNode->childNode = childNode;
+
+				break;
+			}
+		}
+	}
+
+	return true;
 }
 
 //---------------------------------- BinomialHeap::Node ----------------------------------
 
 BinomialHeap::Node::Node()
 {
+	this->parentNode = nullptr;
+	this->childNode = nullptr;
+	this->siblingNode = nullptr;
+	this->degree = 0;
 }
 
 /*virtual*/ BinomialHeap::Node::~Node()
@@ -96,7 +193,7 @@ bool BinomialHeap::Node::IsHeapOrdered() const
 
 	for (const Node* node = this->childNode; node; node = node->siblingNode)
 	{
-		if (this->IsLessThan(node) || this->IsEqualTo(node))
+		if (this->IsLessThan(node))
 			return false;
 
 		if (!node->IsHeapOrdered())
