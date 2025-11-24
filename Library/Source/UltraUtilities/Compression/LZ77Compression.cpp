@@ -34,29 +34,13 @@ LZ77Compression::LZ77Compression(unsigned int windowSize)
 	if (numBits >= sizeof(unsigned int) * 8)
 		return false;
 
-	unsigned int i;
-	for (i = 0; i < windowSize; i++)
-	{
-		if (i >= inputBufferSize)
-		{
-			if (!outputBitStream.Flush())
-				return false;
-
-			return true;
-		}
-
-		if (!outputBitStream.WriteBits(char(0), 1))
-			return false;
-
-		if (!outputBitStream.WriteAllBits(inputBuffer[i]))
-			return false;
-	}
-
+	unsigned int i = 0;
 	while (i < inputBufferSize)
 	{
 		bool emitNextByte = true;
 
 		unsigned int availableWindowSize = UU_MIN(windowSize, inputBufferSize - i);
+		availableWindowSize = UU_MIN(availableWindowSize, i);
 
 		for (unsigned int j = 0; j < availableWindowSize; j++)
 		{
@@ -67,8 +51,8 @@ LZ77Compression::LZ77Compression(unsigned int windowSize)
 			if (patternBufferSize < 3)
 				break;
 
-			const char* searchBuffer = &inputBuffer[i - windowSize];
-			unsigned int searchBufferSize = windowSize;
+			const char* searchBuffer = &inputBuffer[i - availableWindowSize];
+			unsigned int searchBufferSize = availableWindowSize;
 			unsigned int foundPatternOffset = 0;
 
 			if (this->FindPattern(patternBuffer, patternBufferSize, searchBuffer, searchBufferSize, foundPatternOffset))
