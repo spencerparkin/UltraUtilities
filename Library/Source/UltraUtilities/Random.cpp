@@ -52,6 +52,12 @@ XorShiftRandom::XorShiftRandom()
 	return randomInteger;
 }
 
+/*virtual*/ bool XorShiftRandom::CoinToss()
+{
+	unsigned int randomInteger = this->NextRandom();
+	return randomInteger > 2147483647;
+}
+
 unsigned int XorShiftRandom::NextRandom()
 {
 	this->state ^= this->state << 13;

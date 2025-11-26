@@ -72,4 +72,37 @@ TEST_CASE("BinomialHeaps", "[binomial_heap]")
 			REQUIRE(validHeap);
 		}
 	}
+
+	SECTION("Random removal.")
+	{
+		BinomialHeap heap;
+
+		for (int i = 0; i < 1000; i++)
+		{
+			int key = random.GetRandomInteger(0, 100);
+			auto node = new BinomialHeap::TypedNode<int>(key);
+			heap.InsertNode(node);
+		}
+
+		while (!heap.IsEmpty())
+		{
+			BinomialHeap::Node* nodeToRemove = nullptr;
+			heap.ForAllNodes([&nodeToRemove, &random](BinomialHeap::Node* node) -> bool
+				{
+					if (random.CoinToss())
+					{
+						nodeToRemove = node;
+						return false;
+					}
+					return true;
+				});
+			
+			if (nodeToRemove)
+			{
+				heap.RemoveNode(nodeToRemove);
+				bool validHeap = heap.IsValid();
+				REQUIRE(validHeap);
+			}
+		}
+	}
 }

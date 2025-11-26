@@ -92,6 +92,19 @@ namespace UU
 		bool DecreaseKey(Node* node, Node* nodeWithLesserKey);
 
 		/**
+		 * This method can be used to remove any node from the binomial heap,
+		 * even if it's not one with minimal key.
+		 * 
+		 * @param[in,out] node This is assumed to be a node within this heap.  Note that this is not necessarily the node to be deleted!
+		 */
+		void RemoveNode(Node* node);
+		
+		/**
+		 * Tell us if there are any nodes in this heap.
+		 */
+		bool IsEmpty() const;
+
+		/**
 		 * This can be used to walk the entire heap.
 		 */
 		template<typename Lambda>
@@ -143,6 +156,8 @@ namespace UU
 			virtual bool IsGreaterThan(const Node* node) const = 0;
 			virtual bool IsEqualTo(const Node* node) const = 0;
 			virtual void ExchangeKeysWith(Node* node) = 0;
+			virtual void MakeUniquelyMinimal() = 0;
+			virtual bool IsUniquelyMinimal() const = 0;
 
 		private:
 			Node* parentNode;
@@ -190,6 +205,16 @@ namespace UU
 				static_cast<TypedNode<T>*>(node)->key = tempKey;
 			}
 
+			virtual void MakeUniquelyMinimal() override
+			{
+				this->key = (T)-1;
+			}
+
+			virtual bool IsUniquelyMinimal() const override
+			{
+				return this->key == (T)-1;
+			}
+
 		public:
 			T key;
 		};
@@ -198,6 +223,7 @@ namespace UU
 
 		Node* RemoveRoot();
 		bool AppendNode(Node* node, Node*& lastNode);
+		void BubbleNode(Node* node);
 
 		Node* rootNode;
 	};

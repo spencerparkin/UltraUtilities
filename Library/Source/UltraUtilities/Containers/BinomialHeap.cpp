@@ -256,7 +256,12 @@ bool BinomialHeap::DecreaseKey(Node* node, Node* nodeWithLesserKey)
 		return false;
 
 	node->ExchangeKeysWith(nodeWithLesserKey);
+	this->BubbleNode(node);
+	return true;
+}
 
+void BinomialHeap::BubbleNode(Node* node)
+{
 	while (node->parentNode)
 	{
 		if (!node->IsLessThan(node->parentNode))
@@ -267,8 +272,20 @@ bool BinomialHeap::DecreaseKey(Node* node, Node* nodeWithLesserKey)
 			node = node->parentNode;
 		}
 	}
+}
 
-	return true;
+void BinomialHeap::RemoveNode(Node* node)
+{
+	node->MakeUniquelyMinimal();
+	this->BubbleNode(node);
+	Node* removedNode = this->RemoveMinimalNode();
+	UU_ASSERT(removedNode->IsUniquelyMinimal());
+	delete removedNode;
+}
+
+bool BinomialHeap::IsEmpty() const
+{
+	return this->rootNode == nullptr;
 }
 
 //---------------------------------- BinomialHeap::Node ----------------------------------
