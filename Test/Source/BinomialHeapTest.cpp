@@ -7,13 +7,13 @@ using namespace UU;
 TEST_CASE("BinomialHeaps", "[binomial_heap]")
 {
 	XorShiftRandom random;
-	random.SetSeed(1);
+	random.SetSeed(123456789);
 
 	SECTION("Insertion.")
 	{
 		BinomialHeap heap;
 
-		for (int i = 0; i < 100; i++)
+		for (int i = 0; i < 1000; i++)
 		{
 			int j = random.GetRandomInteger(0, 100);
 			heap.Insert(new BinomialHeap::TypedNode<int>(j));
@@ -26,19 +26,22 @@ TEST_CASE("BinomialHeaps", "[binomial_heap]")
 	{
 		BinomialHeap heap;
 
-		for (int i = 0; i < 100; i++)
+		for (int i = 0; i < 1000; i++)
 		{
-			int j = random.GetRandomInteger(0, 100);
-			heap.Insert(new BinomialHeap::TypedNode<int>(j));
+			int key = random.GetRandomInteger(0, 100);
+			heap.Insert<int>(key);
 		}
 
-		int lastKey = 200;
-		for (int i = 0; i < 100; i++)
+		int lastKey = -1;
+		for (int i = 0; i < 1000; i++)
 		{
-			auto node = static_cast<BinomialHeap::TypedNode<int>*>(heap.RemoveMinimal());
-			REQUIRE(node != nullptr);
-			REQUIRE(node->key <= lastKey);
-			lastKey = node->key;
+			int key = -1;
+			bool removed = heap.RemoveMinimum<int>(key);
+			REQUIRE(removed);
+			REQUIRE(key >= lastKey);
+			lastKey = key;
+			bool validHeap = heap.IsValid();
+			REQUIRE(validHeap);
 		}
 	}
 }

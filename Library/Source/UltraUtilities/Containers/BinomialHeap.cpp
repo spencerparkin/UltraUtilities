@@ -64,7 +64,7 @@ void BinomialHeap::Clear()
 	this->rootNode = nullptr;
 }
 
-void BinomialHeap::Insert(Node* node)
+void BinomialHeap::InsertNode(Node* node)
 {
 	BinomialHeap heapA;
 	heapA.rootNode = this->rootNode;
@@ -76,7 +76,7 @@ void BinomialHeap::Insert(Node* node)
 	this->Merge(&heapA, &heapB);
 }
 
-BinomialHeap::Node* BinomialHeap::RemoveMinimal()
+BinomialHeap::Node* BinomialHeap::RemoveMinimalNode()
 {
 	if (!this->rootNode)
 		return nullptr;
@@ -97,15 +97,20 @@ BinomialHeap::Node* BinomialHeap::RemoveMinimal()
 		node->siblingNode = nodeToRemove->siblingNode;
 	}
 
+	nodeToRemove->siblingNode = nullptr;
+
 	BinomialHeap heapA;
 	heapA.rootNode = this->rootNode;
 	this->rootNode = nullptr;
 
 	BinomialHeap heapB;
 
-	DArray<Node*> nodeArray(nodeToRemove->degree);
+	DArray<Node*> nodeArray;
+	nodeArray.SetCapacity(nodeToRemove->degree);
 	for (Node* childNode = nodeToRemove->childNode; childNode; childNode = childNode->siblingNode)
 		nodeArray.Push(childNode);
+
+	nodeToRemove->childNode = nullptr;
 
 	Node* tailNode = nullptr;
 	while (nodeArray.GetSize() > 0)
@@ -121,9 +126,6 @@ BinomialHeap::Node* BinomialHeap::RemoveMinimal()
 	}
 
 	this->Merge(&heapA, &heapB);
-
-	nodeToRemove->childNode = nullptr;
-	nodeToRemove->siblingNode = nullptr;
 	
 	return nodeToRemove;
 }

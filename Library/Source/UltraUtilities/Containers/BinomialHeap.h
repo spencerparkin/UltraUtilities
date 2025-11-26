@@ -13,6 +13,9 @@ namespace UU
 	public:
 		class Node;
 
+		template<typename T>
+		class TypedNode;
+
 		BinomialHeap();
 		virtual ~BinomialHeap();
 
@@ -42,7 +45,7 @@ namespace UU
 		 * over ownership of the memory.  The given node is expected
 		 * to be allocated on the memory heap.
 		 */
-		void Insert(Node* node);
+		void InsertNode(Node* node);
 
 		/**
 		 * Remove a node having a key equal to the smallest key value
@@ -51,7 +54,33 @@ namespace UU
 		 * we remove here.  The caller takes ownership of the return
 		 * memory.
 		 */
-		Node* RemoveMinimal();
+		Node* RemoveMinimalNode();
+
+		/**
+		 * Provide a, perhaps, more convenient insertion routine.
+		 */
+		template<typename T>
+		void Insert(T key)
+		{
+			this->InsertNode(new TypedNode<T>(key));
+		}
+
+		/**
+		 * Provide a, perhaps, more convenient removal routine.
+		 */
+		template<typename T>
+		bool RemoveMinimum(T& key)
+		{
+			bool success = true;
+			Node* node = this->RemoveMinimalNode();
+			auto typedNode = dynamic_cast<TypedNode<T>*>(node);
+			if (typedNode)
+				key = typedNode->key;
+			else
+				success = false;
+			delete node;
+			return success;
+		}
 
 		/**
 		 * This can be used to walk the entire heap.
@@ -59,24 +88,24 @@ namespace UU
 		template<typename Lambda>
 		bool ForAllNodes(Lambda lambda) const
 		{
-			if (!this->rootNode)
-				return false;
-
-			Queue<Node*> queue;
-			queue.PushBack(this->rootNode);
-			while (queue.GetSize() > 0)
+			if (this->rootNode)
 			{
-				Node* node = nullptr;
-				queue.PopFront(node);
+				Queue<Node*> queue;
+				queue.PushBack(this->rootNode);
+				while (queue.GetSize() > 0)
+				{
+					Node* node = nullptr;
+					queue.PopFront(node);
 
-				if (!lambda(node))
-					return false;
+					if (!lambda(node))
+						return false;
 
-				if (node->siblingNode)
-					queue.PushBack(node->siblingNode);
+					if (node->siblingNode)
+						queue.PushBack(node->siblingNode);
 
-				if (node->childNode)
-					queue.PushBack(node->childNode);
+					if (node->childNode)
+						queue.PushBack(node->childNode);
+				}
 			}
 
 			return true;
