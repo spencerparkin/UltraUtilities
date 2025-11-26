@@ -1,4 +1,5 @@
 #include "UltraUtilities/Containers/BinomialHeap.h"
+#include "UltraUtilities/Containers/DArray.hpp"
 #include "UltraUtilities/Random.h"
 #include <catch2/catch_test_macros.hpp>
 
@@ -40,6 +41,33 @@ TEST_CASE("BinomialHeaps", "[binomial_heap]")
 			REQUIRE(removed);
 			REQUIRE(key >= lastKey);
 			lastKey = key;
+			bool validHeap = heap.IsValid();
+			REQUIRE(validHeap);
+		}
+	}
+
+	SECTION("Decrease key.")
+	{
+		BinomialHeap heap;
+
+		DArray<BinomialHeap::TypedNode<int>*> nodeArray;
+		for (int i = 0; i < 1000; i++)
+		{
+			int key = random.GetRandomInteger(0, 100);
+			auto node = new BinomialHeap::TypedNode<int>(key);
+			heap.InsertNode(node);
+			nodeArray.Push(node);
+		}
+
+		for (auto node : nodeArray)
+		{
+			if (node->key == 0)
+				continue;
+			int key = random.GetRandomInteger(0, node->key - 1);
+			REQUIRE(key < node->key);
+			BinomialHeap::TypedNode<int> nodeWithLesserKey(key);
+			bool decreased = heap.DecreaseKey(node, &nodeWithLesserKey);
+			REQUIRE(decreased);
 			bool validHeap = heap.IsValid();
 			REQUIRE(validHeap);
 		}

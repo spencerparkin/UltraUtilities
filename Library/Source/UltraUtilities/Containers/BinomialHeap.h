@@ -83,6 +83,15 @@ namespace UU
 		}
 
 		/**
+		 * This method can be used to decrease the key of a node in the heap.
+		 * 
+		 * @param[in,out] node This is assumed to be a node within this heap.  It will take on the key of the other given node.
+		 * @param[in,out] nodeWithLesserKey This is assumed to be a node that is not in any heap.  It must have a key less than that of the other given node.
+		 * @return False is returned here if the keys between both given nodes cannot be exchanged.
+		 */
+		bool DecreaseKey(Node* node, Node* nodeWithLesserKey);
+
+		/**
 		 * This can be used to walk the entire heap.
 		 */
 		template<typename Lambda>
@@ -133,6 +142,7 @@ namespace UU
 			virtual bool IsLessThan(const Node* node) const = 0;
 			virtual bool IsGreaterThan(const Node* node) const = 0;
 			virtual bool IsEqualTo(const Node* node) const = 0;
+			virtual void ExchangeKeysWith(Node* node) = 0;
 
 		private:
 			Node* parentNode;
@@ -171,6 +181,13 @@ namespace UU
 			virtual bool IsEqualTo(const Node* node) const override
 			{
 				return this->key == static_cast<const TypedNode<T>*>(node)->key;
+			}
+
+			virtual void ExchangeKeysWith(Node* node) override
+			{
+				T tempKey = this->key;
+				this->key = static_cast<TypedNode<T>*>(node)->key;
+				static_cast<TypedNode<T>*>(node)->key = tempKey;
 			}
 
 		public:

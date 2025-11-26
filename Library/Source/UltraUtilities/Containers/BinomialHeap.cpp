@@ -250,6 +250,27 @@ void BinomialHeap::Merge(BinomialHeap* heapA, BinomialHeap* heapB)
 	}
 }
 
+bool BinomialHeap::DecreaseKey(Node* node, Node* nodeWithLesserKey)
+{
+	if (node->IsLessThan(nodeWithLesserKey))
+		return false;
+
+	node->ExchangeKeysWith(nodeWithLesserKey);
+
+	while (node->parentNode)
+	{
+		if (!node->IsLessThan(node->parentNode))
+			break;
+		else
+		{
+			node->ExchangeKeysWith(node->parentNode);
+			node = node->parentNode;
+		}
+	}
+
+	return true;
+}
+
 //---------------------------------- BinomialHeap::Node ----------------------------------
 
 BinomialHeap::Node::Node()
