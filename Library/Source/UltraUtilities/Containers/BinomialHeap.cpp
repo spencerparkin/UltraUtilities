@@ -1,5 +1,6 @@
 #include "UltraUtilities/Containers/BinomialHeap.h"
 #include "UltraUtilities/Containers/HashSet.hpp"
+#include "UltraUtilities/Containers/DArray.hpp"
 
 using namespace UU;
 
@@ -17,6 +18,10 @@ BinomialHeap::BinomialHeap()
 
 bool BinomialHeap::IsValid() const
 {
+	for (const Node* node = this->rootNode; node; node = node->siblingNode)
+		if (node->parentNode)
+			return false;
+
 	if (!this->ForAllNodes([](const Node* node) -> bool {
 			return node->IsDegreeValid();
 		}))
@@ -44,7 +49,7 @@ bool BinomialHeap::IsValid() const
 		if (!node->IsBinomialTree(treeHeight))
 			return false;
 
-		if (treeHeight >= lastTreeHeight)
+		if (treeHeight <= lastTreeHeight)
 			return false;
 
 		lastTreeHeight = treeHeight;
@@ -59,11 +64,105 @@ void BinomialHeap::Clear()
 	this->rootNode = nullptr;
 }
 
-bool BinomialHeap::Merge(BinomialHeap* heapA, BinomialHeap* heapB)
+void BinomialHeap::Insert(Node* node)
+{
+	BinomialHeap heapA;
+	heapA.rootNode = this->rootNode;
+	this->rootNode = nullptr;
+
+	BinomialHeap heapB;
+	heapB.rootNode = node;
+
+	this->Merge(&heapA, &heapB);
+}
+
+BinomialHeap::Node* BinomialHeap::RemoveMinimal()
+{
+	if (!this->rootNode)
+		return nullptr;
+
+	Node* nodeToRemove = nullptr;
+	for (Node* node = this->rootNode; node; node = node->siblingNode)
+		if (!nodeToRemove || node->IsLessThan(nodeToRemove))
+			nodeToRemove = node;
+
+	if (this->rootNode == nodeToRemove)
+		this->rootNode = nodeToRemove->siblingNode;
+	else
+	{
+		Node* node = this->rootNode;
+		while (node->siblingNode != nodeToRemove)
+			node = node->siblingNode;
+
+		node->siblingNode = nodeToRemove->siblingNode;
+	}
+
+	BinomialHeap heapA;
+	heapA.rootNode = this->rootNode;
+	this->rootNode = nullptr;
+
+	BinomialHeap heapB;
+
+	DArray<Node*> nodeArray(nodeToRemove->degree);
+	for (Node* childNode = nodeToRemove->childNode; childNode; childNode = childNode->siblingNode)
+		nodeArray.Push(childNode);
+
+	Node* tailNode = nullptr;
+	while (nodeArray.GetSize() > 0)
+	{
+		Node* node = nodeArray.Pop((Node*)nullptr);
+		node->siblingNode = nullptr;
+		node->parentNode = nullptr;
+		if (!tailNode)
+			heapB.rootNode = node;
+		else
+			tailNode->siblingNode = node;
+		tailNode = node;
+	}
+
+	this->Merge(&heapA, &heapB);
+
+	nodeToRemove->childNode = nullptr;
+	nodeToRemove->siblingNode = nullptr;
+	
+	return nodeToRemove;
+}
+
+BinomialHeap::Node* BinomialHeap::RemoveRoot()
+{
+	if (!this->rootNode)
+		return nullptr;
+
+	Node* node = this->rootNode;
+	this->rootNode = node->siblingNode;
+	node->siblingNode = nullptr;
+	return node;
+}
+
+bool BinomialHeap::AppendNode(Node* node, Node*& lastNode)
+{
+	if (node->siblingNode)
+		return false;
+
+	if (!this->rootNode)
+		this->rootNode = node;
+	else
+	{
+		if (!lastNode)
+			return false;
+
+		lastNode->siblingNode = node;
+	}
+
+	lastNode = node;
+	return true;
+}
+
+void BinomialHeap::Merge(BinomialHeap* heapA, BinomialHeap* heapB)
 {
 	this->Clear();
 
-	Node* currentNode = nullptr;
+	Node* lastNode = nullptr;
 
 	while (true)
 	{
@@ -74,28 +173,18 @@ bool BinomialHeap::Merge(BinomialHeap* heapA, BinomialHeap* heapB)
 			break;
 
 		if (nodeA->degree <= nodeB->degree)
-		{
-			heapA->rootNode = nodeA->siblingNode;
-			nodeA->siblingNode = nullptr;
-			if (currentNode)
-				currentNode->siblingNode = nodeA;
-			else
-				this->rootNode = nodeA;
-			currentNode = nodeA;
-		}
+			this->AppendNode(heapA->RemoveRoot(), lastNode);
 		else
-		{
-			heapB->rootNode = nodeB->siblingNode;
-			nodeB->siblingNode = nullptr;
-			if (currentNode)
-				currentNode->siblingNode = nodeB;
-			else
-				this->rootNode = nodeB;
-			currentNode = nodeB;
-		}
+			this->AppendNode(heapB->RemoveRoot(), lastNode);
 	}
 
-	currentNode = this->rootNode;
+	while (heapA->rootNode)
+		this->AppendNode(heapA->RemoveRoot(), lastNode);
+
+	while (heapB->rootNode)
+		this->AppendNode(heapB->RemoveRoot(), lastNode);
+
+	Node* currentNode = this->rootNode;
 	Node* previousNode = nullptr;
 
 	enum Action
@@ -143,18 +232,20 @@ bool BinomialHeap::Merge(BinomialHeap* heapA, BinomialHeap* heapB)
 					parentNode = currentNode->siblingNode;
 					if (previousNode)
 						previousNode->siblingNode = currentNode->siblingNode;
+					else
+						this->rootNode = currentNode->siblingNode;
 				}
 
 				childNode->parentNode = parentNode;
 				childNode->siblingNode = parentNode->childNode;
 				parentNode->childNode = childNode;
+				parentNode->degree++;
+				currentNode = parentNode;
 
 				break;
 			}
 		}
 	}
-
-	return true;
 }
 
 //---------------------------------- BinomialHeap::Node ----------------------------------
@@ -193,7 +284,7 @@ bool BinomialHeap::Node::IsHeapOrdered() const
 
 	for (const Node* node = this->childNode; node; node = node->siblingNode)
 	{
-		if (this->IsLessThan(node))
+		if (node->IsLessThan(this))
 			return false;
 
 		if (!node->IsHeapOrdered())

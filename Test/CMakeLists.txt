@@ -12,6 +12,7 @@ set(TEST_SOURCES
 	Source/HashSetTest.cpp
 	Source/BTreeTest.cpp
 	Source/CompressionTest.cpp
+	Source/BinomialHeapTest.cpp
 )
 
 add_executable(Test ${TEST_SOURCES})

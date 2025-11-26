@@ -11,6 +11,8 @@ namespace UU
 	class UU_API BinomialHeap
 	{
 	public:
+		class Node;
+
 		BinomialHeap();
 		virtual ~BinomialHeap();
 
@@ -33,7 +35,23 @@ namespace UU
 		 * having been transfered into this one heap.  Also note that
 		 * this is a commutative operation.
 		 */
-		bool Merge(BinomialHeap* heapA, BinomialHeap* heapB);
+		void Merge(BinomialHeap* heapA, BinomialHeap* heapB);
+
+		/**
+		 * Insert the given node into this heap.  This heap takes
+		 * over ownership of the memory.  The given node is expected
+		 * to be allocated on the memory heap.
+		 */
+		void Insert(Node* node);
+
+		/**
+		 * Remove a node having a key equal to the smallest key value
+		 * that exists in the heap.  There could be more than one node
+		 * with such a key.  We do not define here which of such nodes
+		 * we remove here.  The caller takes ownership of the return
+		 * memory.
+		 */
+		Node* RemoveMinimal();
 
 		/**
 		 * This can be used to walk the entire heap.
@@ -102,8 +120,9 @@ namespace UU
 		class TypedNode : public Node
 		{
 		public:
-			TypedNode()
+			TypedNode(T givenKey)
 			{
+				this->key = givenKey;
 			}
 
 			virtual ~TypedNode()
@@ -112,17 +131,17 @@ namespace UU
 
 			virtual bool IsLessThan(const Node* node) const override
 			{
-				return this->key < static_cast<TypedNode<T>*>(node)->key;
+				return this->key < static_cast<const TypedNode<T>*>(node)->key;
 			}
 
 			virtual bool IsGreaterThan(const Node* node) const override
 			{
-				return this->key > static_cast<TypedNode<T>*>(node)->key;
+				return this->key > static_cast<const TypedNode<T>*>(node)->key;
 			}
 
 			virtual bool IsEqualTo(const Node* node) const override
 			{
-				return this->key == static_cast<TypedNode<T>*>(node)->key;
+				return this->key == static_cast<const TypedNode<T>*>(node)->key;
 			}
 
 		public:
@@ -130,6 +149,9 @@ namespace UU
 		};
 
 	private:
+
+		Node* RemoveRoot();
+		bool AppendNode(Node* node, Node*& lastNode);
 
 		Node* rootNode;
 	};

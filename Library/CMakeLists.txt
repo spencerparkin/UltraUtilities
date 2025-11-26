@@ -4,6 +4,8 @@ set(ULTRA_UTILITIES_SOURCES
 	Source/UltraUtilities/Defines.h
 	Source/UltraUtilities/String.cpp
 	Source/UltraUtilities/String.h
+	Source/UltraUtilities/Random.cpp
+	Source/UltraUtilities/Random.h
 	Source/UltraUtilities/Graph.cpp
 	Source/UltraUtilities/Graph.h
 	Source/UltraUtilities/MulticastDelegate.hpp
