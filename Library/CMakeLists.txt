@@ -35,6 +35,10 @@ set(ULTRA_UTILITIES_SOURCES
 	Source/UltraUtilities/Containers/Queue.hpp
 	Source/UltraUtilities/Containers/BinomialHeap.cpp
 	Source/UltraUtilities/Containers/BinomialHeap.h
+	Source/UltraUtilities/Containers/FibonacciHeap.cpp
+	Source/UltraUtilities/Containers/FibonacciHeap.h
+	Source/UltraUtilities/Containers/LoopedList.cpp
+	Source/UltraUtilities/Containers/LoopedList.h
 	Source/UltraUtilities/Compression/Compression.cpp
 	Source/UltraUtilities/Compression/Compression.h
 	Source/UltraUtilities/Compression/HuffmanCompression.cpp
