@@ -183,7 +183,7 @@ namespace UU
 				return this->key == static_cast<const TypedNode<T>*>(node)->key;
 			}
 
-		protected:
+		public:
 			T key;
 		};
 

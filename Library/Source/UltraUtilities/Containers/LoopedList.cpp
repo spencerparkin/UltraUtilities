@@ -62,7 +62,9 @@ void LoopedList::RemoveNode(Node* oldNode)
 	UU_ASSERT(this->numNodes > 0);
 	if (this->numNodes > 0)
 	{
-		if (this->mainNode == oldNode)
+		if (this->numNodes == 1)
+			this->mainNode = nullptr;
+		else if (this->mainNode == oldNode)
 			this->mainNode = oldNode->nextNode;
 
 		oldNode->Unlink();

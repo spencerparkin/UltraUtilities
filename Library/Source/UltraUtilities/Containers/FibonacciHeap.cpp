@@ -1,5 +1,6 @@
 #include "UltraUtilities/Containers/FibonacciHeap.h"
 #include "UltraUtilities/Containers/DArray.hpp"
+#include "UltraUtilities/Math/Functions.h"
 
 using namespace UU;
 
@@ -51,7 +52,9 @@ FibonacciHeap::Node* FibonacciHeap::RemoveMinimumNode()
 		this->rootList.InsertNodeAfter(childNode);
 	}
 
-	DArray<Node*> nodeArray(this->numNodes);		// STPTODO: This can't be right.
+	unsigned int nodeArraySize = (unsigned int)NaturalLogarithm(double(this->numNodes));
+	nodeArraySize = UU_MAX(1, nodeArraySize);
+	DArray<Node*> nodeArray(nodeArraySize);
 
 	for (unsigned int i = 0; i < nodeArray.GetSize(); i++)
 		nodeArray[i] = nullptr;
