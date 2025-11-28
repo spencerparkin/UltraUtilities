@@ -44,6 +44,7 @@ namespace UU
 		 * Return the node being used to maintain a reference to the entire list.
 		 */
 		Node* GetMainNode();
+		const Node* GetMainNode() const;
 
 		/**
 		 * Assign an alternative node as the one maintaining a reference to the entire list.
@@ -83,11 +84,14 @@ namespace UU
 			Node();
 			virtual ~Node();
 
-			void Decouple();
-			void Couple(Node* beforeNode, Node* afterNode);
+			void Unlink();
+			void Link(Node* beforeNode, Node* afterNode);
 
 			Node* GetNextNode();
 			Node* GetPrevNode();
+
+			const Node* GetNextNode() const;
+			const Node* GetPrevNode() const;
 
 		public:
 			Node* nextNode;

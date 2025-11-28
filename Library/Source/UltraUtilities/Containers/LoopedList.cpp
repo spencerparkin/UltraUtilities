@@ -17,32 +17,65 @@ LoopedList::LoopedList()
 
 void LoopedList::InsertNodeAfter(Node* newNode, Node* afterNode /*= nullptr*/)
 {
-	if (!afterNode)
-		afterNode = this->mainNode;
-	
-	newNode->Couple(afterNode, afterNode->nextNode);
+	UU_ASSERT(!afterNode || this->numNodes > 0);
+
+	if (!this->mainNode)
+	{
+		this->mainNode = newNode;
+		newNode->nextNode = newNode;
+		newNode->prevNode = newNode;
+	}
+	else
+	{
+		if (!afterNode)
+			afterNode = this->mainNode;
+
+		newNode->Link(afterNode, afterNode->nextNode);
+	}
+
 	this->numNodes++;
 }
 
 void LoopedList::InsertNodeBefore(Node* newNode, Node* beforeNode /*= nullptr*/)
 {
-	if (!beforeNode)
-		beforeNode = this->mainNode;
+	UU_ASSERT(!beforeNode || this->numNodes > 0);
 
-	newNode->Couple(beforeNode->prevNode, beforeNode);
+	if (!this->mainNode)
+	{
+		this->mainNode = newNode;
+		newNode->nextNode = newNode;
+		newNode->prevNode = newNode;
+	}
+	else
+	{
+		if (!beforeNode)
+			beforeNode = this->mainNode;
+
+		newNode->Link(beforeNode->prevNode, beforeNode);
+	}
+
 	this->numNodes++;
 }
 
 void LoopedList::RemoveNode(Node* oldNode)
 {
-	if (this->mainNode == oldNode)
-		this->mainNode = oldNode->nextNode;
+	UU_ASSERT(this->numNodes > 0);
+	if (this->numNodes > 0)
+	{
+		if (this->mainNode == oldNode)
+			this->mainNode = oldNode->nextNode;
 
-	oldNode->Decouple();
-	this->numNodes--;
+		oldNode->Unlink();
+		this->numNodes--;
+	}
 }
 
 LoopedList::Node* LoopedList::GetMainNode()
+{
+	return this->mainNode;
+}
+
+const LoopedList::Node* LoopedList::GetMainNode() const
 {
 	return this->mainNode;
 }
@@ -127,23 +160,16 @@ LoopedList::Node::Node()
 {
 }
 
-void LoopedList::Node::Decouple()
+void LoopedList::Node::Unlink()
 {
-	if (this->nextNode != this)
-		this->nextNode = this->nextNode->nextNode;
-
-	if (this->prevNode != this)
-		this->prevNode = this->prevNode->prevNode;
-
+	this->prevNode->nextNode = this->nextNode;
+	this->nextNode->prevNode = this->prevNode;
 	this->nextNode = nullptr;
 	this->prevNode = nullptr;
 }
 
-void LoopedList::Node::Couple(Node* beforeNode, Node* afterNode)
+void LoopedList::Node::Link(Node* beforeNode, Node* afterNode)
 {
-	UU_ASSERT(beforeNode->nextNode == afterNode);
-	UU_ASSERT(afterNode->prevNode == beforeNode);
-
 	beforeNode->nextNode = this;
 	afterNode->prevNode = this;
 
@@ -157,6 +183,16 @@ LoopedList::Node* LoopedList::Node::GetNextNode()
 }
 
 LoopedList::Node* LoopedList::Node::GetPrevNode()
+{
+	return this->prevNode;
+}
+
+const LoopedList::Node* LoopedList::Node::GetNextNode() const
+{
+	return this->nextNode;
+}
+
+const LoopedList::Node* LoopedList::Node::GetPrevNode() const
 {
 	return this->prevNode;
 }
