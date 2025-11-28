@@ -51,7 +51,7 @@ FibonacciHeap::Node* FibonacciHeap::RemoveMinimumNode()
 		this->rootList.InsertNodeAfter(childNode);
 	}
 
-	DArray<Node*> nodeArray(this->numNodes);
+	DArray<Node*> nodeArray(this->numNodes);		// STPTODO: This can't be right.
 
 	for (unsigned int i = 0; i < nodeArray.GetSize(); i++)
 		nodeArray[i] = nullptr;
