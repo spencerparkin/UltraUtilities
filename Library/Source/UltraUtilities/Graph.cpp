@@ -143,6 +143,7 @@ bool Graph::DijkstrasAlgorithm(Node* nodeA, Node* nodeB, List<Node*>& shortestPa
 
 	// I don't think that we can use the StaticPriorityQueue here, because the
 	// priority of the keys can change while they're present in the queue.
+	// STPTODO: I think our time-complexity would improve if we used a binomial heap or a fibonacci heap here.
 	DynamicPriorityQueue<Node*, NodeCompare> queue;
 
 	nodeA->distance = 0.0;
