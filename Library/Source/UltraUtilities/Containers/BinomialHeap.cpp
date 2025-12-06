@@ -8,6 +8,7 @@ using namespace UU;
 
 BinomialHeap::BinomialHeap()
 {
+	this->canExchangeKeys = false;
 	this->rootNode = nullptr;
 }
 
@@ -255,6 +256,9 @@ bool BinomialHeap::DecreaseKey(Node* node, Node* nodeWithLesserKey)
 	if (node->IsLessThan(nodeWithLesserKey))
 		return false;
 
+	if (!this->canExchangeKeys)
+		return false;
+
 	node->ExchangeKeysWith(nodeWithLesserKey);
 	this->BubbleNode(node);
 	return true;
@@ -267,14 +271,55 @@ void BinomialHeap::KeyWasDecreased(Node* node)
 
 void BinomialHeap::BubbleNode(Node* node)
 {
-	while (node->parentNode)
+	if (this->canExchangeKeys)
 	{
-		if (!node->IsLessThan(node->parentNode))
-			break;
-		else
+		while (node->parentNode)
 		{
-			node->ExchangeKeysWith(node->parentNode);
-			node = node->parentNode;
+			if (!node->IsLessThan(node->parentNode))
+				break;
+			else
+			{
+				node->ExchangeKeysWith(node->parentNode);
+				node = node->parentNode;
+			}
+		}
+	}
+	else
+	{
+		// I *think* we still get the same time-complexity here, but it's just more complicated.
+		Node* childNode = node;
+
+		while (childNode->parentNode)
+		{
+			if (!childNode->IsLessThan(childNode->parentNode))
+				break;
+			
+			Node* parentNode = childNode->parentNode;
+			
+			parentNode->childNode = childNode->childNode;
+			childNode->parentNode = parentNode->parentNode;
+
+			parentNode->parentNode = childNode;
+			childNode->childNode = parentNode;
+
+			Exchange(childNode->siblingNode, parentNode->siblingNode);
+			Exchange(childNode->degree, parentNode->degree);
+
+			if (!childNode->parentNode)
+			{
+				if (this->rootNode == parentNode)
+					this->rootNode = childNode;
+				else
+				{
+					node = this->rootNode;
+					while (node->siblingNode != parentNode)
+						node = node->siblingNode;
+
+					node->siblingNode = childNode;
+				}
+
+				break;
+			}
 		}
 	}
 }
@@ -291,6 +336,11 @@ void BinomialHeap::RemoveNode(Node* node)
 bool BinomialHeap::IsEmpty() const
 {
 	return this->rootNode == nullptr;
+}
+
+void BinomialHeap::SetCanExchangeKeys(bool canExchangeKeys)
+{
+	this->canExchangeKeys = canExchangeKeys;
 }
 
 //---------------------------------- BinomialHeap::Node ----------------------------------

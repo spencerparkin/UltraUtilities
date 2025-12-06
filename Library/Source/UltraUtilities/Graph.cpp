@@ -129,7 +129,7 @@ bool Graph::DijkstrasAlgorithm(Node* nodeA, Node* nodeB, List<Node*>& shortestPa
 	for (Node* node : this->nodeArray)
 	{
 		node->parentNode = nullptr;
-		node->distance = 1.7976931348623158e+308;
+		node->SetWeight(1.7976931348623158e+308);
 		node->considered = false;
 	}
 
@@ -138,15 +138,15 @@ bool Graph::DijkstrasAlgorithm(Node* nodeA, Node* nodeB, List<Node*>& shortestPa
 	public:
 		static bool FirstOfHigherPriorityThanSecond(const Node* keyA, const Node* keyB)
 		{
-			return keyA->distance < keyB->distance;
+			return keyA->GetWeight() < keyB->GetWeight();
 		}
 	};
 
-	// I don't think that we can use the StaticPriorityQueue here, because the
-	// priority of the keys can change while they're present in the queue.
+	// We can't use the StaticPriorityQueue here, because the priority
+	// of the keys can change while they're present in the queue.
 	DynamicPriorityQueue<Node*, NodeCompare> queue;
 
-	nodeA->distance = 0.0;
+	nodeA->SetWeight(0.0);
 	nodeA->considered = true;
 	queue.InsertKey(nodeA);
 
@@ -160,9 +160,9 @@ bool Graph::DijkstrasAlgorithm(Node* nodeA, Node* nodeB, List<Node*>& shortestPa
 			double edgeLength = edge->GetWeight();
 			Node* adjacentNode = edge->Follow(node);
 
-			if (adjacentNode->distance > node->distance + edgeLength)
+			if (adjacentNode->GetWeight() > node->GetWeight() + edgeLength)
 			{
-				adjacentNode->distance = node->distance + edgeLength;
+				adjacentNode->SetWeight(node->GetWeight() + edgeLength);
 				adjacentNode->parentNode = node;
 			}
 
@@ -206,37 +206,41 @@ bool Graph::DijkstrasAlgorithm2(Node* nodeA, Node* nodeB, List<Node*>& shortestP
 	for (Node* node : this->nodeArray)
 	{
 		node->parentNode = nullptr;
-		node->distance = 1.7976931348623158e+308;
+		node->SetWeight(1.7976931348623158e+308);
 		node->considered = false;
 	}
 
 	BinomialHeap queue;
+	queue.SetCanExchangeKeys(false);
 
-	nodeA->distance = 0.0;
+	nodeA->SetWeight(0.0);
 	nodeA->considered = true;
-	queue.Insert(dynamic_cast<BinomialHeap::Node*>(nodeA));
+	queue.InsertNode(dynamic_cast<BinomialHeap::Node*>(nodeA));
 
 	while (!queue.IsEmpty())
 	{
-		Node* node = nullptr;
-		queue.RemoveMinimum<Node*>(node);
+		Node* node = dynamic_cast<Node*>(queue.RemoveMinimalNode());
 
 		for (Edge* edge : node->adjacencyArray)
 		{
 			double edgeLength = edge->GetWeight();
 			Node* adjacentNode = edge->Follow(node);
 
-			if (adjacentNode->distance > node->distance + edgeLength)
-			{
-				adjacentNode->distance = node->distance + edgeLength;
-				adjacentNode->parentNode = node;
-				queue.KeyWasDecreased(dynamic_cast<BinomialHeap::Node*>(adjacentNode));
-			}
-
 			if (!adjacentNode->considered)
 			{
 				adjacentNode->considered = true;
-				queue.Insert(dynamic_cast<BinomialHeap::Node*>(adjacentNode));
+				queue.InsertNode(dynamic_cast<BinomialHeap::Node*>(adjacentNode));
+			}
+
+			if (adjacentNode->GetWeight() > node->GetWeight() + edgeLength)
+			{
+				adjacentNode->SetWeight(node->GetWeight() + edgeLength);
+				adjacentNode->parentNode = node;
+
+				// The correctness of the algorithm ensures, I believe, that
+				// the adjacent node is a member of the binomial heap if we
+				// get here.  Otherwise, this call would not make sense.
+				queue.KeyWasDecreased(dynamic_cast<BinomialHeap::Node*>(adjacentNode));
 			}
 		}
 	}
@@ -261,7 +265,6 @@ bool Graph::DijkstrasAlgorithm2(Node* nodeA, Node* nodeB, List<Node*>& shortestP
 Graph::Node::Node()
 {
 	this->considered = false;
-	this->distance = 0.0;
 	this->parentNode = nullptr;
 }
 
@@ -272,6 +275,10 @@ Graph::Node::Node()
 /*virtual*/ double Graph::Node::GetWeight() const
 {
 	return 0.0;
+}
+
+/*virtual*/ void Graph::Node::SetWeight(double weight)
+{
 }
 
 bool Graph::Node::DepthFirstSearchRecursive(NodeVisitor* visitor)
@@ -308,6 +315,10 @@ Graph::Edge::Edge()
 /*virtual*/ double Graph::Edge::GetWeight() const
 {
 	return 0.0;
+}
+
+/*virtual*/ void Graph::Edge::SetWeight(double weight)
+{
 }
 
 bool Graph::Edge::Link(Node* nodeA, Node* nodeB)

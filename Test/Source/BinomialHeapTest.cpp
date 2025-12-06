@@ -49,6 +49,7 @@ TEST_CASE("BinomialHeaps", "[binomial_heap]")
 	SECTION("Decrease key.")
 	{
 		BinomialHeap heap;
+		heap.SetCanExchangeKeys(true);
 
 		DArray<BinomialHeap::TypedNode<int>*> nodeArray;
 		for (int i = 0; i < 1000; i++)
@@ -76,6 +77,7 @@ TEST_CASE("BinomialHeaps", "[binomial_heap]")
 	SECTION("Random removal.")
 	{
 		BinomialHeap heap;
+		heap.SetCanExchangeKeys(true);
 
 		for (int i = 0; i < 1000; i++)
 		{

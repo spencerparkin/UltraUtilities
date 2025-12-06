@@ -28,4 +28,15 @@
 #define UU_MIN(a,b)			((a) < (b) ? (a) : (b))
 #define UU_MAX(a,b)			((a) > (b) ? (a) : (b))
 
+namespace UU
+{
+	template<typename T>
+	inline void Exchange(T& a, T& b)
+	{
+		T temp = a;
+		a = b;
+		b = temp;
+	}
+}
+
 // TODO: Generate doxegen stuff?

@@ -92,8 +92,8 @@ namespace UU
 		bool DecreaseKey(Node* node, Node* nodeWithLesserKey);
 
 		/**
-		 * If the user decreased the key of the given node, which must be in this
-		 * heap, then this method must be called to adjust the heap accordingly.
+		 * If the user decreased the key of the given node (which must be in this
+		 * heap) then this method must be called to adjust the heap accordingly.
 		 * Note that it is not legal to increase the value of a key.
 		 */
 		void KeyWasDecreased(Node* node);
@@ -110,6 +110,13 @@ namespace UU
 		 * Tell us if there are any nodes in this heap.
 		 */
 		bool IsEmpty() const;
+
+		/**
+		 * When a key is decreased, we either shuffle keys between nodes, or
+		 * we shuffle nodes around in the heap.  If nodes and keys cannot be
+		 * separated, then pass false here.
+		 */
+		void SetCanExchangeKeys(bool canExchangeKeys);
 
 		/**
 		 * This can be used to walk the entire heap.
@@ -232,6 +239,7 @@ namespace UU
 		bool AppendNode(Node* node, Node*& lastNode);
 		void BubbleNode(Node* node);
 
+		bool canExchangeKeys;
 		Node* rootNode;
 	};
 }

@@ -209,6 +209,9 @@ namespace UU
 	/**
 	 * Unlike @ref StaticDynamicPriority queue, here the stored keys of
 	 * the queue can change priority while being present in the queue.
+	 * The @ref BinomialHeap container is more efficient, but has the
+	 * limitation that priorities can only go one direction (down.)  Here
+	 * they can go either direction (up or down.)
 	 */
 	template<typename T, typename C = PriorityQueueComparitor<T>>
 	class DynamicPriorityQueue

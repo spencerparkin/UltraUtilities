@@ -104,6 +104,7 @@ namespace UU
 		 * so it should have better time-complexity.  Note that in order for this method to work, the graph
 		 * node must be a class that derives from the base graph node and from the binomial heap node.  In
 		 * other words, multiple inheritance is required.  Nodes of the graph must also be binomial heap nodes.
+		 * We rely on a dynamic cross-cast so that we can cast between either node type.
 		 */
 		bool DijkstrasAlgorithm2(Node* nodeA, Node* nodeB, List<Node*>& shortestPath, double& shortestDistance);
 
@@ -121,14 +122,17 @@ namespace UU
 			virtual ~Node();
 
 			/**
-			 * Some algorithms take node-weight into account.  For those that do, this
-			 * method can be overridden to provide that weight.  By default, here we
-			 * just return zero.
+			 * Some algorithms take node-weight (or sometimes interpreted as distance) into account.
+			 * For those that do, this method can be overridden to provide that weight.  By default,
+			 * here we just return zero.
 			 */
 			virtual double GetWeight() const;
 
-		public:
-			mutable double distance;
+			/**
+			 * The derived class is reponsible for storing the given weight (or distance)
+			 * associated with the node.  By default, here we do nothing.
+			 */
+			virtual void SetWeight(double weight);
 
 		protected:
 
@@ -160,6 +164,12 @@ namespace UU
 			 * that may prevent some algorithms from being correct or even terminating.
 			 */
 			virtual double GetWeight() const;
+
+			/**
+			 * The derived class is responsible for storing the given weight or distance.
+			 * By default, here we do nothing.
+			 */
+			virtual void SetWeight(double weight);
 
 			/**
 			 * Have this edge connect the two given nodes.  This will fail if this
