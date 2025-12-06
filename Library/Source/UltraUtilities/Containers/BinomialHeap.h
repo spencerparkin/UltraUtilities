@@ -92,6 +92,13 @@ namespace UU
 		bool DecreaseKey(Node* node, Node* nodeWithLesserKey);
 
 		/**
+		 * If the user decreased the key of the given node, which must be in this
+		 * heap, then this method must be called to adjust the heap accordingly.
+		 * Note that it is not legal to increase the value of a key.
+		 */
+		void KeyWasDecreased(Node* node);
+
+		/**
 		 * This method can be used to remove any node from the binomial heap,
 		 * even if it's not one with minimal key.
 		 * 

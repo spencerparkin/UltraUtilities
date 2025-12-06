@@ -100,6 +100,14 @@ namespace UU
 		bool DijkstrasAlgorithm(Node* nodeA, Node* nodeB, List<Node*>& shortestPath, double& shortestDistance);
 
 		/**
+		 * See @ref DijkstrasAlgorithm.  This one uses a binomial heap instead of the other kind of heap,
+		 * so it should have better time-complexity.  Note that in order for this method to work, the graph
+		 * node must be a class that derives from the base graph node and from the binomial heap node.  In
+		 * other words, multiple inheritance is required.  Nodes of the graph must also be binomial heap nodes.
+		 */
+		bool DijkstrasAlgorithm2(Node* nodeA, Node* nodeB, List<Node*>& shortestPath, double& shortestDistance);
+
+		/**
 		 * These are the nodes (or vertices) of the graph.  Typically, the user will
 		 * define a derivative of this class so as to provide satalite data or override
 		 * virtual methods.

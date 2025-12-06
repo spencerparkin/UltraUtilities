@@ -1,6 +1,7 @@
 #include "UltraUtilities/Graph.h"
 #include "UltraUtilities/Containers/List.hpp"
 #include "UltraUtilities/Containers/PriorityQueue.hpp"
+#include "UltraUtilities/Containers/BinomialHeap.h"
 
 using namespace UU;
 
@@ -143,7 +144,6 @@ bool Graph::DijkstrasAlgorithm(Node* nodeA, Node* nodeB, List<Node*>& shortestPa
 
 	// I don't think that we can use the StaticPriorityQueue here, because the
 	// priority of the keys can change while they're present in the queue.
-	// STPTODO: I think our time-complexity would improve if we used a binomial heap or a fibonacci heap here.
 	DynamicPriorityQueue<Node*, NodeCompare> queue;
 
 	nodeA->distance = 0.0;
@@ -170,6 +170,73 @@ bool Graph::DijkstrasAlgorithm(Node* nodeA, Node* nodeB, List<Node*>& shortestPa
 			{
 				adjacentNode->considered = true;
 				queue.InsertKey(adjacentNode);
+			}
+		}
+	}
+
+	if (nodeB->parentNode == nullptr)
+		return false;
+
+	Node* node = nodeB;
+	shortestPath.PushFront(node);
+
+	do
+	{
+		node = node->parentNode;
+		shortestPath.PushFront(node);
+	} while (node != nodeA);
+
+	return true;
+}
+
+bool Graph::DijkstrasAlgorithm2(Node* nodeA, Node* nodeB, List<Node*>& shortestPath, double& shortestDistance)
+{
+	if (!dynamic_cast<BinomialHeap::Node*>(nodeA) || !dynamic_cast<BinomialHeap::Node*>(nodeB))
+		return false;
+
+	shortestPath.Clear();
+	shortestDistance = 0.0;
+
+	if (nodeA == nodeB)
+	{
+		shortestPath.PushBack(nodeA);
+		return true;
+	}
+
+	for (Node* node : this->nodeArray)
+	{
+		node->parentNode = nullptr;
+		node->distance = 1.7976931348623158e+308;
+		node->considered = false;
+	}
+
+	BinomialHeap queue;
+
+	nodeA->distance = 0.0;
+	nodeA->considered = true;
+	queue.Insert(dynamic_cast<BinomialHeap::Node*>(nodeA));
+
+	while (!queue.IsEmpty())
+	{
+		Node* node = nullptr;
+		queue.RemoveMinimum<Node*>(node);
+
+		for (Edge* edge : node->adjacencyArray)
+		{
+			double edgeLength = edge->GetWeight();
+			Node* adjacentNode = edge->Follow(node);
+
+			if (adjacentNode->distance > node->distance + edgeLength)
+			{
+				adjacentNode->distance = node->distance + edgeLength;
+				adjacentNode->parentNode = node;
+				queue.KeyWasDecreased(dynamic_cast<BinomialHeap::Node*>(adjacentNode));
+			}
+
+			if (!adjacentNode->considered)
+			{
+				adjacentNode->considered = true;
+				queue.Insert(dynamic_cast<BinomialHeap::Node*>(adjacentNode));
 			}
 		}
 	}

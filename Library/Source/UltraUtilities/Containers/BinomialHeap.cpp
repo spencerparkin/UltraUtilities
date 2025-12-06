@@ -260,6 +260,11 @@ bool BinomialHeap::DecreaseKey(Node* node, Node* nodeWithLesserKey)
 	return true;
 }
 
+void BinomialHeap::KeyWasDecreased(Node* node)
+{
+	this->BubbleNode(node);
+}
+
 void BinomialHeap::BubbleNode(Node* node)
 {
 	while (node->parentNode)
