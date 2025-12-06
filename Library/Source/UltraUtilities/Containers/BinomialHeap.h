@@ -1,7 +1,7 @@
 #pragma once
 
 #include "UltraUtilities/Defines.h"
-#include "UltraUtilities/Containers/Queue.hpp"
+#include "UltraUtilities/Containers/List.hpp"
 
 namespace UU
 {
@@ -112,12 +112,12 @@ namespace UU
 		{
 			if (this->rootNode)
 			{
-				Queue<Node*> queue;
+				List<Node*> queue;
 				queue.PushBack(this->rootNode);
-				while (queue.GetSize() > 0)
+				while (queue.GetNumValues() > 0)
 				{
 					Node* node = nullptr;
-					queue.PopFront(node);
+					queue.PopFront(&node);
 
 					if (!lambda(node))
 						return false;

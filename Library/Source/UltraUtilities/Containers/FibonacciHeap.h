@@ -1,7 +1,7 @@
 #pragma once
 
 #include "UltraUtilities/Containers/LoopedList.h"
-#include "UltraUtilities/Containers/Queue.hpp"
+#include "UltraUtilities/Containers/List.hpp"
 
 namespace UU
 {
@@ -108,12 +108,12 @@ namespace UU
 		template<typename Lambda>
 		bool ForAllNodes(Lambda lambda) const
 		{
-			Queue<const LoopedList*> listQueue;
+			List<const LoopedList*> listQueue;
 			listQueue.PushBack(&this->rootList);
-			while (listQueue.GetSize() > 0)
+			while (listQueue.GetNumValues() > 0)
 			{
 				const LoopedList* nodeList = nullptr;
-				listQueue.PopFront(nodeList);
+				listQueue.PopFront(&nodeList);
 
 				const Node* node = (const Node*)nodeList->GetMainNode();
 				for (unsigned int i = 0; i < nodeList->GetNumNodes(); i++)
