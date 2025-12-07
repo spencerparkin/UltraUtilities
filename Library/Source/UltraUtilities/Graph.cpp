@@ -2,6 +2,7 @@
 #include "UltraUtilities/Containers/List.hpp"
 #include "UltraUtilities/Containers/PriorityQueue.hpp"
 #include "UltraUtilities/Containers/BinomialHeap.h"
+#include "UltraUtilities/Containers/FibonacciHeap.h"
 
 using namespace UU;
 
@@ -174,18 +175,7 @@ bool Graph::DijkstrasAlgorithm(Node* nodeA, Node* nodeB, List<Node*>& shortestPa
 		}
 	}
 
-	if (nodeB->parentNode == nullptr)
-		return false;
-
-	Node* node = nodeB;
-	shortestPath.PushFront(node);
-
-	do
-	{
-		node = node->parentNode;
-		shortestPath.PushFront(node);
-	} while (node != nodeA);
-
+	nodeB->CollectParentChain(shortestPath, true);
 	return true;
 }
 
@@ -245,18 +235,62 @@ bool Graph::DijkstrasAlgorithm2(Node* nodeA, Node* nodeB, List<Node*>& shortestP
 		}
 	}
 
-	if (nodeB->parentNode == nullptr)
+	nodeB->CollectParentChain(shortestPath, true);
+	return true;
+}
+
+bool Graph::DijkstrasAlgorithm3(Node* nodeA, Node* nodeB, List<Node*>& shortestPath, double& shortestDistance)
+{
+	if (!dynamic_cast<FibonacciHeap::Node*>(nodeA) || !dynamic_cast<FibonacciHeap::Node*>(nodeB))
 		return false;
 
-	Node* node = nodeB;
-	shortestPath.PushFront(node);
+	shortestPath.Clear();
+	shortestDistance = 0.0;
 
-	do
+	if (nodeA == nodeB)
 	{
-		node = node->parentNode;
-		shortestPath.PushFront(node);
-	} while (node != nodeA);
+		shortestPath.PushBack(nodeA);
+		return true;
+	}
 
+	for (Node* node : this->nodeArray)
+	{
+		node->parentNode = nullptr;
+		node->SetWeight(1.7976931348623158e+308);
+		node->considered = false;
+	}
+
+	FibonacciHeap queue;
+
+	nodeA->SetWeight(0.0);
+	nodeA->considered = true;
+	queue.InsertNode(dynamic_cast<FibonacciHeap::Node*>(nodeA));
+
+	while (queue.GetNumNodes() > 0)
+	{
+		Node* node = dynamic_cast<Node*>(queue.RemoveMinimumNode());
+
+		for (Edge* edge : node->adjacencyArray)
+		{
+			double edgeLength = edge->GetWeight();
+			Node* adjacentNode = edge->Follow(node);
+
+			if (!adjacentNode->considered)
+			{
+				adjacentNode->considered = true;
+				queue.InsertNode(dynamic_cast<FibonacciHeap::Node*>(adjacentNode));
+			}
+
+			if (adjacentNode->GetWeight() > node->GetWeight() + edgeLength)
+			{
+				adjacentNode->SetWeight(node->GetWeight() + edgeLength);
+				adjacentNode->parentNode = node;
+				queue.KeyWasDecreased(dynamic_cast<FibonacciHeap::Node*>(adjacentNode));
+			}
+		}
+	}
+
+	nodeB->CollectParentChain(shortestPath, true);
 	return true;
 }
 
@@ -270,6 +304,28 @@ Graph::Node::Node()
 
 /*virtual*/ Graph::Node::~Node()
 {
+}
+
+void Graph::Node::CollectParentChain(List<Node*>& nodeList, bool reverseOrder)
+{
+	Node* node = this;
+
+	if (reverseOrder)
+	{
+		while (node)
+		{
+			nodeList.PushFront(node);
+			node = node->parentNode;
+		}
+	}
+	else
+	{
+		while (node)
+		{
+			nodeList.PushBack(node);
+			node = node->parentNode;
+		}
+	}
 }
 
 /*virtual*/ double Graph::Node::GetWeight() const

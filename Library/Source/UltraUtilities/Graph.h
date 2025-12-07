@@ -109,6 +109,13 @@ namespace UU
 		bool DijkstrasAlgorithm2(Node* nodeA, Node* nodeB, List<Node*>& shortestPath, double& shortestDistance);
 
 		/**
+		 * This is just like @ref DijkstrasAlgorithm2, but here we're using a fobonacci heap instead of a binomial heap.
+		 */
+		bool DijkstrasAlgorithm3(Node* nodeA, Node* nodeB, List<Node*>& shortestPath, double& shortestDistance);
+
+		//bool GetConnectedComponents(DArray<Graph*>& ConnectedComponentsArray) const;
+
+		/**
 		 * These are the nodes (or vertices) of the graph.  Typically, the user will
 		 * define a derivative of this class so as to provide satalite data or override
 		 * virtual methods.
@@ -133,6 +140,13 @@ namespace UU
 			 * associated with the node.  By default, here we do nothing.
 			 */
 			virtual void SetWeight(double weight);
+
+			/**
+			 * Collect all nodes (include this one) from here to the root of this node's
+			 * parent chain.  The parent of a node is not part of the graph structure,
+			 * but nodes are given parents during certain graph algorithms.
+			 */
+			void CollectParentChain(List<Node*>& nodeList, bool reverseOrder);
 
 		protected:
 
