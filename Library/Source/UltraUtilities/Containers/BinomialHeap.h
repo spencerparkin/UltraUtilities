@@ -94,7 +94,9 @@ namespace UU
 		/**
 		 * If the user decreased the key of the given node (which must be in this
 		 * heap) then this method must be called to adjust the heap accordingly.
-		 * Note that it is not legal to increase the value of a key.
+		 * Note that it is not legal to increase the value of a key.  If you ever
+		 * increase the value of a key in the heap, then all bets are off, and we
+		 * leave the remainder of the behavior of the heap undefined.
 		 */
 		void KeyWasDecreased(Node* node);
 

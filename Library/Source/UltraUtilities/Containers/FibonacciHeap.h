@@ -79,6 +79,26 @@ namespace UU
 		}
 
 		/**
+		 * If the user decreased the key of a node, then this call must be made
+		 * to fixup the heap.  Note that it is not legal to increase the value
+		 * of a key in the heap.  If you do, then all bets are off, and the remainder
+		 * of behavior of this heap is left undefined.  Note also that no check is
+		 * made to make sure that the given node is actually a member of this heap.
+		 * It is up to the caller to make sure this is the case.
+		 */
+		void KeyWasDecreased(Node* node);
+
+		/**
+		 * This method can be used to remove any node from the fibonacci heap,
+		 * even if it's not one with minimal key.  It is up to the caller to
+		 * ensure that this is actually a node within the heap.  If this is not
+		 * the case, then the behavior is undefined and heap corruption will ensue.
+		 *
+		 * @param[in,out] node This is assumed to be a node within this heap.
+		 */
+		void RemoveNode(Node* node);
+
+		/**
 		 * Merge the two given heaps into this heap, destroying them
 		 * in the process.
 		 */
@@ -144,12 +164,22 @@ namespace UU
 			virtual bool IsGreaterThan(const Node* node) const = 0;
 			virtual bool IsLessThan(const Node* node) const = 0;
 			virtual bool IsEqualTo(const Node* node) const = 0;
+			virtual void MakeUniquelyMinimal() = 0;
+			virtual bool IsUniquelyMinimal() const = 0;
 
 			bool IsHeapOrdered() const;
 
 		protected:
 			LoopedList childList;
 			Node* parentNode;
+
+			// The only purpose of this boolean is to help us obtain the desired time
+			// bounds for the method that decreases a key in the heap.  In most cases,
+			// I have at least an intuitive understanding of what makes an algorithm
+			// efficient, even if I can't follow the proof from start to finish.  In
+			// this case, however, I don't get it at all, and am just following the
+			// recipe from the book.
+			bool mark;
 		};
 
 		/**
@@ -181,6 +211,16 @@ namespace UU
 			virtual bool IsEqualTo(const Node* node) const override
 			{
 				return this->key == static_cast<const TypedNode<T>*>(node)->key;
+			}
+
+			virtual void MakeUniquelyMinimal() override
+			{
+				this->key = (T)-1;
+			}
+
+			virtual bool IsUniquelyMinimal() const override
+			{
+				return this->key == (T)-1;
 			}
 
 		public:

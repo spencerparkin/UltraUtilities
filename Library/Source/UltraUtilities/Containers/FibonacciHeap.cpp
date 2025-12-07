@@ -77,12 +77,14 @@ FibonacciHeap::Node* FibonacciHeap::RemoveMinimumNode()
 			{
 				rootNodeA->childList.InsertNodeAfter(rootNodeB);
 				rootNodeB->parentNode = rootNodeA;
+				rootNodeB->mark = false;
 				this->rootList.InsertNodeAfter(rootNodeA);
 			}
 			else
 			{
 				rootNodeB->childList.InsertNodeAfter(rootNodeA);
 				rootNodeA->parentNode = rootNodeB;
+				rootNodeA->mark = false;
 				this->rootList.InsertNodeAfter(rootNodeB);
 			}
 		}
@@ -104,6 +106,53 @@ FibonacciHeap::Node* FibonacciHeap::RemoveMinimumNode()
 
 	this->numNodes--;
 	return minimalNode;
+}
+
+void FibonacciHeap::KeyWasDecreased(Node* node)
+{
+	Node* possibleNewMinimum = node;
+
+	if (node->parentNode && node->parentNode->IsGreaterThan(node))
+	{
+		Node* parentNode = node->parentNode;
+		parentNode->childList.RemoveNode(node);
+		node->parentNode = nullptr;
+		node->mark = false;
+		this->rootList.InsertNodeAfter(node);
+
+		node = parentNode;
+		while (node->parentNode)
+		{
+			if (!node->mark)
+			{
+				node->mark = true;
+				break;
+			}
+			else
+			{
+				parentNode = node->parentNode;
+				parentNode->childList.RemoveNode(node);
+				node->parentNode = nullptr;
+				node->mark = false;
+				this->rootList.InsertNodeAfter(node);
+				node = parentNode;
+			}
+		}
+	}
+
+	if (possibleNewMinimum->IsLessThan((Node*)this->rootList.GetMainNode()))
+	{
+		this->rootList.SetMainNode(possibleNewMinimum);
+	}
+}
+
+void FibonacciHeap::RemoveNode(Node* node)
+{
+	node->MakeUniquelyMinimal();
+	this->KeyWasDecreased(node);
+	Node* removedNode = this->RemoveMinimumNode();
+	UU_ASSERT(node == removedNode && removedNode->IsUniquelyMinimal());
+	delete removedNode;
 }
 
 void FibonacciHeap::Merge(FibonacciHeap* heapA, FibonacciHeap* heapB)
@@ -165,6 +214,7 @@ bool FibonacciHeap::IsValid() const
 
 FibonacciHeap::Node::Node()
 {
+	this->mark = false;
 	this->parentNode = nullptr;
 }
 
