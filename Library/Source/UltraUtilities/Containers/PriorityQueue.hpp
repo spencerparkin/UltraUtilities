@@ -92,7 +92,7 @@ namespace UU
 			while (i != 0)
 			{
 				unsigned int j = Parent(i);
-				if (this->array[j] >= key)
+				if (!C::FirstOfHigherPriorityThanSecond(key, this->array[j]))
 					break;
 
 				this->array[i] = this->array[j];

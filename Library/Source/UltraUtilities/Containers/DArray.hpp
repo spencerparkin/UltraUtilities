@@ -277,7 +277,7 @@ namespace UU
 		}
 
 		/**
-		 * This is a super lame and slow bubble sort.  It is a stable sort.
+		 * This is a super lame and slow bubble sort.  It is a stable sort, though.
 		 * I think the worst-case running time may be when the list is in reverse order.
 		 * The best-case running time, though, is linear when the list is already sorted.
 		 */
