@@ -16,6 +16,8 @@ namespace UU
 	{
 	public:
 		Graph();
+		Graph(const Graph& graph);
+		Graph(Graph&& graph) noexcept;
 		virtual ~Graph();
 
 		class Node;
@@ -113,7 +115,18 @@ namespace UU
 		 */
 		bool DijkstrasAlgorithm3(Node* nodeA, Node* nodeB, List<Node*>& shortestPath, double& shortestDistance);
 
-		//bool GetConnectedComponents(DArray<Graph*>& ConnectedComponentsArray) const;
+		/**
+		 * Break this graph into one or more well-connected graphs.
+		 * Note that the caller will need to delete the graph pointers returned here.
+		 */
+		bool GetConnectedComponents(DArray<Graph*>& connectedComponentsArray);
+
+		/**
+		 * Return the first hamitonian path we can find in the graph, if at all.
+		 * Note that this is possibly an NP-hard problem, so it's not very efficient,
+		 * to say the least.
+		 */
+		bool FindHamiltonianPath(List<Node*>& nodePathList);
 
 		/**
 		 * These are the nodes (or vertices) of the graph.  Typically, the user will
@@ -158,6 +171,7 @@ namespace UU
 			DArray<Edge*> adjacencyArray;
 			mutable bool considered;
 			mutable Node* parentNode;
+			mutable unsigned int offset;
 		};
 
 		/**
@@ -167,6 +181,8 @@ namespace UU
 		 */
 		class UU_API Edge
 		{
+			friend class Graph;
+
 		public:
 			Edge();
 			virtual ~Edge();
@@ -206,6 +222,7 @@ namespace UU
 
 		protected:
 			Node* nodeArray[2];
+			mutable unsigned int offset;
 		};
 
 		/**
@@ -249,6 +266,16 @@ namespace UU
 		 * This is used internally to prepare for graph traversal.
 		 */
 		void ClearTraversalFlags();
+
+		/**
+		 * Give each node and edge knowledge of where it is in the array.
+		 */
+		void AssignOffsets();
+
+		/**
+		 * Given a set of edges, do they form a path through the graph in the form of a sequence of nodes?
+		 */
+		bool ConstructPathFromEdges(DArray<Edge*>& givenEdgeArray, List<Node*>& nodePathList);
 
 		DArray<Node*> nodeArray;
 		DArray<Edge*> edgeArray;

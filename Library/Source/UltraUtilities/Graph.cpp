@@ -3,6 +3,8 @@
 #include "UltraUtilities/Containers/PriorityQueue.hpp"
 #include "UltraUtilities/Containers/BinomialHeap.h"
 #include "UltraUtilities/Containers/FibonacciHeap.h"
+#include "UltraUtilities/Containers/HashSet.hpp"
+#include "UltraUtilities/Math/Combinatorics.h"
 
 using namespace UU;
 
@@ -10,6 +12,23 @@ using namespace UU;
 
 Graph::Graph()
 {
+}
+
+Graph::Graph(const Graph& graph)
+{
+	//...
+}
+
+Graph::Graph(Graph&& graph) noexcept
+{
+	for (Node* node : graph.nodeArray)
+		this->nodeArray.Push(node);
+
+	for (Edge* edge : graph.edgeArray)
+		this->edgeArray.Push(edge);
+
+	graph.nodeArray.SetSize(0);
+	graph.edgeArray.SetSize(0);
 }
 
 /*virtual*/ Graph::~Graph()
@@ -294,10 +313,174 @@ bool Graph::DijkstrasAlgorithm3(Node* nodeA, Node* nodeB, List<Node*>& shortestP
 	return true;
 }
 
+bool Graph::GetConnectedComponents(DArray<Graph*>& connectedComponentsArray)
+{
+	while (this->nodeArray.GetSize() > 0)
+	{
+		this->AssignOffsets();
+
+		Graph* graph = new Graph();
+		connectedComponentsArray.Push(graph);
+
+		HashSet<unsigned int> edgeOffsetSet;
+
+		NodeLambdaVisitor visitor([graph, &edgeOffsetSet](Node* node) -> bool
+			{
+				graph->nodeArray.Push(node);
+				for (Edge* edge : node->adjacencyArray)
+					edgeOffsetSet.Insert(edge->offset);
+				return true;
+			});
+
+		this->BreadthFirstSearch(this->nodeArray[0], &visitor);
+
+		// This is slow.
+		graph->nodeArray.Sort([](Node* nodeA, Node* nodeB) -> int
+			{
+				return nodeA->offset > nodeB->offset;
+			});
+
+		for (Node* node : graph->nodeArray)
+			this->nodeArray.QuickRemove(node->offset);
+
+		DArray<unsigned int> edgeOffsetArray;
+		for (unsigned int offset : edgeOffsetSet)
+			edgeOffsetArray.Push(offset);
+
+		// This is slow.
+		edgeOffsetArray.Sort([](int offsetA, int offsetB) -> int
+			{
+				return offsetA > offsetB;
+			});
+
+		for (unsigned int offset : edgeOffsetArray)
+		{
+			graph->edgeArray.Push(this->edgeArray[offset]);
+			this->edgeArray.QuickRemove(offset);
+		}
+	}
+
+	return true;
+}
+
+bool Graph::FindHamiltonianPath(List<Node*>& nodePathList)
+{
+	nodePathList.Clear();
+
+	if (this->nodeArray.GetSize() == 0)
+		return true;
+
+	if (this->nodeArray.GetSize() == 1)
+	{
+		nodePathList.PushBack(this->nodeArray[0]);
+		return true;
+	}
+
+	// This is going to be a brute-force attack, and the running time
+	// is going to be absolutely abysmal, but it will be technically
+	// correct, I believe.
+
+	bool pathFound = false;
+
+	for (unsigned int numberOfChoices = this->edgeArray.GetSize(); numberOfChoices > 0; numberOfChoices--)
+	{
+		LambdaCombinatorialEnumerator enumerator([this, &nodePathList, &pathFound](const DArray<unsigned int>& offsetArray) -> bool
+			{
+				DArray<Edge*> chosenEdgeArray;
+				chosenEdgeArray.SetCapacity(offsetArray.GetSize());
+				for (unsigned int i = 0; i < offsetArray.GetSize(); i++)
+					chosenEdgeArray.Push(this->edgeArray[offsetArray[i]]);
+
+				if (this->ConstructPathFromEdges(chosenEdgeArray, nodePathList) && nodePathList.GetNumValues() == this->nodeArray.GetSize())
+				{
+					pathFound = true;
+					return false;
+				}
+
+				return true;
+			});
+
+		DArray<unsigned int> offsetArray;
+		offsetArray.SetCapacity(this->edgeArray.GetSize());
+		for (unsigned int i = 0; i < this->edgeArray.GetSize(); i++)
+			offsetArray.Push(i);
+
+		enumerator.VisitAllCombinations(numberOfChoices, offsetArray);
+
+		if (pathFound)
+			break;
+	}
+
+	return pathFound;
+}
+
+bool Graph::ConstructPathFromEdges(DArray<Edge*>& givenEdgeArray, List<Node*>& nodePathList)
+{
+	if (givenEdgeArray.GetSize() == 0)
+		return false;
+
+	nodePathList.Clear();
+	nodePathList.PushBack(givenEdgeArray[0]->nodeArray[0]);
+
+	while (nodePathList.GetNumValues() < givenEdgeArray.GetSize() + 1)
+	{
+		unsigned int integrationCount = 0;
+
+		for (unsigned int i = 0; i < givenEdgeArray.GetSize(); i++)
+		{
+			Edge* edge = givenEdgeArray[i];
+
+			bool integratedEdge = false;
+
+			if (edge->nodeArray[0] == nodePathList.GetFirst())
+			{
+				nodePathList.PushFront(edge->nodeArray[1]);
+				integratedEdge = true;
+			}
+			else if (edge->nodeArray[1] == nodePathList.GetFirst())
+			{
+				nodePathList.PushFront(edge->nodeArray[0]);
+				integratedEdge = true;
+			}
+			else if (edge->nodeArray[0] == nodePathList.GetLast())
+			{
+				nodePathList.PushBack(edge->nodeArray[1]);
+				integratedEdge = true;
+			}
+			else if (edge->nodeArray[1] == nodePathList.GetLast())
+			{
+				nodePathList.PushBack(edge->nodeArray[0]);
+				integratedEdge = true;
+			}
+
+			if (integratedEdge)
+			{
+				givenEdgeArray.QuickRemove(i);
+				integrationCount++;
+			}
+		}
+
+		if (integrationCount == 0)
+			return false;
+	}
+
+	return true;
+}
+
+void Graph::AssignOffsets()
+{
+	for (unsigned int i = 0; i < this->nodeArray.GetSize(); i++)
+		this->nodeArray[i]->offset = i;
+
+	for (unsigned int i = 0; i < this->edgeArray.GetSize(); i++)
+		this->edgeArray[i]->offset = i;
+}
+
 //------------------------------------ Graph::Node ------------------------------------
 
 Graph::Node::Node()
 {
+	this->offset = -1;
 	this->considered = false;
 	this->parentNode = nullptr;
 }
@@ -360,6 +543,7 @@ bool Graph::Node::DepthFirstSearchRecursive(NodeVisitor* visitor)
 
 Graph::Edge::Edge()
 {
+	this->offset = -1;
 	this->nodeArray[0] = nullptr;
 	this->nodeArray[1] = nullptr;
 }

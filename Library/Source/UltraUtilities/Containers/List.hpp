@@ -82,6 +82,22 @@ namespace UU
 		}
 
 		/**
+		 * Return the first value in the list.  The user must check that the list is non-empty first.
+		 */
+		V GetFirst()
+		{
+			return static_cast<ListNode<V>*>(this->list.GetHead())->value;
+		}
+
+		/**
+		 * Return the last value in the list.  The user must check that the list is non-empty first.
+		 */
+		V GetLast()
+		{
+			return static_cast<ListNode<V>*>(this->list.GetTail())->value;
+		}
+
+		/**
 		 * Set the value of list item i.  Note that this is slow.
 		 */
 		bool SetAt(unsigned int i, V value)

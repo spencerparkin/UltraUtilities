@@ -46,6 +46,8 @@ set(ULTRA_UTILITIES_SOURCES
 	Source/UltraUtilities/Compression/LZ77Compression.h
 	Source/UltraUtilities/Math/Functions.cpp
 	Source/UltraUtilities/Math/Functions.h
+	Source/UltraUtilities/Math/Combinatorics.cpp
+	Source/UltraUtilities/Math/Combinatorics.h
 	uu.natvis
 )
 
