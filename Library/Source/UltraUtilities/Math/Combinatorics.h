@@ -28,6 +28,11 @@ namespace UU
 		bool VisitAllPermutations(unsigned int numberOfChoices, DArray<unsigned int>& thingsArray);
 
 		/**
+		 * Visit all permutations of the given array of things.
+		 */
+		bool VisitAllPermutationsOf(DArray<unsigned int>& thingsArray);
+
+		/**
 		 * This gets called to visit each choices.  The user is, of course, expected to override it.
 		 * 
 		 * @return Return true to keep being called; false to terminate visitation.

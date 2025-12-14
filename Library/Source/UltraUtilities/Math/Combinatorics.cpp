@@ -47,7 +47,45 @@ bool CombinatorialEnumerator::VisitAllCombinations(unsigned int numberOfChoices,
 
 bool CombinatorialEnumerator::VisitAllPermutations(unsigned int numberOfChoices, DArray<unsigned int>& thingsArray)
 {
-	// STPTODO: Write this.  Could we base it on the VisitAllCombinations algorithm?
+	LambdaCombinatorialEnumerator enumerator([this](const DArray<unsigned int>& chosenThingsArray) -> bool
+		{
+			DArray<unsigned int> chosenThingsCopy = chosenThingsArray;
+			return this->VisitAllPermutationsOf(chosenThingsCopy);
+		});
 
-	return false;
+	return enumerator.VisitAllCombinations(numberOfChoices, thingsArray);
+}
+
+bool CombinatorialEnumerator::VisitAllPermutationsOf(DArray<unsigned int>& thingsArray)
+{
+	if (thingsArray.GetSize() == 1)
+		return this->VisitChoice(thingsArray);
+
+	unsigned int thing = thingsArray.Pop();
+
+	LambdaCombinatorialEnumerator enumerator([this, thing](const DArray<unsigned int>& subChosenThingsArray) -> bool
+		{
+			DArray<unsigned int> chosenThingsArray;
+			chosenThingsArray.SetCapacity(subChosenThingsArray.GetSize() + 1);
+
+			for (unsigned int i = 0; i < chosenThingsArray.GetSize(); i++)
+			{
+				unsigned int k = 0;
+
+				for (unsigned int j = 0; j < chosenThingsArray.GetSize(); j++)
+				{
+					if (i == j)
+						chosenThingsArray.Push(thing);
+					else
+						chosenThingsArray.Push(subChosenThingsArray[k++]);
+				}
+
+				if (!this->VisitChoice(chosenThingsArray))
+					return false;
+			}
+
+			return true;
+		});
+
+	return enumerator.VisitAllPermutationsOf(thingsArray);
 }
