@@ -68,7 +68,7 @@ bool CombinatorialEnumerator::VisitAllPermutationsOf(DArray<unsigned int>& thing
 			DArray<unsigned int> chosenThingsArray;
 			chosenThingsArray.SetCapacity(subChosenThingsArray.GetSize() + 1);
 
-			for (unsigned int i = 0; i < chosenThingsArray.GetSize(); i++)
+			for (unsigned int i = 0; i < chosenThingsArray.GetCapacity(); i++)
 			{
 				chosenThingsArray.SetSize(0);
 				unsigned int k = 0;
