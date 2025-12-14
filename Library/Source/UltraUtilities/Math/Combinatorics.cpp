@@ -70,6 +70,7 @@ bool CombinatorialEnumerator::VisitAllPermutationsOf(DArray<unsigned int>& thing
 
 			for (unsigned int i = 0; i < chosenThingsArray.GetSize(); i++)
 			{
+				chosenThingsArray.SetSize(0);
 				unsigned int k = 0;
 
 				for (unsigned int j = 0; j < chosenThingsArray.GetSize(); j++)
