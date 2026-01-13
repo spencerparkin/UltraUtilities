@@ -13,7 +13,7 @@ namespace UU
 	public:
 		String();
 		String(const String& string);
-		String(String&& string);
+		String(String&& string) noexcept;
 		String(const char* string);
 		String(const String& stringA, const String& stringB);
 		String(const String& stringA, const char* stringB);

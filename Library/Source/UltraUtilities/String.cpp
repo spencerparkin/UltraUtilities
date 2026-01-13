@@ -16,7 +16,7 @@ String::String(const String& string)
 		(*this->charArray)[i] = (*string.charArray)[i];
 }
 
-String::String(String&& string)
+String::String(String&& string) noexcept
 {
 	this->charArray = string.charArray;
 	string.charArray = nullptr;
@@ -124,12 +124,20 @@ int String::CompareWith(const String& string) const
 
 void String::PushChar(char ch)
 {
+	this->charArray->Pop();
 	this->charArray->Push(ch);
+	this->charArray->Push('\0');
 }
 
 char String::PopChar()
 {
-	return this->charArray->Pop('\0');
+	if (this->Length() == 0)
+		return '\0';
+
+	this->charArray->Pop();
+	char ch = this->charArray->Pop();
+	this->charArray->Push('\0');
+	return ch;
 }
 
 void String::Reversed(String& reversedString) const
