@@ -6,13 +6,26 @@ using namespace UU;
 
 WordTree::WordTree(Mode mode)
 {
+	this->numWords = 0;
 	this->mode = mode;
 	this->rootNode = nullptr;
 }
 
 /*virtual*/ WordTree::~WordTree()
 {
+	this->Clear();
+}
+
+void WordTree::Clear()
+{
 	delete this->rootNode;
+	this->rootNode = nullptr;
+	this->numWords = 0;
+}
+
+unsigned int WordTree::GetNumWords() const
+{
+	return this->numWords;
 }
 
 bool WordTree::MakeWordTraversalParams(const char* word, WordTraversalParams& params) const
@@ -76,6 +89,9 @@ bool WordTree::AddWord(const char* word)
 
 		node = node->childNodeArray[j];
 	}
+
+	if (wordAdded)
+		this->numWords++;
 
 	return wordAdded;
 }

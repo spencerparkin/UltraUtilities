@@ -24,9 +24,25 @@ namespace UU
 		WordTree(Mode mode);
 		virtual ~WordTree();
 
+		/**
+		 * Add the given word, in full, to the tree.  False is returned here if it is already in the tree.
+		 */
 		bool AddWord(const char* word);
 
+		/**
+		 * Tell us if the given word is a prefix (or suffix) of any word in the tree.
+		 */
 		bool ContainsWord(const char* word, const Node** lastNode = nullptr) const;
+
+		/**
+		 * Remove all words from this tree, making it an empy tree.
+		 */
+		void Clear();
+
+		/**
+		 * Return the number of words in the tree.
+		 */
+		unsigned int GetNumWords() const;
 
 		/**
 		 * If in prefix mode, return all strings in this word tree with the given prefix.
@@ -61,5 +77,6 @@ namespace UU
 		bool MakeWordTraversalParams(const char* word, WordTraversalParams& params) const;
 
 		Node* rootNode;
+		unsigned int numWords;
 	};
 }
