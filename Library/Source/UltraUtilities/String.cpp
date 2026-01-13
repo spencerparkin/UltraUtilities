@@ -121,3 +121,18 @@ int String::CompareWith(const String& string) const
 
 	return 0;
 }
+
+void String::PushChar(char ch)
+{
+	this->charArray->Push(ch);
+}
+
+char String::PopChar()
+{
+	return this->charArray->Pop('\0');
+}
+
+void String::Reversed(String& reversedString) const
+{
+	// TODO: Write this.
+}

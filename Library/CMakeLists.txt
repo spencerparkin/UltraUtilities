@@ -38,6 +38,8 @@ set(ULTRA_UTILITIES_SOURCES
 	Source/UltraUtilities/Containers/FibonacciHeap.h
 	Source/UltraUtilities/Containers/LoopedList.cpp
 	Source/UltraUtilities/Containers/LoopedList.h
+	Source/UltraUtilities/Containers/WordTree.cpp
+	Source/UltraUtilities/Containers/WordTree.h
 	Source/UltraUtilities/Compression/Compression.cpp
 	Source/UltraUtilities/Compression/Compression.h
 	Source/UltraUtilities/Compression/HuffmanCompression.cpp

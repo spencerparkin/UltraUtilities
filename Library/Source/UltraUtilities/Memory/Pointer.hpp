@@ -158,6 +158,18 @@ namespace UU
 				delete this->ref;
 		}
 
+		void operator=(SharedPtr<T>& sharedPtr)
+		{
+			this->ref = sharedPtr.ref;
+			this->ref->count++;
+		}
+
+		void operator=(const SharedPtr<T>& sharedPtr) const
+		{
+			this->ref = sharedPtr.ref;
+			this->ref->count++;
+		}
+
 		template<typename T2>
 		void operator=(SharedPtr<T2>& sharedPtr)
 		{
@@ -201,6 +213,16 @@ namespace UU
 		}
 
 		const T* Get() const
+		{
+			return this->ref ? static_cast<const T*>(this->ref->pointer) : nullptr;
+		}
+
+		T* operator->()
+		{
+			return this->ref ? static_cast<T*>(this->ref->pointer) : nullptr;
+		}
+
+		const T* operator->() const
 		{
 			return this->ref ? static_cast<const T*>(this->ref->pointer) : nullptr;
 		}

@@ -73,6 +73,21 @@ namespace UU
 
 		// TODO: Add split and combine, each with a delimeter.
 
+		/**
+		 * Append a character to the end of the string.
+		 */
+		void PushChar(char ch);
+
+		/**
+		 * Pop a character from the end of the string.
+		 */
+		char PopChar();
+
+		/**
+		 * Produce this string, but with the characters in reverse order.
+		 */
+		void Reversed(String& reversedString) const;
+
 	private:
 		DArray<char>* charArray;
 	};
