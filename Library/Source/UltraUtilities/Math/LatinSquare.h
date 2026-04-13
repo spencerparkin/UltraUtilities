@@ -32,7 +32,6 @@ namespace UU
 		bool SetValue(int row, int col, int value);
 		bool GetValue(int row, int col, int& value) const;
 		bool CoordsValid(int row, int col) const;
-		bool CanLegallySetValue(int row, int col, int value) const;
 
 	private:
 		bool IsPermutation(int* permutationArray) const;

@@ -84,101 +84,7 @@ bool LatinSquare::IsPermutation(int* permutationArray) const
 
 void LatinSquare::RandomlyGenerate(Random& random)
 {
-	DArray<int> valueArray;
-	for (int i = 0; i < this->size * this->size; i++)
-		valueArray.Push(i % this->size);
-
-	random.Shuffle(valueArray.GetBuffer(), valueArray.GetSize());
-
-	List<int> valueQueue;
-	for (int i = 0; i < this->size * this->size; i++)
-		valueQueue.PushBack(valueArray[i]);
-
-	for (int row = 0; row < this->size; row++)
-		for (int col = 0; col < this->size; col++)
-			this->matrix[row][col] = -1;
-
-	struct Location
-	{
-		int row;
-		int col;
-	};
-
-	DArray<Location> vacantLocationArray;
-	for (int row = 0; row < this->size; row++)
-		for (int col = 0; col < this->size; col++)
-			vacantLocationArray.Push(Location{ row, col });
-
-	DArray<Location> usedLocationArray;
-
-	random.Shuffle(vacantLocationArray.GetBuffer(), vacantLocationArray.GetSize());
-
-	// This isn't a very efficient algorithm, and I can't prove that it will always terminate.
-	while (valueQueue.GetNumValues() > 0)
-	{
-		int value = -1;
-		valueQueue.PopFront(&value);
-
-		bool valuePlaced = false;
-
-		for (int i = 0; i < (int)vacantLocationArray.GetSize(); i++)
-		{
-			const Location& location = vacantLocationArray[i];
-
-			if (this->CanLegallySetValue(location.row, location.col, value))
-			{
-				this->matrix[location.row][location.col] = value;
-				vacantLocationArray.QuickRemove(i);
-				usedLocationArray.Push(location);
-				valuePlaced = true;
-				break;
-			}
-		}
-
-		if (valuePlaced)
-			continue;
-
-		valueQueue.PushBack(value);
-
-		// Here, a value that we must place could not be placed in any vacant location.
-		// Therefore, our only hope of placing it requires us to open up a new vacancy.
-		// We'll do this by moving an already-placed value into an existing vacancy, which
-		// should always be possible to do.
-
-		random.Shuffle(usedLocationArray.GetBuffer(), usedLocationArray.GetSize());
-		random.Shuffle(vacantLocationArray.GetBuffer(), vacantLocationArray.GetSize());
-
-		bool valueSwapped = false;
-
-		for (int i = 0; i < (int)usedLocationArray.GetSize(); i++)
-		{
-			const Location& usedLocation = usedLocationArray[i];
-			value = this->matrix[usedLocation.row][usedLocation.col];
-			this->matrix[usedLocation.row][usedLocation.col] = -1;
-
-			for (int j = 0; j < (int)vacantLocationArray.GetSize(); j++)
-			{
-				const Location& vacantLocation = vacantLocationArray[j];
-				if (this->CanLegallySetValue(vacantLocation.row, vacantLocation.col, value))
-				{
-					this->matrix[vacantLocation.row][vacantLocation.col] = value;
-					usedLocationArray.Push(vacantLocation);
-					usedLocationArray.QuickRemove(i);
-					vacantLocationArray.Push(usedLocation);
-					vacantLocationArray.QuickRemove(j);
-					valueSwapped = true;
-					break;
-				}
-			}
-
-			if (valueSwapped)
-				break;
-
-			this->matrix[usedLocation.row][usedLocation.col] = value;
-		}
-
-		UU_ASSERT(valueSwapped);
-	}
+	
 }
 
 bool LatinSquare::SetValue(int row, int col, int value)
@@ -206,32 +112,6 @@ bool LatinSquare::CoordsValid(int row, int col) const
 
 	if (!(0 <= col && col < this->size))
 		return false;
-
-	return true;
-}
-
-bool LatinSquare::CanLegallySetValue(int row, int col, int value) const
-{
-	if (!this->CoordsValid(row, col))
-		return false;
-
-	for (int i = 0; i < this->size; i++)
-	{
-		if (i == col)
-			continue;
-
-		if (this->matrix[row][i] == value)
-			return false;
-	}
-
-	for (int i = 0; i < this->size; i++)
-	{
-		if (i == row)
-			continue;
-
-		if (this->matrix[i][col] == value)
-			return false;
-	}
 
 	return true;
 }
