@@ -50,6 +50,8 @@ set(ULTRA_UTILITIES_SOURCES
 	Source/UltraUtilities/Math/Functions.h
 	Source/UltraUtilities/Math/Combinatorics.cpp
 	Source/UltraUtilities/Math/Combinatorics.h
+	Source/UltraUtilities/Math/LatinSquare.cpp
+	Source/UltraUtilities/Math/LatinSquare.h
 	uu.natvis
 )
 
