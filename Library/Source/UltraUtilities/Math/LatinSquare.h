@@ -34,7 +34,8 @@ namespace UU
 		bool CoordsValid(int row, int col) const;
 
 	private:
-		bool IsPermutation(int* permutationArray) const;
+		bool IsPermutation(const int* permutationArray) const;
+		bool RandomlyGenerateInternal(Random& random, int targetRow, int targetCol);
 
 		int size;
 		int** matrix;

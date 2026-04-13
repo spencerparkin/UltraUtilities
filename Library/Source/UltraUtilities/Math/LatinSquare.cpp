@@ -1,6 +1,5 @@
 #include "UltraUtilities/Math/LatinSquare.h"
 #include "UltraUtilities/Random.h"
-#include "UltraUtilities/Containers/List.hpp"
 #include "UltraUtilities/Containers/DArray.hpp"
 
 using namespace UU;
@@ -30,61 +29,103 @@ bool LatinSquare::IsValid() const
 		if (!this->IsPermutation(this->matrix[row]))
 			return false;
 
-	bool isValid = true;
-	int* colArray = new int[this->size];
+	DArray<int> colArray(this->size);
 
 	for (int col = 0; col < this->size; col++)
 	{
 		for (int row = 0; row < this->size; row++)
 			colArray[row] = this->matrix[row][col];
 
-		if (!this->IsPermutation(colArray))
-		{
-			isValid = false;
-			break;
-		}
+		if (!this->IsPermutation(colArray.GetBuffer()))
+			return false;
 	}
 
-	delete[] colArray;
-
-	return isValid;
+	return true;
 }
 
-bool LatinSquare::IsPermutation(int* permutationArray) const
+bool LatinSquare::IsPermutation(const int* permutationArray) const
 {
-	int* countArray = new int[this->size];
+	DArray<int> countArray(this->size);
 	for (int i = 0; i < this->size; i++)
 		countArray[i] = 0;
-
-	bool isValid = true;
 
 	for (int i = 0; i < this->size; i++)
 	{
 		int j = permutationArray[i];
 
 		if (j < 0 || j >= this->size)
-		{
-			isValid = false;
-			break;
-		}
+			return false;
 
 		if (countArray[j] != 0)
-		{
-			isValid = false;
-			break;
-		}
+			return false;
 
 		countArray[j]++;
 	}
 
-	delete[] countArray;
-
-	return isValid;
+	return true;
 }
 
 void LatinSquare::RandomlyGenerate(Random& random)
 {
-	
+	for (int row = 0; row < this->size; row++)
+		for (int col = 0; col < this->size; col++)
+			this->matrix[row][col] = -1;
+
+	bool success = this->RandomlyGenerateInternal(random, 0, 0);
+	UU_ASSERT(success);
+}
+
+bool LatinSquare::RandomlyGenerateInternal(Random& random, int targetRow, int targetCol)
+{
+	DArray<int> possibleValuesArray;
+
+	for (int i = 0; i < this->size; i++)
+	{
+		int col;
+		for (col = 0; col < targetCol; col++)
+			if (this->matrix[targetRow][col] == i)
+				break;
+
+		if (col < targetCol)
+			continue;
+
+		int row;
+		for (row = 0; row < targetRow; row++)
+			if (this->matrix[row][targetCol] == i)
+				break;
+
+		if (row < targetRow)
+			continue;
+
+		possibleValuesArray.Push(i);
+	}
+
+	if (possibleValuesArray.GetSize() == 0)
+		return false;
+
+	random.Shuffle(possibleValuesArray.GetBuffer(), possibleValuesArray.GetSize());
+
+	int nextTargetRow = targetRow;
+	int nextTargetCol = targetCol;
+
+	if (++nextTargetCol == this->size)
+	{
+		nextTargetCol = 0;
+		nextTargetRow++;
+	}
+
+	for (int i = 0; i < (int)possibleValuesArray.GetSize(); i++)
+	{
+		this->matrix[targetRow][targetCol] = possibleValuesArray[i];
+
+		if (nextTargetRow == this->size)
+			return true;
+
+		if (this->RandomlyGenerateInternal(random, nextTargetRow, nextTargetCol))
+			return true;
+	}
+
+	return false;
 }
 
 bool LatinSquare::SetValue(int row, int col, int value)
