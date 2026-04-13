@@ -163,7 +163,9 @@ void LatinSquare::RandomlyGenerate(Random& random)
 				{
 					this->matrix[vacantLocation.row][vacantLocation.col] = value;
 					usedLocationArray.Push(vacantLocation);
+					usedLocationArray.QuickRemove(i);
 					vacantLocationArray.Push(usedLocation);
+					vacantLocationArray.QuickRemove(j);
 					valueSwapped = true;
 					break;
 				}
