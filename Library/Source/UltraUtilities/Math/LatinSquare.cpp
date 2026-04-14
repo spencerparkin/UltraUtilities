@@ -104,6 +104,8 @@ bool LatinSquare::RandomlyGenerateInternal(Random& random, int targetRow, int ta
 		if (row < targetRow)
 			continue;
 
+		// TODO: If sudoku_contraint, just further restrict our possible values here.
+
 		possibleValuesArray.Push(i);
 	}
 
