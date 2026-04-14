@@ -15,6 +15,22 @@ TEST_CASE("Latin Squares", "[latin_square]")
 			LatinSquare latinSquare(i);
 			latinSquare.RandomlyGenerate(random);
 			REQUIRE(latinSquare.IsValid());
+
+			for (int row = 0; row < latinSquare.GetSize(); row++)
+			{
+				for (int col = 0; col < latinSquare.GetSize(); col++)
+				{
+					int value = -1;
+					latinSquare.GetValue(row, col, value);
+					printf("%d", value);
+					if (col < latinSquare.GetSize() - 1)
+						printf(", ");
+				}
+
+				printf("\n");
+			}
+
+			printf("\n");
 		}
 	}
 }

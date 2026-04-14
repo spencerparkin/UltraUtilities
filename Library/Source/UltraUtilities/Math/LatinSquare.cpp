@@ -6,6 +6,8 @@ using namespace UU;
 
 LatinSquare::LatinSquare(int size)
 {
+	UU_ASSERT(size > 0);
+
 	this->size = size;
 	this->matrix = new int* [this->size];
 	for (int row = 0; row < this->size; row++)
@@ -21,6 +23,11 @@ LatinSquare::LatinSquare(int size)
 	for (int row = 0; row < this->size; row++)
 		delete[] this->matrix[row];
 	delete[] this->matrix;
+}
+
+int LatinSquare::GetSize() const
+{
+	return this->size;
 }
 
 bool LatinSquare::IsValid() const
