@@ -12,7 +12,7 @@ LatinSquare::LatinSquare(int size)
 	{
 		this->matrix[row] = new int[this->size];
 		for (int col = 0; col < this->size; col++)
-			this->matrix[col] = 0;
+			this->matrix[row][col] = 0;
 	}
 }
 

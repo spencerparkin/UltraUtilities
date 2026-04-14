@@ -14,6 +14,7 @@ set(TEST_SOURCES
 	Source/CompressionTest.cpp
 	Source/BinomialHeapTest.cpp
 	Source/FibonacciHeapTest.cpp
+	Source/LatinSquareTest.cpp
 )
 
 add_executable(Test ${TEST_SOURCES})
