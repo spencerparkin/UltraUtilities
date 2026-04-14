@@ -9,6 +9,7 @@ TEST_CASE("Latin Squares", "[latin_square]")
 	SECTION("Test randomly generating latin squares.")
 	{
 		XorShiftRandom random;
+		random.SetSeed(938532);
 
 		for (int i = 1; i < 10; i++)
 		{
