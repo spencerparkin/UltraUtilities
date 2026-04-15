@@ -74,6 +74,76 @@ bool LatinSquare::IsPermutation(const int* permutationArray) const
 	return true;
 }
 
+bool LatinSquare::CompleteSquare()
+{
+	int bestRow = -1;
+	int bestCol = -1;
+	int leastNumberOfPossibleValues = 99999;
+
+	for (int row = 0; row < this->size; row++)
+	{
+		for (int col = 0; col < this->size; col++)
+		{
+			if (this->matrix[row][col] != -1)
+				continue;
+
+			DArray<int> possibleValuesArray;
+			this->GetAllPossibleValuesForLocation(row, col, possibleValuesArray);
+			if (possibleValuesArray.GetSize() == 0)
+				return false;
+
+			if (possibleValuesArray.GetSize() < leastNumberOfPossibleValues)
+			{
+				leastNumberOfPossibleValues = possibleValuesArray.GetSize();
+				bestRow = row;
+				bestCol = col;
+			}
+		}
+	}
+
+	UU_ASSERT(bestRow != -1 && bestCol != -1);
+
+	DArray<int> possibleValuesArray;
+	this->GetAllPossibleValuesForLocation(bestRow, bestCol, possibleValuesArray);
+
+	for (int i = 0; i < (int)possibleValuesArray.GetSize(); i++)
+	{
+		int value = possibleValuesArray[i];
+		this->matrix[bestRow][bestCol] = value;
+
+		if (this->CompleteSquare())
+			return true;
+	}
+
+	this->matrix[bestRow][bestCol] = -1;
+	return false;
+}
+
+/*virtual*/ void LatinSquare::GetAllPossibleValuesForLocation(int targetRow, int targetCol, DArray<int>& possibleValuesArray)
+{
+	DArray<int> countArray;
+	countArray.SetSize(this->size);
+	for (int i = 0; i < this->size; i++)
+		countArray[i] = 0;
+
+	this->BumpIllegalValuesForLocation(targetRow, targetCol, countArray);
+
+	for (int i = 0; i < this->size; i++)
+		if (countArray[i] == 0)
+			possibleValuesArray.Push(i);
+}
+
+/*virtual*/ void LatinSquare::BumpIllegalValuesForLocation(int targetRow, int targetCol, DArray<int>& countArray)
+{
+	for (int row = 0; row < this->size; row++)
+		if (this->matrix[row][targetCol] != -1)
+			countArray[this->matrix[row][targetCol]]++;
+
+	for (int col = 0; col < this->size; col++)
+		if (this->matrix[targetRow][col] != -1)
+			countArray[this->matrix[targetRow][col]]++;
+}
+
 void LatinSquare::RandomlyGenerate(Random& random)
 {
 	for (int row = 0; row < this->size; row++)
@@ -222,4 +292,22 @@ SudokuSquare::SudokuSquare() : LatinSquare(9)
 	}
 
 	return true;
+}
+
+/*virtual*/ void SudokuSquare::BumpIllegalValuesForLocation(int targetRow, int targetCol, DArray<int>& countArray)
+{
+	LatinSquare::BumpIllegalValuesForLocation(targetRow, targetCol, countArray);
+
+	int subSquareRow = 3 * (targetRow / 3);
+	int subSquareCol = 3 * (targetCol / 3);
+
+	for (int row = subSquareRow; row < subSquareRow + 3; row++)
+	{
+		for (int col = subSquareCol; col < subSquareCol + 3; col++)
+		{
+			int value = this->matrix[row][col];
+			if (value != -1)
+				countArray[value]++;
+		}
+	}
 }

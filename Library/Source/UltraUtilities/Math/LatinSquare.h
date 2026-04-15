@@ -31,6 +31,17 @@ namespace UU
 		 */
 		void RandomlyGenerate(Random& random);
 
+		/**
+		 * Here we employ an algorithm very similar to the one that generates a
+		 * random square, but here the idea is to complete the square.  All entries
+		 * should be -1 except for a few sparse entries.  If there is just one solution
+		 * to the square, then we should find it.  If there are many, then we don't
+		 * define here which we find, but we should find one of them.  If there is
+		 * no solution, then we should return false here, and the square should remain
+		 * untouched.
+		 */
+		bool CompleteSquare();
+
 		bool SetValue(int row, int col, int value);
 		bool GetValue(int row, int col, int& value) const;
 		bool CoordsValid(int row, int col) const;
@@ -43,6 +54,17 @@ namespace UU
 		 * values that can be read from the matrix when making the determination.
 		 */
 		virtual bool CanPlaceValueAtTargetLocation(int targetRow, int targetCol, int value);
+
+		/**
+		 * This is used by the solver.  You can read any value of the matrix,
+		 * but should ignore any values of -1.
+		 */
+		virtual void GetAllPossibleValuesForLocation(int targetRow, int targetCol, DArray<int>& possibleValuesArray);
+
+		/**
+		 * This is used by the @ref GetAllPossibleValuesForLocation function.
+		 */
+		virtual void BumpIllegalValuesForLocation(int targetRow, int targetCol, DArray<int>& countArray);
 
 		bool IsPermutation(const int* permutationArray) const;
 		bool RandomlyGenerateInternal(Random& random, int targetRow, int targetCol);
@@ -65,5 +87,6 @@ namespace UU
 
 	protected:
 		virtual bool CanPlaceValueAtTargetLocation(int targetRow, int targetCol, int value) override;
+		virtual void BumpIllegalValuesForLocation(int targetRow, int targetCol, DArray<int>& countArray) override;
 	};
 }
