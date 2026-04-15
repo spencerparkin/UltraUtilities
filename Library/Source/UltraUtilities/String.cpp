@@ -84,10 +84,26 @@ void String::operator=(const String& string)
 		(*this->charArray)[i] = (*string.charArray)[i];
 }
 
-void String::operator=(String&& string)
+void String::operator=(String&& string) noexcept
 {
 	this->charArray = string.charArray;
 	string.charArray = nullptr;
+}
+
+void String::operator+=(const String& string)
+{
+	this->charArray->Pop();
+	for (unsigned int i = 0; i < string.Length(); i++)
+		this->PushChar((*string.charArray)[i]);
+	this->charArray->Push('\0');
+}
+
+void String::operator+=(const char* string)
+{
+	this->charArray->Pop();
+	for (unsigned int i = 0; string[i] != '\0'; i++)
+		this->charArray->Push(string[i]);
+	this->charArray->Push('\0');
 }
 
 void String::operator=(const char* string)

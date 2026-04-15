@@ -4,6 +4,8 @@
 
 using namespace UU;
 
+//-------------------------- LatinSquare --------------------------
+
 LatinSquare::LatinSquare(int size)
 {
 	UU_ASSERT(size > 0);
@@ -30,7 +32,7 @@ int LatinSquare::GetSize() const
 	return this->size;
 }
 
-bool LatinSquare::IsValid() const
+/*virtual*/ bool LatinSquare::IsValid() const
 {
 	for (int row = 0; row < this->size; row++)
 		if (!this->IsPermutation(this->matrix[row]))
@@ -82,32 +84,26 @@ void LatinSquare::RandomlyGenerate(Random& random)
 	UU_ASSERT(success);
 }
 
+ /*virtual*/ bool LatinSquare::CanPlaceValueAtTargetLocation(int targetRow, int targetCol, int value)
+{
+	 for (int col = 0; col < targetCol; col++)
+		 if (this->matrix[targetRow][col] == value)
+			 return false;
+
+	 for (int row = 0; row < targetRow; row++)
+		 if (this->matrix[row][targetCol] == value)
+			 return false;
+
+	 return true;
+}
+
 bool LatinSquare::RandomlyGenerateInternal(Random& random, int targetRow, int targetCol)
 {
 	DArray<int> possibleValuesArray;
 
 	for (int i = 0; i < this->size; i++)
-	{
-		int col;
-		for (col = 0; col < targetCol; col++)
-			if (this->matrix[targetRow][col] == i)
-				break;
-
-		if (col < targetCol)
-			continue;
-
-		int row;
-		for (row = 0; row < targetRow; row++)
-			if (this->matrix[row][targetCol] == i)
-				break;
-
-		if (row < targetRow)
-			continue;
-
-		// TODO: If sudoku_contraint, just further restrict our possible values here.
-
-		possibleValuesArray.Push(i);
-	}
+		if (this->CanPlaceValueAtTargetLocation(targetRow, targetCol, i))
+			possibleValuesArray.Push(i);
 
 	if (possibleValuesArray.GetSize() == 0)
 		return false;
@@ -162,6 +158,68 @@ bool LatinSquare::CoordsValid(int row, int col) const
 
 	if (!(0 <= col && col < this->size))
 		return false;
+
+	return true;
+}
+
+//-------------------------- SudokuSquare --------------------------
+
+SudokuSquare::SudokuSquare() : LatinSquare(9)
+{
+}
+
+/*virtual*/ SudokuSquare::~SudokuSquare()
+{
+}
+
+/*virtual*/ bool SudokuSquare::CanPlaceValueAtTargetLocation(int targetRow, int targetCol, int value)
+{
+	if (!LatinSquare::CanPlaceValueAtTargetLocation(targetRow, targetCol, value))
+		return false;
+
+	int subSquareRow = 3 * (targetRow / 3);
+	int subSquareCol = 3 * (targetCol / 3);
+
+	for (int row = subSquareRow; row <= targetRow; row++)
+	{
+		int colStop = (row == targetRow) ? targetCol : (subSquareCol + 3);
+		for (int col = subSquareCol; col < colStop; col++)
+			if (this->matrix[row][col] == value)
+				return false;
+	}
+
+	return true;
+}
+
+/*virtual*/ bool SudokuSquare::IsValid() const
+{
+	if (!LatinSquare::IsValid())
+		return false;
+
+	DArray<int> valuesCountArray;
+	valuesCountArray.SetSize(9);
+
+	for (int i = 0; i < 3; i++)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			for (int k = 0; k < 9; k++)
+				valuesCountArray[k] = 0;
+
+			for (int row = i * 3; row < (i + 1) * 3; row++)
+			{
+				for (int col = j * 3; col < (j + 1) * 3; col++)
+				{
+					int value = this->matrix[row][col];
+
+					if (valuesCountArray[value] != 0)
+						return false;
+
+					valuesCountArray[value]++;
+				}
+			}
+		}
+	}
 
 	return true;
 }

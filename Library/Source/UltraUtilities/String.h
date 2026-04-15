@@ -7,6 +7,8 @@ namespace UU
 {
 	/**
 	 * These are null-terminated arrays of characters.
+	 * 
+	 * This is probably the worst implementation of a string class ever, but...whatever.
 	 */
 	class UU_API String
 	{
@@ -21,8 +23,10 @@ namespace UU
 		virtual ~String();
 
 		void operator=(const String& string);
-		void operator=(String&& string);
+		void operator=(String&& string) noexcept;
 		void operator=(const char* string);
+		void operator+=(const String& string);
+		void operator+=(const char* string);
 
 		unsigned int Length() const
 		{

@@ -6,32 +6,23 @@ using namespace UU;
 
 TEST_CASE("Latin Squares", "[latin_square]")
 {
+	XorShiftRandom random;
+	random.SetSeed(938532);
+
 	SECTION("Test randomly generating latin squares.")
 	{
-		XorShiftRandom random;
-		random.SetSeed(938532);
-
 		for (int i = 1; i < 10; i++)
 		{
 			LatinSquare latinSquare(i);
 			latinSquare.RandomlyGenerate(random);
 			REQUIRE(latinSquare.IsValid());
-
-			for (int row = 0; row < latinSquare.GetSize(); row++)
-			{
-				for (int col = 0; col < latinSquare.GetSize(); col++)
-				{
-					int value = -1;
-					latinSquare.GetValue(row, col, value);
-					printf("%d", value);
-					if (col < latinSquare.GetSize() - 1)
-						printf(", ");
-				}
-
-				printf("\n");
-			}
-
-			printf("\n");
 		}
+	}
+
+	SECTION("Test randomly generating sudoku square.")
+	{
+		SudokuSquare sudokuSquare;
+		sudokuSquare.RandomlyGenerate(random);
+		REQUIRE(sudokuSquare.IsValid());
 	}
 }
