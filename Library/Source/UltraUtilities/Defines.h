@@ -37,6 +37,23 @@ namespace UU
 		a = b;
 		b = temp;
 	}
+
+	template<typename Functor>
+	class LambdaOnExit
+	{
+	public:
+		LambdaOnExit(Functor functor) : functor(functor)
+		{
+		}
+
+		virtual ~LambdaOnExit()
+		{
+			this->functor();
+		}
+
+	private:
+		Functor functor;
+	};
 }
 
 // TODO: Generate doxegen stuff?

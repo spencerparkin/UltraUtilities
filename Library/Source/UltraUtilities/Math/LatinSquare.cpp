@@ -16,7 +16,7 @@ LatinSquare::LatinSquare(int size)
 	{
 		this->matrix[row] = new int[this->size];
 		for (int col = 0; col < this->size; col++)
-			this->matrix[row][col] = 0;
+			this->matrix[row][col] = -1;
 	}
 }
 
@@ -76,9 +76,20 @@ bool LatinSquare::IsPermutation(const int* permutationArray) const
 
 bool LatinSquare::CompleteSquare()
 {
-	int bestRow = -1;
-	int bestCol = -1;
-	int leastNumberOfPossibleValues = 99999;
+	struct LocationInfo
+	{
+		int row, col;
+		DArray<int> possibleValuesArray;
+	};
+
+	DArray<LocationInfo*> locationInfoArray;
+
+	LambdaOnExit lambdaOnExit([&locationInfoArray]()
+		{
+			for (int i = 0; i < (int)locationInfoArray.GetSize(); i++)
+				delete locationInfoArray[i];
+		}
+	);
 
 	for (int row = 0; row < this->size; row++)
 	{
@@ -87,35 +98,51 @@ bool LatinSquare::CompleteSquare()
 			if (this->matrix[row][col] != -1)
 				continue;
 
-			DArray<int> possibleValuesArray;
-			this->GetAllPossibleValuesForLocation(row, col, possibleValuesArray);
-			if (possibleValuesArray.GetSize() == 0)
-				return false;
+			LocationInfo* locationInfo = new LocationInfo;
+			locationInfoArray.Push(locationInfo);
 
-			if (possibleValuesArray.GetSize() < leastNumberOfPossibleValues)
-			{
-				leastNumberOfPossibleValues = possibleValuesArray.GetSize();
-				bestRow = row;
-				bestCol = col;
-			}
+			locationInfo->row = row;
+			locationInfo->col = col;
+
+			this->GetAllPossibleValuesForLocation(row, col, locationInfo->possibleValuesArray);
+			if (locationInfo->possibleValuesArray.GetSize() == 0)
+				return false;
 		}
 	}
 
-	UU_ASSERT(bestRow != -1 && bestCol != -1);
+	if (locationInfoArray.GetSize() == 0)
+		return true;
 
-	DArray<int> possibleValuesArray;
-	this->GetAllPossibleValuesForLocation(bestRow, bestCol, possibleValuesArray);
+	locationInfoArray.Sort([](const LocationInfo* locationInfoA, const LocationInfo* locationInfoB) -> int
+		{
+			int sizeA = locationInfoA->possibleValuesArray.GetSize();
+			int sizeB = locationInfoB->possibleValuesArray.GetSize();
 
-	for (int i = 0; i < (int)possibleValuesArray.GetSize(); i++)
+			if (sizeA < sizeB)
+				return -1;
+			else if (sizeA > sizeB)
+				return 1;
+
+			return 0;
+		}
+	);
+
+	for (int i = 0; i < (int)locationInfoArray.GetSize(); i++)
 	{
-		int value = possibleValuesArray[i];
-		this->matrix[bestRow][bestCol] = value;
+		const LocationInfo* locationInfo = locationInfoArray[i];
 
-		if (this->CompleteSquare())
-			return true;
+		for (int j = 0; j < (int)locationInfo->possibleValuesArray.GetSize(); j++)
+		{
+			int value = locationInfo->possibleValuesArray[j];
+			this->matrix[locationInfo->row][locationInfo->col] = value;
+
+			if (this->CompleteSquare())
+				return true;
+		}
+
+		this->matrix[locationInfo->row][locationInfo->col] = -1;
 	}
 
-	this->matrix[bestRow][bestCol] = -1;
 	return false;
 }
 
