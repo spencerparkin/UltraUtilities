@@ -85,6 +85,9 @@ namespace UU
 
 		virtual bool IsValid() const override;
 
+		// STPTODO: How do you create a Sudoku puzzle that has exactly one solution?
+		//          How do you make one that is easy, medium or hard?
+
 	protected:
 		virtual bool CanPlaceValueAtTargetLocation(int targetRow, int targetCol, int value) override;
 		virtual void BumpIllegalValuesForLocation(int targetRow, int targetCol, DArray<int>& countArray) override;
