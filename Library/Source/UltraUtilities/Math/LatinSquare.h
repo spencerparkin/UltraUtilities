@@ -76,24 +76,4 @@ namespace UU
 		int size;
 		int** matrix;
 	};
-
-	/**
-	 * This is a special case of 9x9 latin square where
-	 * each 3x3 sub-square also contains the numberse 0-9.
-	 */
-	class SudokuSquare : public LatinSquare
-	{
-	public:
-		SudokuSquare();
-		virtual ~SudokuSquare();
-
-		virtual bool IsValid() const override;
-		virtual LatinSquare* Clone() const override;
-
-		void MakePuzzle(Random& random, int difficultyLevel);
-
-	protected:
-		virtual bool CanPlaceValueAtTargetLocation(int targetRow, int targetCol, int value) override;
-		virtual void BumpIllegalValuesForLocation(int targetRow, int targetCol, DArray<int>& countArray) override;
-	};
 }
