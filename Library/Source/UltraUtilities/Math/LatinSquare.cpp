@@ -27,6 +27,13 @@ LatinSquare::LatinSquare(int size)
 	delete[] this->matrix;
 }
 
+void LatinSquare::Clear()
+{
+	for (int row = 0; row < this->size; row++)
+		for (int col = 0; col < this->size; col++)
+			this->matrix[row][col] = -1;
+}
+
 int LatinSquare::GetSize() const
 {
 	return this->size;
@@ -74,7 +81,7 @@ bool LatinSquare::IsPermutation(const int* permutationArray) const
 	return true;
 }
 
-bool LatinSquare::CompleteSquare()
+bool LatinSquare::CompleteSquare(int* numBacktracks /*= nullptr*/)
 {
 	struct LocationInfo
 	{
@@ -106,7 +113,12 @@ bool LatinSquare::CompleteSquare()
 
 			this->GetAllPossibleValuesForLocation(row, col, locationInfo->possibleValuesArray);
 			if (locationInfo->possibleValuesArray.GetSize() == 0)
+			{
+				if (numBacktracks)
+					(*numBacktracks)++;
+
 				return false;
+			}
 		}
 	}
 
@@ -136,12 +148,15 @@ bool LatinSquare::CompleteSquare()
 			int value = locationInfo->possibleValuesArray[j];
 			this->matrix[locationInfo->row][locationInfo->col] = value;
 
-			if (this->CompleteSquare())
+			if (this->CompleteSquare(numBacktracks))
 				return true;
 		}
 
 		this->matrix[locationInfo->row][locationInfo->col] = -1;
 	}
+
+	if (numBacktracks)
+		(*numBacktracks)++;
 
 	return false;
 }
@@ -259,6 +274,25 @@ bool LatinSquare::CoordsValid(int row, int col) const
 	return true;
 }
 
+/*virtual*/ LatinSquare* LatinSquare::Clone() const
+{
+	LatinSquare* latinSquare = new LatinSquare(this->size);
+	latinSquare->Copy(this);
+	return latinSquare;
+}
+
+bool LatinSquare::Copy(const LatinSquare* latinSquare)
+{
+	if (this->size != latinSquare->size)
+		return false;
+
+	for (int row = 0; row < this->size; row++)
+		for (int col = 0; col < this->size; col++)
+			this->matrix[row][col] = latinSquare->matrix[row][col];
+
+	return true;
+}
+
 //-------------------------- SudokuSquare --------------------------
 
 SudokuSquare::SudokuSquare() : LatinSquare(9)
@@ -337,4 +371,69 @@ SudokuSquare::SudokuSquare() : LatinSquare(9)
 				countArray[value]++;
 		}
 	}
+}
+
+void SudokuSquare::MakePuzzle(Random& random, int difficultyLevel)
+{
+	this->RandomlyGenerate(random);
+
+	struct Location
+	{
+		int row, col;
+		int value;
+	};
+
+	DArray<Location> locationArray;
+	for (int row = 0; row < this->size; row++)
+		for (int col = 0; col < this->size; col++)
+			locationArray.Push({ row, col, this->matrix[row][col] });
+	
+	random.Shuffle(locationArray.GetBuffer(), locationArray.GetSize());
+
+	this->Clear();
+
+	int delta = this->size / 4;
+	int fillLocation = 0;
+	int fillLocationTarget = this->size / 2;
+
+	// STPTODO: This is a sketch of an idea.  Not yet tested.
+	while (delta > 0)
+	{
+		while (fillLocation != fillLocationTarget)
+		{
+			if (fillLocation < fillLocationTarget)
+			{
+				const Location& location = locationArray[fillLocation];
+				this->matrix[location.row][location.col] = location.value;
+				fillLocation++;
+			}
+			else
+			{
+				fillLocation--;
+				const Location& location = locationArray[fillLocation];
+				this->matrix[location.row][location.col] = -1;
+			}
+		}
+
+		SudokuSquare* sudokuSquare = (SudokuSquare*)this->Clone();
+		int numBacktracks = 0;
+		sudokuSquare->CompleteSquare(&numBacktracks);
+		delete sudokuSquare;
+
+		if (numBacktracks < difficultyLevel)
+			fillLocationTarget -= delta;
+		else if (numBacktracks > difficultyLevel)
+			fillLocationTarget += delta;
+		else
+			break;
+		
+		delta /= 2;
+	}
+}
+
+/*virtual*/ LatinSquare* SudokuSquare::Clone() const
+{
+	auto sudokuSquare = new SudokuSquare();
+	sudokuSquare->Copy(this);
+	return sudokuSquare;
 }

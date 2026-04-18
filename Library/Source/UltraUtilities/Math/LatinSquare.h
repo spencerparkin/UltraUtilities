@@ -40,12 +40,16 @@ namespace UU
 		 * no solution, then we should return false here, and the square should remain
 		 * untouched.
 		 */
-		bool CompleteSquare();
+		bool CompleteSquare(int* numBacktracks = nullptr);
+
+		virtual LatinSquare* Clone() const;
 
 		bool SetValue(int row, int col, int value);
 		bool GetValue(int row, int col, int& value) const;
 		bool CoordsValid(int row, int col) const;
 		int GetSize() const;
+		void Clear();
+		bool Copy(const LatinSquare* latinSquare);
 
 	protected:
 		/**
@@ -84,9 +88,9 @@ namespace UU
 		virtual ~SudokuSquare();
 
 		virtual bool IsValid() const override;
+		virtual LatinSquare* Clone() const override;
 
-		// STPTODO: How do you create a Sudoku puzzle that has exactly one solution?
-		//          How do you make one that is easy, medium or hard?
+		void MakePuzzle(Random& random, int difficultyLevel);
 
 	protected:
 		virtual bool CanPlaceValueAtTargetLocation(int targetRow, int targetCol, int value) override;
