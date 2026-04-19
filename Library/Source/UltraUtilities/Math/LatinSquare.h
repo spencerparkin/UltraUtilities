@@ -40,7 +40,7 @@ namespace UU
 		 * no solution, then we should return false here, and the square should remain
 		 * untouched.
 		 */
-		bool CompleteSquare(int* numBacktracks = nullptr);
+		bool CompleteSquare(bool failOnFirstBacktrack = false);
 
 		virtual LatinSquare* Clone() const;
 

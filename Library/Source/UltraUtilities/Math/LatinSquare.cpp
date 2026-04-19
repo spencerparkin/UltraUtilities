@@ -81,8 +81,16 @@ bool LatinSquare::IsPermutation(const int* permutationArray) const
 	return true;
 }
 
-bool LatinSquare::CompleteSquare(int* numBacktracks /*= nullptr*/)
+bool LatinSquare::CompleteSquare(bool failOnFirstBacktrack /*= false*/)
 {
+	// Something very curious: If the square is empty to begin with, then
+	// we can complete the square.  If, however, we generate a random
+	// square, then remove enough (but not all!) of the numbers, then we
+	// can fail to complete the square here, because we do not terminate
+	// in any reasonable amount of time.  Yet we know that the partially
+	// filled square has values in it that contribute to a valid square,
+	// and there's less work to be done than with a totally empty square.
+
 	struct LocationInfo
 	{
 		int row, col;
@@ -113,12 +121,7 @@ bool LatinSquare::CompleteSquare(int* numBacktracks /*= nullptr*/)
 
 			this->GetAllPossibleValuesForLocation(row, col, locationInfo->possibleValuesArray);
 			if (locationInfo->possibleValuesArray.GetSize() == 0)
-			{
-				if (numBacktracks)
-					(*numBacktracks)++;
-
 				return false;
-			}
 		}
 	}
 
@@ -148,15 +151,17 @@ bool LatinSquare::CompleteSquare(int* numBacktracks /*= nullptr*/)
 			int value = locationInfo->possibleValuesArray[j];
 			this->matrix[locationInfo->row][locationInfo->col] = value;
 
-			if (this->CompleteSquare(numBacktracks))
+			if (this->CompleteSquare(failOnFirstBacktrack))
 				return true;
+			else if (failOnFirstBacktrack)
+			{
+				this->matrix[locationInfo->row][locationInfo->col] = -1;
+				return false;
+			}
 		}
 
 		this->matrix[locationInfo->row][locationInfo->col] = -1;
 	}
-
-	if (numBacktracks)
-		(*numBacktracks)++;
 
 	return false;
 }
