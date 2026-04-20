@@ -39,6 +39,29 @@ int LatinSquare::GetSize() const
 	return this->size;
 }
 
+int LatinSquare::GetNumSetValues() const
+{
+	int numSetValues = 0;
+
+	for (int row = 0; row < this->size; row++)
+	{
+		for (int col = 0; col < this->size; col++)
+		{
+			int value = this->matrix[row][col];
+
+			if (0 <= value && value < this->size)
+				numSetValues++;
+		}
+	}
+
+	return numSetValues;
+}
+
+int LatinSquare::GetNumValues() const
+{
+	return this->size * this->size;
+}
+
 /*virtual*/ bool LatinSquare::IsValid() const
 {
 	for (int row = 0; row < this->size; row++)

@@ -48,22 +48,25 @@ namespace UU
 		bool GetValue(int row, int col, int& value) const;
 		bool CoordsValid(int row, int col) const;
 		int GetSize() const;
+		int GetNumSetValues() const;
+		int GetNumValues() const;
 		void Clear();
 		bool Copy(const LatinSquare* latinSquare);
-
-	protected:
-		/**
-		 * It's important to understand here that only the values prior to this
-		 * in a book-reading sense (top to bottom, left to right) are valid
-		 * values that can be read from the matrix when making the determination.
-		 */
-		virtual bool CanPlaceValueAtTargetLocation(int targetRow, int targetCol, int value);
 
 		/**
 		 * This is used by the solver.  You can read any value of the matrix,
 		 * but should ignore any values of -1.
 		 */
 		virtual void GetAllPossibleValuesForLocation(int targetRow, int targetCol, DArray<int>& possibleValuesArray);
+
+	protected:
+
+		/**
+		 * It's important to understand here that only the values prior to this
+		 * in a book-reading sense (top to bottom, left to right) are valid
+		 * values that can be read from the matrix when making the determination.
+		 */
+		virtual bool CanPlaceValueAtTargetLocation(int targetRow, int targetCol, int value);
 
 		/**
 		 * This is used by the @ref GetAllPossibleValuesForLocation function.
