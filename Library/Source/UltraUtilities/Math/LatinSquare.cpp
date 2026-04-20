@@ -189,7 +189,7 @@ bool LatinSquare::CompleteSquare(bool failOnFirstBacktrack /*= false*/)
 	return false;
 }
 
-/*virtual*/ void LatinSquare::GetAllPossibleValuesForLocation(int targetRow, int targetCol, DArray<int>& possibleValuesArray)
+/*virtual*/ void LatinSquare::GetAllPossibleValuesForLocation(int targetRow, int targetCol, DArray<int>& possibleValuesArray) const
 {
 	DArray<int> countArray;
 	countArray.SetSize(this->size);
@@ -203,7 +203,18 @@ bool LatinSquare::CompleteSquare(bool failOnFirstBacktrack /*= false*/)
 			possibleValuesArray.Push(i);
 }
 
-/*virtual*/ void LatinSquare::BumpIllegalValuesForLocation(int targetRow, int targetCol, DArray<int>& countArray)
+bool LatinSquare::IsPossibleValueForLocation(int row, int col, int value) const
+{
+	DArray<int> possibleValuesArray;
+	this->GetAllPossibleValuesForLocation(row, col, possibleValuesArray);
+	for (int i = 0; i < (int)possibleValuesArray.GetSize(); i++)
+		if (possibleValuesArray[i] == value)
+			return true;
+
+	return false;
+}
+
+/*virtual*/ void LatinSquare::BumpIllegalValuesForLocation(int targetRow, int targetCol, DArray<int>& countArray) const
 {
 	for (int row = 0; row < this->size; row++)
 		if (this->matrix[row][targetCol] != -1)

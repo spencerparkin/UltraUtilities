@@ -57,7 +57,9 @@ namespace UU
 		 * This is used by the solver.  You can read any value of the matrix,
 		 * but should ignore any values of -1.
 		 */
-		virtual void GetAllPossibleValuesForLocation(int targetRow, int targetCol, DArray<int>& possibleValuesArray);
+		virtual void GetAllPossibleValuesForLocation(int targetRow, int targetCol, DArray<int>& possibleValuesArray) const;
+
+		bool IsPossibleValueForLocation(int row, int col, int value) const;
 
 	protected:
 
@@ -71,7 +73,7 @@ namespace UU
 		/**
 		 * This is used by the @ref GetAllPossibleValuesForLocation function.
 		 */
-		virtual void BumpIllegalValuesForLocation(int targetRow, int targetCol, DArray<int>& countArray);
+		virtual void BumpIllegalValuesForLocation(int targetRow, int targetCol, DArray<int>& countArray) const;
 
 		bool IsPermutation(const int* permutationArray) const;
 		bool RandomlyGenerateInternal(Random& random, int targetRow, int targetCol);
