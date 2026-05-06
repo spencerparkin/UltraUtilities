@@ -183,7 +183,7 @@ void WordTree::Node::ExploreAll(List<char>& charList, DArray<String>& completedW
 				charList.PopBack();
 				break;
 			case Mode::SuffixTree:
-				charList.PopBack();
+				charList.PopFront();
 				break;
 			}
 		}
